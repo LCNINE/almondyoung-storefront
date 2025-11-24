@@ -17,8 +17,9 @@ export default async function SocialCallbackPage({
   const redirectTo = params?.redirect_to ?? appConfig.auth.redirect_to
   let result
 
+  console.log("almondToken:", almondToken)
   if (!almondToken) {
-    redirect("/login")
+    // redirect("/login")
   }
 
   const customer = await retrieveCustomer()
