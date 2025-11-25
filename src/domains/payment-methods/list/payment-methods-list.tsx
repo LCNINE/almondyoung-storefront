@@ -289,13 +289,13 @@ export default function PaymentManagement() {
   useEffect(() => {
     const fetchSummary = async () => {
       try {
-        const res = await fetch('/api/wallet/payments/bnpl/summary')
+        const res = await fetch("/api/wallet/payments/bnpl/summary")
         if (res.ok) {
           const data = await res.json()
           setBnplSummary(data)
         }
       } catch (error) {
-        console.error('Failed to fetch BNPL summary:', error)
+        console.error("Failed to fetch BNPL summary:", error)
       } finally {
         setIsLoading(false)
       }
@@ -305,7 +305,11 @@ export default function PaymentManagement() {
   }, [])
 
   if (isLoading) {
-    return <div className="flex h-screen items-center justify-center">Loading...</div>
+    return (
+      <div className="flex h-screen items-center justify-center">
+        Loading...
+      </div>
+    )
   }
 
   return (
@@ -328,10 +332,9 @@ export default function PaymentManagement() {
       {/* 메뉴 네비게이션 - nav 시맨틱 태그 사용 */}
       <nav
         aria-label="계좌 관련 메뉴"
-        className="md:mx-4 mt-10 rounded-lg bg-white shadow-sm md:mx-0"
+        className="mt-10 rounded-lg bg-white shadow-sm md:mx-0 md:mx-4"
       >
         <ul className="divide-y divide-gray-200">
-
           {/* divide-muted 대신 Tailwind 기본값 사용 */}
           {ACCOUNT_MENU_ITEMS.map((item) => (
             <li key={item.label}>
@@ -345,12 +348,12 @@ export default function PaymentManagement() {
                 </span>
                 <ChevronRight
                   className="h-5 w-5 text-gray-400"
-                  aria-hidden="true" />
+                  aria-hidden="true"
+                />
               </a>
             </li>
           ))}
         </ul>
-
       </nav>
 
       <PaymentMethodAddDrawer

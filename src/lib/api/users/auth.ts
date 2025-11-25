@@ -1,7 +1,6 @@
 "use client"
 
 import { SignupSchema } from "domains/auth/schemas/signup-schema"
-import { USER_SERVICE_BASE_URL } from "../api.config"
 import { ApiError } from "../api-error"
 
 type LocalSignupRequest = Omit<SignupSchema, "passwordConfirm" | "marketingAll">

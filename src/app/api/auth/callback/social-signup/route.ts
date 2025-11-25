@@ -1,4 +1,5 @@
-import { medusaSignup, retrieveCustomer } from "@lib/api/medusa/customer"
+import { retrieveCustomer } from "@lib/api/medusa/customer"
+import { medusaSignup } from "@lib/api/medusa/signup"
 import { appConfig } from "@lib/app-config"
 import { setTokenCookies } from "@lib/data/cookies"
 import { NextRequest, NextResponse } from "next/server"
@@ -34,12 +35,9 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    console.log("response:", response)
-
     const result = await response.json()
 
     const { accessToken, refreshToken } = result.data
-    console.log("result:", result.data)
     setTokenCookies(accessToken, refreshToken)
 
     // 이미 메두사 회원인지 체크

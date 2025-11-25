@@ -3,7 +3,7 @@ import MypageLayout from "@components/layout/mypage-layout"
 import { getDigitalAssets } from "@lib/api/medusa/digital-asset"
 import { fetchMe } from "@lib/api/users/me"
 import { UserDetail } from "domains/auth/types"
-import DownloadTemplate from "domains/mypage/template/download-template"
+import DownloadPageTemplate from "domains/mypage/template/download-page-template"
 import { AlertCircle } from "lucide-react"
 import { Metadata } from "next"
 
@@ -37,9 +37,9 @@ export default async function DownloadPage({
         }}
       >
         <MypageLayout>
-          <DownloadTemplate
+          <DownloadPageTemplate
             user={currentUser as UserDetail}
-            digitalAssets={digitalAssets}
+            digitalAssets={digitalAssets.data.licenses}
             currentPage={page}
             itemsPerPage={take}
             is_exercised={is_exercised}

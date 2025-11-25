@@ -1,4 +1,5 @@
-import { medusaSignup, retrieveCustomer } from "@lib/api/medusa/customer"
+import { retrieveCustomer } from "@lib/api/medusa/customer"
+import { medusaSignup } from "@lib/api/medusa/signup"
 import { appConfig } from "@lib/app-config"
 import { setTokenCookies } from "@lib/data/cookies"
 import { NextRequest, NextResponse } from "next/server"
@@ -75,17 +76,19 @@ export async function GET(request: NextRequest) {
     const currentUserData = await currentUser.json()
 
     if (currentUserData.success) {
-      try {
-        await medusaSignup({
-          email: currentUserData.data.email,
-          first_name: currentUserData.data.username,
-          last_name: currentUserData.data.username,
-          almond_user_id: currentUserData.data.id,
-          almond_login_id: currentUserData.data.loginId,
-        })
-      } catch (error) {
-        console.error("medusaSignup error:", error)
-        throw error
+      const result = await medusaSignup({
+        email: currentUserData.data.email,
+        first_name: currentUserData.data.username,
+        last_name: currentUserData.data.username,
+        almond_user_id: currentUserData.data.id,
+        almond_login_id: currentUserData.data.loginId,
+      })
+
+      if (!result.success) {
+        console.error("medusaSignup failed:", result.error, result.message)
+        return NextResponse.redirect(
+          new URL("/login?error=signup_failed", request.url)
+        )
       }
     }
 
