@@ -2,7 +2,7 @@ import { CartQuickButton } from "@components/cart/mobile-cart-quickButton"
 import { FloatingButtons } from "@components/common/custom-buttons/floating-buttons"
 import { BottomNavigation } from "@components/layout/components/bottom-nav"
 import Footer from "@components/layout/components/footer"
-import { fetchCurrentUser } from "@lib/api/users"
+import { fetchMe } from "@lib/api/users/me"
 import categoriesData from "@lib/data/dummy/get-categories.json"
 import { CategoryProvider } from "@lib/providers/category-provider"
 import { CustomThemeProvider } from "@lib/providers/custom-theme-provider"
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 export default async function RootLayout(props: { children: React.ReactNode }) {
   // 개발 중에는 static JSON 사용
   const categories = categoriesData.categories
-  const currentUser = await fetchCurrentUser().catch(() => null)
+  const currentUser = await fetchMe().catch(() => null)
 
   return (
     <html lang="ko" suppressHydrationWarning>

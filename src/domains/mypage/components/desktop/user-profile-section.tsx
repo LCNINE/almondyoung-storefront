@@ -32,7 +32,7 @@ export function UserProfileSection({
       try {
         await signout()
         setUser(null)
-        router.push("/")
+        router.replace("/")
       } catch (error) {
         console.error("로그아웃 중 오류가 발생했습니다:", error)
       }

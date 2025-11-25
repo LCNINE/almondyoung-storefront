@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server"
-import { ApiResponse } from "./api-response"
 
 type RouteHandlerFunction<T = any> = (
   request: NextRequest,
@@ -18,16 +17,19 @@ export function routeHandler(handler: RouteHandlerFunction) {
 
         // error.tsx에서 처리
         if (statusCode === 401) {
-          return ApiResponse.unauthorized("TOKEN_EXPIRED", 401)
+          return NextResponse.json({ error: "TOKEN_EXPIRED" }, { status: 401 })
         }
 
-        return ApiResponse.error(
-          (error as any).message || "Request failed",
-          statusCode
+        return NextResponse.json(
+          { error: (error as any).message || "Request failed" },
+          { status: statusCode }
         )
       }
 
-      return ApiResponse.error("Internal server error", 500)
+      return NextResponse.json(
+        { error: "Internal server error" },
+        { status: 500 }
+      )
     }
   }
 }

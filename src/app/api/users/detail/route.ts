@@ -1,5 +1,4 @@
 import { routeHandler } from "@lib/api/api-route-handler"
-import { ApiResponse } from "@lib/api/api-response"
 import { NextRequest, NextResponse } from "next/server"
 
 export const GET = routeHandler(async (request: NextRequest) => {
@@ -23,5 +22,5 @@ export const GET = routeHandler(async (request: NextRequest) => {
 
   const data = await res.json()
 
-  return ApiResponse.success(data)
+  return NextResponse.json(data)
 })
