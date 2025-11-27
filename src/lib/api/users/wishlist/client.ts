@@ -12,7 +12,6 @@ export const toggleWishlist = async (productId: string) => {
   const response = await fetch(`/api/users/wishlist`, {
     method: "POST",
     body: JSON.stringify({ productId }),
-    credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },

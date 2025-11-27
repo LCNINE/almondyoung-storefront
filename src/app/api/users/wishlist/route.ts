@@ -5,14 +5,6 @@ import { NextRequest, NextResponse } from "next/server"
 export const GET = routeHandler(async (request: NextRequest) => {
   const cookies = request.cookies.toString()
 
-  const accessToken = await getAccessToken()
-
-  if (!accessToken)
-    return NextResponse.json({
-      success: true,
-      data: [],
-    })
-
   const res = await fetch(`${process.env.BACKEND_URL}/users/wishlist`, {
     method: "GET",
     headers: {
