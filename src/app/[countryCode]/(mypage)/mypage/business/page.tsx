@@ -4,8 +4,17 @@ import { WithHeaderLayout } from "@components/layout"
 import MypageLayout from "@components/layout/mypage-layout"
 import { getMyBusiness } from "@lib/api/users/business/server"
 import { fetchMe } from "@lib/api/users/me"
+import { appConfig } from "@lib/app-config"
+import { getSEOTags } from "@lib/seo"
 import BusinessInfoTemplate from "domains/mypage/template/business-info-template"
 import { Suspense } from "react"
+
+export const metadata = getSEOTags({
+  title: `마이페이지 | 사업자 정보`,
+  openGraph: {},
+  twitter: {},
+  extraTags: {},
+})
 
 export default async function BusinessPage() {
   const currentUser = await fetchMe()
