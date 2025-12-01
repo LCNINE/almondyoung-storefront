@@ -26,8 +26,13 @@ export default function BusinessFileManager({
         onOpenChange={setIsOpen}
         className="flex w-full flex-col"
       >
-        <div className="flex items-center justify-between">
-          <h4 className="text-sm font-semibold">사업자가 없으신가요?</h4>
+        <div
+          className="flex items-center justify-between"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          <h4 className="cursor-pointer text-sm font-semibold">
+            사업자가 없으신가요?
+          </h4>
 
           <CollapsibleTrigger asChild>
             <Button
@@ -76,19 +81,21 @@ function BusinessFileForm() {
         shouldValidate: true,
       })
       form.setValue("isSubmitting", true)
+
+      e.target.value = ""
     }
   }
 
   const handleRemoveFile = () => {
     if (file) {
-      form.resetField("file")
+      form.setValue("file", undefined)
       form.setValue("fileUrl", undefined)
     }
   }
 
   return (
     <div className="flex items-center gap-3">
-      <label className="border-input bg-background hover:bg-muted flex cursor-pointer items-center gap-2 rounded-md border px-4 py-2 text-sm transition-colors">
+      <label className="border-input bg-background hover:bg-muted flex cursor-pointer items-center gap-2 rounded-md border-2 px-4 py-2 text-sm transition-colors">
         <Upload className="h-4 w-4" />
         파일 선택
         <input
