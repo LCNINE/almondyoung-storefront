@@ -75,8 +75,19 @@ export default function BusinessInfoForm({
         formData.append("file", file)
         formData.append("context", "business-verification-file")
 
-        fileRes = await uploadFile(formData)
-        console.log("fileRes:", fileRes)
+        try {
+          fileRes = await uploadFile(formData)
+          console.log("fileRes:", fileRes)
+        } catch (error) {
+          console.log("error:", error)
+          if (error instanceof HttpApiError) {
+            toast.error(error.message)
+          } else {
+            toast.error("파일 업로드 중 오류가 발생했습니다.")
+          }
+
+          return
+        }
       }
 
       try {
