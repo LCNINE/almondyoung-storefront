@@ -33,7 +33,8 @@ export default function Error({
             // 토큰 복구 성공하면 새로고침
             console.log("토큰 복구 성공")
             await new Promise((resolve) => setTimeout(resolve, 100))
-            router.refresh()
+            window.location.reload()
+
             return
           }
 
