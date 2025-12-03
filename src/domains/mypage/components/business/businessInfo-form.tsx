@@ -58,6 +58,7 @@ export default function BusinessInfoForm({
       externalBusinessStatus: "null",
       isSubmitting: false,
       externalBusinessStatus: "null",
+      isSubmitting: false,
     },
   })
 
@@ -109,6 +110,7 @@ export default function BusinessInfoForm({
             metadata,
             externalBusinessStatus:
               form.watch("externalBusinessStatus") === "success" ? true : false,
+            metadata,
           })
 
           router.refresh()
@@ -137,6 +139,7 @@ export default function BusinessInfoForm({
                 form.watch("externalBusinessStatus") === "success"
                   ? true
                   : false,
+              metadata,
             },
             businessId: initialData?.id!,
           })
@@ -238,7 +241,6 @@ export default function BusinessInfoForm({
     })
   }
 
-  console.log("initialData:", initialData)
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
