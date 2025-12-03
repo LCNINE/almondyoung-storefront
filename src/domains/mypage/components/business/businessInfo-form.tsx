@@ -20,7 +20,7 @@ import {
   fetchExternalBusinessInfo,
   updateBusiness,
 } from "@lib/api/users/business/client"
-import type { BusinessInfo } from "@lib/api/users/business/types"
+import type { BusinessInfo } from "@lib/types/dto/business"
 import type { FilesDto } from "@lib/types/dto/files"
 import { formatBusinessNumber } from "@lib/utils/format-business-number"
 import { ViewMode } from "domains/mypage/template/business-info-template"
@@ -219,6 +219,7 @@ export default function BusinessInfoForm({
     })
   }
 
+  console.log("initialData:", initialData)
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
