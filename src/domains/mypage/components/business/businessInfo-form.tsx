@@ -238,6 +238,7 @@ export default function BusinessInfoForm({
     })
   }
 
+  console.log("initialData:", initialData)
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
