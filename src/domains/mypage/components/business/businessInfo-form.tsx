@@ -57,8 +57,6 @@ export default function BusinessInfoForm({
       metadata: initialData?.metadata ?? undefined,
       externalBusinessStatus: "null",
       isSubmitting: false,
-      externalBusinessStatus: "null",
-      isSubmitting: false,
     },
   })
 
@@ -108,9 +106,6 @@ export default function BusinessInfoForm({
             externalBusinessStatus:
               form.watch("externalBusinessStatus") === "success" ? true : false,
             metadata,
-            externalBusinessStatus:
-              form.watch("externalBusinessStatus") === "success" ? true : false,
-            metadata,
           })
 
           router.refresh()
@@ -130,11 +125,6 @@ export default function BusinessInfoForm({
                 : initialData?.fileUrl
                   ? initialData.fileUrl
                   : "",
-              externalBusinessStatus:
-                form.watch("externalBusinessStatus") === "success"
-                  ? true
-                  : false,
-              metadata,
               externalBusinessStatus:
                 form.watch("externalBusinessStatus") === "success"
                   ? true
