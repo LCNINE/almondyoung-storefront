@@ -113,7 +113,7 @@ export function DesktopHeader() {
 
     // 1. 사용자 전문분야와 직접 매칭 (name으로 비교)
     const directMatch = userSpecialties.some(
-      (specialty) =>
+      (specialty: string) =>
         specialty && (name.includes(specialty) || specialty.includes(name))
     )
 
@@ -264,7 +264,7 @@ export function DesktopHeader() {
           </div>
         </div>
 
-        <div className="relative z-205 flex items-center gap-8">
+        <div className="relative flex items-center gap-8">
           <button
             onMouseEnter={() => setOpen(true)}
             onMouseLeave={() => setOpen(false)}
