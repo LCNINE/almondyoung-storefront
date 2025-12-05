@@ -120,7 +120,7 @@ export default function NotFound() {
       <footer className="border-border border-t py-6">
         <div className="container mx-auto px-4 text-center">
           <p className="text-muted-foreground text-xs">
-            © 2025 ALMOND YOUNG. All rights reserved.
+            © {new Date().getFullYear()} ALMOND YOUNG. All rights reserved.
           </p>
         </div>
       </footer>
