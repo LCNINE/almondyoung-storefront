@@ -103,7 +103,7 @@ export default function NotFound() {
 
           {/* Additional Help */}
           <div
-            className="border-border animate-fade-in mt-10 rounded-lg border bg-[hsl(0_0%_98%)] p-4"
+            className="bg-surface animate-fade-in mt-10 rounded-lg p-4"
             style={{ animationDelay: "0.6s" }}
           >
             <p className="text-muted-foreground text-xs">

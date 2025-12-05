@@ -148,7 +148,7 @@ export default function Error({
                 variant="default"
                 size="lg"
                 className="w-full sm:w-auto"
-                onClick={() => router.push("/")}
+                onClick={() => (window.location.href = "/")}
               >
                 <Home className="h-4 w-4" />
                 홈으로 돌아가기
@@ -158,7 +158,7 @@ export default function Error({
                 variant="outline"
                 size="lg"
                 className="w-full sm:w-auto"
-                onClick={() => router.refresh()}
+                onClick={() => window.location.reload()}
               >
                 <RefreshCw className="h-4 w-4" />
                 새로고침
@@ -167,7 +167,7 @@ export default function Error({
 
             {/* Help Section */}
             <div
-              className="border-border bg-surface animate-fade-in mt-10 rounded-lg border p-4"
+              className="bg-surface animate-fade-in mt-10 rounded-lg p-4"
               style={{ animationDelay: "0.7s" }}
             >
               <p className="text-muted-foreground text-xs">
