@@ -1,5 +1,6 @@
 import { WithHeaderLayout } from "@components/layout"
 import MypageLayout from "@components/layout/mypage-layout"
+import { PaymentManagement } from "domains/payment/payment-management"
 
 export default function PaymentPage() {
   return (
@@ -11,7 +12,9 @@ export default function PaymentPage() {
         mobileSubBackHeaderTitle: "결제수단 관리",
       }}
     >
-      <MypageLayout>=</MypageLayout>
+      <MypageLayout>
+        <PaymentManagement />
+      </MypageLayout>
     </WithHeaderLayout>
   )
 }

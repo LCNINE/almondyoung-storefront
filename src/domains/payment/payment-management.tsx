@@ -1,0 +1,43 @@
+"use client"
+
+import { PageTitle } from "@components/common/page-title"
+import { useState } from "react"
+import PaymentRegistrationModal from "./components/modals/payment-registration-modal"
+import AccountSection from "./components/sections/account-section"
+import DeferredPaymentSection from "./components/sections/deferred-payment-section"
+import PaymentMenuList from "./components/sections/payment-menu-list"
+import PendingPointsSection from "./components/sections/pending-points-section"
+import PointSection from "./components/sections/point-section"
+
+export function PaymentManagement() {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  return (
+    <div className="rounded-xl bg-white px-3 pt-4 pb-9 md:px-6">
+      <PageTitle>결제수단 관리</PageTitle>
+
+      <div className="bg-gray-10 mt-5 mb-4 p-4">
+        {/* 나중결제 내역 */}
+        <DeferredPaymentSection />
+
+        {/* 적립금 섹션 */}
+        <PointSection />
+
+        {/* 계좌 섹션 */}
+        <AccountSection />
+
+        {/* 적립 예정인 적립금 섹션 */}
+        <PendingPointsSection />
+      </div>
+
+      {/* 하단 메뉴 리스트 */}
+      <PaymentMenuList />
+
+      {/* 등록 모달 */}
+      <PaymentRegistrationModal
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+      />
+    </div>
+  )
+}
