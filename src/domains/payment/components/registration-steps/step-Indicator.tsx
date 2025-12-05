@@ -1,3 +1,5 @@
+"use client"
+
 interface Step {
   id: string
   label: string
@@ -11,6 +13,10 @@ export function StepIndicator({
   currentStep: string
 }) {
   const currentIndex = steps.findIndex((s) => s.id === currentStep)
+
+  if (currentStep === "birthDate") {
+    return null
+  }
 
   return (
     <div className="flex items-center justify-center gap-2 py-4">

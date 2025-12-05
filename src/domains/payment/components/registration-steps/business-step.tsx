@@ -1,5 +1,5 @@
 // 사업자 인증 스템 컴포넌트
-export default function BusinessVerificationStep({
+export default function BusinessStep({
   onComplete,
 }: {
   onComplete: (data: {

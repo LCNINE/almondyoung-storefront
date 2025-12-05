@@ -26,7 +26,7 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>
 
 // 휴대폰 인증 스텝 컴포넌트
-export function PhoneVerificationStep({
+export function PhoneStep({
   onComplete,
 }: {
   onComplete: (data: { verified: boolean; phoneNumber: string }) => void
@@ -55,7 +55,8 @@ export function PhoneVerificationStep({
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <p className="text-sm text-gray-600">
-        결제수단 등록을 위해서 본인인증을 진행해주세요.
+        결제수단 등록을 위해서 본인인증을 진행해주세요. 아몬드영 인증 서비스를
+        통해 안전하게 진행됩니다.
       </p>
 
       <div className="space-y-3">

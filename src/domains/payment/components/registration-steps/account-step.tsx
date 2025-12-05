@@ -1,5 +1,5 @@
 // 계좌 등록 스텝 컴포넌트
-export default function AccountRegistrationStep({
+export default function AccountStep({
   onComplete,
 }: {
   onComplete: (data: {

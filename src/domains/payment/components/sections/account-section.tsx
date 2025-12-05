@@ -13,9 +13,11 @@ export default function AccountSection() {
         action={
           <Button
             variant="ghost"
-            className="w-full cursor-pointer px-6 font-medium hover:bg-transparent hover:text-inherit sm:w-auto"
+            className="w-full cursor-pointer px-0! font-medium hover:bg-transparent hover:text-inherit sm:w-auto md:px-6"
           >
-            <span className="font-bold">등록한 계좌가 없어요</span>{" "}
+            <span className="w-full text-left font-bold">
+              등록한 계좌가 없어요
+            </span>
             <ChevronRight className="size-4" />
           </Button>
         }

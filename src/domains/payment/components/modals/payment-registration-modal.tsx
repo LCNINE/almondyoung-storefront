@@ -1,13 +1,18 @@
 "use client"
 
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "@components/common/ui/dialog"
 import { useState } from "react"
-import { Dialog, DialogContent } from "@components/common/ui/dialog"
-import { PhoneVerificationStep } from "../registration-steps/phone-verification-step"
-import BusinessVerificationStep from "../registration-steps/business-verification-step"
-import AccountRegistrationStep from "../registration-steps/account-registration-step"
-import { StepIndicator } from "../registration-steps"
+import AccountStep from "../registration-steps/account-step"
+import BirthdateStep from "../registration-steps/birthdate-step"
+import BusinessStep from "../registration-steps/business-step"
+import { PhoneStep } from "../registration-steps/phone-step"
+import { StepIndicator } from "../registration-steps/step-Indicator"
 
-type Step = "phone" | "business" | "account"
+type Step = "birthDate" | "phone" | "business" | "account"
 
 interface RegistrationData {
   phone?: { verified: boolean; phoneNumber: string }
@@ -19,11 +24,13 @@ interface RegistrationData {
 export default function PaymentRegistrationModal({
   open,
   onOpenChange,
+  isUserBirthDate,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
+  isUserBirthDate: boolean
 }) {
-  const [currentStep, setCurrentStep] = useState<Step>("phone")
+  const [currentStep, setCurrentStep] = useState<Step>("birthDate")
   const [data, setData] = useState<RegistrationData>({})
 
   const steps = [
@@ -53,7 +60,7 @@ export default function PaymentRegistrationModal({
   }
 
   const handleClose = () => {
-    setCurrentStep("phone")
+    setCurrentStep("birthDate")
     setData({})
     onOpenChange(false)
   }
@@ -61,18 +68,24 @@ export default function PaymentRegistrationModal({
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
+        <DialogTitle className="sr-only">결제수단 등록</DialogTitle>
+
         {/* 단계 표시 */}
         <StepIndicator steps={steps} currentStep={currentStep} />
 
         {/* 단계별 컨텐츠 */}
+        {currentStep === "birthDate" && (
+          <BirthdateStep onComplete={() => setCurrentStep("phone")} />
+        )}
+
         {currentStep === "phone" && (
-          <PhoneVerificationStep onComplete={handlePhoneComplete} />
+          <PhoneStep onComplete={handlePhoneComplete} />
         )}
         {currentStep === "business" && (
-          <BusinessVerificationStep onComplete={handleBusinessComplete} />
+          <BusinessStep onComplete={handleBusinessComplete} />
         )}
         {currentStep === "account" && (
-          <AccountRegistrationStep onComplete={handleAccountComplete} />
+          <AccountStep onComplete={handleAccountComplete} />
         )}
       </DialogContent>
     </Dialog>
