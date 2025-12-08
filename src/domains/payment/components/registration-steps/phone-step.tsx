@@ -60,12 +60,12 @@ export function PhoneStep({
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      name: "정중식",
-      residentNumberFront: "941024",
-      residentNumberBack: "1",
-      phoneNumber: "+821022720693",
+      name: "",
+      residentNumberFront: "",
+      residentNumberBack: "",
+      phoneNumber: "",
       countryCode: "KR",
-      carrier: "lgu",
+      carrier: "",
     },
   })
 
