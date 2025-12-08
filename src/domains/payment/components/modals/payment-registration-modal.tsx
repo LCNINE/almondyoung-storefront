@@ -3,6 +3,7 @@
 import {
   Dialog,
   DialogContent,
+  DialogHeader,
   DialogTitle,
 } from "@components/common/ui/dialog"
 import { useEffect, useState } from "react"
@@ -11,6 +12,7 @@ import BirthdateStep from "../registration-steps/birthdate-step"
 import BusinessStep from "../registration-steps/business-step"
 import { PhoneStep } from "../registration-steps/phone-step"
 import { StepIndicator } from "../registration-steps/step-Indicator"
+import { UserDetail } from "@lib/types/ui/user"
 
 type Step = "birthDate" | "phone" | "business" | "account"
 
@@ -25,10 +27,12 @@ export default function PaymentRegistrationModal({
   open,
   onOpenChange,
   isUserBirthDate,
+  user,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   isUserBirthDate: boolean
+  user: UserDetail
 }) {
   const [currentStep, setCurrentStep] = useState<Step>(() =>
     isUserBirthDate ? "phone" : "birthDate"
@@ -78,9 +82,12 @@ export default function PaymentRegistrationModal({
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
-        <DialogTitle className="absolute left-0 w-full border-b text-center">
-          결제수단 등록
-        </DialogTitle>
+        {/* 헤더 */}
+        <DialogHeader>
+          <DialogTitle>
+            {steps.find((step) => step.id === currentStep)?.label}
+          </DialogTitle>
+        </DialogHeader>
 
         {/* 단계 표시 */}
         <StepIndicator steps={steps} currentStep={currentStep} />
@@ -91,7 +98,7 @@ export default function PaymentRegistrationModal({
         )}
 
         {currentStep === "phone" && (
-          <PhoneStep onComplete={handlePhoneComplete} />
+          <PhoneStep onComplete={handlePhoneComplete} user={user} />
         )}
         {currentStep === "business" && (
           <BusinessStep onComplete={handleBusinessComplete} />

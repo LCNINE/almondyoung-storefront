@@ -45,6 +45,7 @@ export function PaymentManagement({
       <PaymentRegistrationModal
         open={isPaymentRegisterModalOpen}
         onOpenChange={setIsPaymentRegisterModalOpen}
+        user={currentUser}
         isUserBirthDate={currentUser.profile?.birthDate ? true : false}
       />
     </div>

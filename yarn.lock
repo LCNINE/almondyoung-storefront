@@ -5390,6 +5390,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"classnames@npm:^2.5.1":
+  version: 2.5.1
+  resolution: "classnames@npm:2.5.1"
+  checksum: da424a8a6f3a96a2e87d01a432ba19315503294ac7e025f9fece656db6b6a0f7b5003bb1fbb51cbb0d9624d964f1b9bb35a51c73af9b2434c7b292c42231c1e5
+  languageName: node
+  linkType: hard
+
 "cli-columns@npm:^4.0.0":
   version: 4.0.0
   resolution: "cli-columns@npm:4.0.0"
@@ -5636,6 +5643,13 @@ __metadata:
     typescript:
       optional: true
   checksum: a30c424b53d442ea0bdd24cb1b3d0d8687c8dda4a17ab6afcdc439f8964438801619cdb66e8e79f63b9caa3e6586b60d8bab9ce203e72df6c5e80179b971fe8f
+  languageName: node
+  linkType: hard
+
+"country-flag-icons@npm:^1.5.17":
+  version: 1.6.4
+  resolution: "country-flag-icons@npm:1.6.4"
+  checksum: bb8bf196fac9a157f9b04110eaf55cd1aaed93960acec92052323c799d602e0b98ff974d563912af17ad3a01fd006aafc54c6bd10cb5450b18ae8e93952ee3df
   languageName: node
   linkType: hard
 
@@ -7456,13 +7470,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"input-otp@npm:^1.4.2":
-  version: 1.4.2
-  resolution: "input-otp@npm:1.4.2"
+"input-format@npm:^0.3.14":
+  version: 0.3.14
+  resolution: "input-format@npm:0.3.14"
+  dependencies:
+    prop-types: ^15.8.1
   peerDependencies:
-    react: ^16.8 || ^17.0 || ^18.0 || ^19.0.0 || ^19.0.0-rc
-    react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0.0 || ^19.0.0-rc
-  checksum: 9c1a21ac36c8ea6857cb1ea894d88f44d0df2ef2e78090560cbc491888ef44ccd62e6390bc0a826939d6e8d50fbe6bddc6fe082180de715c6fab8ccf52aa2426
+    react: ">=18.1.0"
+    react-dom: ">=18.1.0"
+  peerDependenciesMeta:
+    react:
+      optional: true
+    react-dom:
+      optional: true
+  checksum: 8776bd706ff86f97aa017a84bb1f1e3e48f6f60257cbf45fa6d1283f64fddbea8baac2e02f9eb85044cd25ef1a10b7d9c84c07e82f0fbed90161df183e75a460
   languageName: node
   linkType: hard
 
@@ -8211,6 +8232,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"libphonenumber-js@npm:^1.12.27":
+  version: 1.12.31
+  resolution: "libphonenumber-js@npm:1.12.31"
+  checksum: 21ae24e8612414f91e722f0ecb7d12426992807ba268f4d1b864f57d20fa7cf717f41d898c1f7069a7a5ab5a38c60a83e8e233b0057c15b5a0d821d7f2d88f10
+  languageName: node
+  linkType: hard
+
 "lightningcss-android-arm64@npm:1.30.2":
   version: 1.30.2
   resolution: "lightningcss-android-arm64@npm:1.30.2"
@@ -8566,7 +8594,6 @@ __metadata:
     eslint: 8.10.0
     eslint-config-next: 15.0.3
     i: ^0.3.7
-    input-otp: ^1.4.2
     intl-tel-input: ^25.12.5
     lodash: ^4.17.21
     lucide-react: ^0.542.0
@@ -8586,6 +8613,7 @@ __metadata:
     react-hook-form: ^7.62.0
     react-icons: ^5.5.0
     react-mobile-picker: ^1.2.0
+    react-phone-number-input: ^3.4.14
     react-resizable-panels: ^3.0.5
     server-only: ^0.0.1
     shadcn: latest
@@ -10091,6 +10119,22 @@ react-day-picker@latest:
     react: ^18 || ^19
     react-dom: ^18 || ^19
   checksum: 6a5dc0d5258d9b636e187a7ac0a13ad905197afbbbd348cb390c813265bf5a0005d60b7dc00b504740a9baf3602c1c580d98ad25d874dd23b303c6ed09f27a81
+  languageName: node
+  linkType: hard
+
+"react-phone-number-input@npm:^3.4.14":
+  version: 3.4.14
+  resolution: "react-phone-number-input@npm:3.4.14"
+  dependencies:
+    classnames: ^2.5.1
+    country-flag-icons: ^1.5.17
+    input-format: ^0.3.14
+    libphonenumber-js: ^1.12.27
+    prop-types: ^15.8.1
+  peerDependencies:
+    react: ">=16.8"
+    react-dom: ">=16.8"
+  checksum: bd6c8e4e4e7bb0fd18aaa17824a1dff9eb2a30025b8f86db2b5ea541cb56207ad6f35cc951820ddb72ddb9e5ae2578f8416d1f9cc6a5bf8b2f976be96ec1e9ad
   languageName: node
   linkType: hard
 
