@@ -18,8 +18,6 @@ export function PaymentManagement({
   const [isPaymentRegisterModalOpen, setIsPaymentRegisterModalOpen] =
     useState(false)
 
-  console.log("currentUser:", currentUser)
-
   return (
     <div className="p x-3 rounded-xl bg-white pt-4 pb-9 md:px-6">
       <PageTitle>결제수단 관리</PageTitle>

@@ -16,6 +16,8 @@ import {
 
 const schema = z.object({
   name: z.string().min(1, "이름을 입력해주세요"),
+  residentNumberFront: z.string().min(1, "주민번호 앞자리를 입력해주세요"),
+  residentNumberBack: z.string().min(1, "주민번호 뒷자리를 입력해주세요"),
   phoneNumber: z
     .string()
     .regex(/^\d{10,11}$/, "올바른 전화번호를 입력해주세요"),
@@ -61,6 +63,20 @@ export function PhoneStep({
 
       <div className="space-y-3">
         <Input placeholder="이름" {...register("name")} />
+
+        <div className="flex items-center gap-2">
+          <Input
+            placeholder="주민번호 앞자리"
+            {...register("residentNumberFront")}
+          />
+          <span>-</span>{" "}
+          <Input
+            className="placeholder:tracking-wide"
+            placeholder="0******"
+            {...register("residentNumberBack")}
+            maxLength={1}
+          />
+        </div>
 
         <div className="flex gap-2">
           <Input placeholder="전화번호(숫자만)" {...register("phoneNumber")} />

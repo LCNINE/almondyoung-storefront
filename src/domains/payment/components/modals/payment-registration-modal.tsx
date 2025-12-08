@@ -5,7 +5,7 @@ import {
   DialogContent,
   DialogTitle,
 } from "@components/common/ui/dialog"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import AccountStep from "../registration-steps/account-step"
 import BirthdateStep from "../registration-steps/birthdate-step"
 import BusinessStep from "../registration-steps/business-step"
@@ -30,8 +30,18 @@ export default function PaymentRegistrationModal({
   onOpenChange: (open: boolean) => void
   isUserBirthDate: boolean
 }) {
-  const [currentStep, setCurrentStep] = useState<Step>("birthDate")
+  const [currentStep, setCurrentStep] = useState<Step>(() =>
+    isUserBirthDate ? "phone" : "birthDate"
+  )
   const [data, setData] = useState<RegistrationData>({})
+
+  useEffect(() => {
+    if (isUserBirthDate) {
+      setCurrentStep("phone")
+    } else {
+      setCurrentStep("birthDate")
+    }
+  }, [isUserBirthDate])
 
   const steps = [
     { id: "phone", label: "본인인증" },
@@ -60,7 +70,7 @@ export default function PaymentRegistrationModal({
   }
 
   const handleClose = () => {
-    setCurrentStep("birthDate")
+    setCurrentStep(isUserBirthDate ? "phone" : "birthDate")
     setData({})
     onOpenChange(false)
   }
@@ -68,7 +78,9 @@ export default function PaymentRegistrationModal({
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
-        <DialogTitle className="sr-only">결제수단 등록</DialogTitle>
+        <DialogTitle className="absolute left-0 w-full border-b text-center">
+          결제수단 등록
+        </DialogTitle>
 
         {/* 단계 표시 */}
         <StepIndicator steps={steps} currentStep={currentStep} />
