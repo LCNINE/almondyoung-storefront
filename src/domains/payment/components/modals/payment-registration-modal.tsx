@@ -18,7 +18,12 @@ type Step = "birthDate" | "phone" | "business" | "account"
 
 interface RegistrationData {
   phone?: { verified: boolean; phoneNumber: string }
-  business?: { verified: boolean; businessNumber: string; companyName: string }
+  business?: {
+    verified: boolean
+    businessNumber: string
+    ceoName: string
+    file: File | null
+  }
   account?: { bank: string; accountNumber: string }
 }
 
@@ -34,22 +39,23 @@ export default function PaymentRegistrationModal({
   isUserBirthDate: boolean
   user: UserDetail
 }) {
-  const [currentStep, setCurrentStep] = useState<Step>(() =>
-    isUserBirthDate ? "phone" : "birthDate"
-  )
+  // const [currentStep, setCurrentStep] = useState<Step>(() =>
+  //   isUserBirthDate ? "phone" : "birthDate"
+  // )
+  const [currentStep, setCurrentStep] = useState<Step>(() => "business")
   const [data, setData] = useState<RegistrationData>({})
 
-  useEffect(() => {
-    if (isUserBirthDate) {
-      setCurrentStep("phone")
-    } else {
-      setCurrentStep("birthDate")
-    }
-  }, [isUserBirthDate])
+  // useEffect(() => {
+  //   if (isUserBirthDate) {
+  //     setCurrentStep("phone")
+  //   } else {
+  //     setCurrentStep("birthDate")
+  //   }
+  // }, [isUserBirthDate])
 
   const steps = [
     { id: "phone", label: "본인인증" },
-    { id: "business", label: "사업자대인" },
+    { id: "business", label: "사업자 확인" },
     { id: "account", label: "계좌등록 및 동의" },
   ] as const
 

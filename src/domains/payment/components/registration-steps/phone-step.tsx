@@ -128,12 +128,17 @@ export function PhoneStep({
       })}
       className="space-y-4"
     >
-      <p className="text-sm text-gray-600">
+      <p className="bg-gray-10 px-4 py-2 text-sm text-gray-600">
         결제수단 등록을 위해서 본인인증을 진행해주세요. 아몬드영 인증 서비스를
         통해 안전하게 진행됩니다.
       </p>
 
       <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-bold">휴대폰 인증</h2>
+          <span>(본인 명의의 휴대폰만 인증 가능)</span>
+        </div>
+
         <Input placeholder="이름" {...form.register("name")} required />
 
         <div className="flex items-center gap-2">
