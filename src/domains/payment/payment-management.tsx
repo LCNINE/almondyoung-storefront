@@ -1,9 +1,10 @@
 "use client"
 
 import { PageTitle } from "@components/common/page-title"
+import { BusinessInfo } from "@lib/types/dto/business"
 import type { UserDetail } from "@lib/types/ui/user"
 import { useState } from "react"
-import PaymentRegistrationModal from "./components/modals/payment-registration-modal"
+import PaymentRegistrationModal from "./components/modals/payment-registration-wizard-modal"
 import AccountSection from "./components/sections/account-section"
 import DeferredPaymentSection from "./components/sections/deferred-payment-section"
 import PaymentMenuList from "./components/sections/payment-menu-list"
@@ -12,8 +13,10 @@ import PointSection from "./components/sections/point-section"
 
 export function PaymentManagement({
   currentUser,
+  businessInfo,
 }: {
   currentUser: UserDetail
+  businessInfo: BusinessInfo
 }) {
   const [isPaymentRegisterModalOpen, setIsPaymentRegisterModalOpen] =
     useState(false)
@@ -47,6 +50,7 @@ export function PaymentManagement({
         onOpenChange={setIsPaymentRegisterModalOpen}
         user={currentUser}
         isUserBirthDate={currentUser.profile?.birthDate ? true : false}
+        businessInfo={businessInfo}
       />
     </div>
   )

@@ -6,13 +6,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@components/common/ui/dialog"
-import { useEffect, useState } from "react"
+import { BusinessInfo } from "@lib/types/dto/business"
+import { UserDetail } from "@lib/types/ui/user"
+import { useState } from "react"
 import AccountStep from "../registration-steps/account-step"
 import BirthdateStep from "../registration-steps/birthdate-step"
 import BusinessStep from "../registration-steps/business-step"
 import { PhoneStep } from "../registration-steps/phone-step"
 import { StepIndicator } from "../registration-steps/step-Indicator"
-import { UserDetail } from "@lib/types/ui/user"
 
 type Step = "birthDate" | "phone" | "business" | "account"
 
@@ -28,16 +29,18 @@ interface RegistrationData {
 }
 
 // 결제 수단 등록 모달 컴포넌트
-export default function PaymentRegistrationModal({
+export default function PaymentRegistrationWizardModal({
   open,
   onOpenChange,
   isUserBirthDate,
   user,
+  businessInfo,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   isUserBirthDate: boolean
   user: UserDetail
+  businessInfo: BusinessInfo
 }) {
   // const [currentStep, setCurrentStep] = useState<Step>(() =>
   //   isUserBirthDate ? "phone" : "birthDate"
@@ -106,8 +109,12 @@ export default function PaymentRegistrationModal({
         {currentStep === "phone" && (
           <PhoneStep onComplete={handlePhoneComplete} user={user} />
         )}
+
         {currentStep === "business" && (
-          <BusinessStep onComplete={handleBusinessComplete} />
+          <BusinessStep
+            onComplete={handleBusinessComplete}
+            businessInfo={businessInfo}
+          />
         )}
         {currentStep === "account" && (
           <AccountStep onComplete={handleAccountComplete} />

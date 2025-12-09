@@ -1,3 +1,4 @@
+import { Spinner } from "@components/common/spinner"
 import { Badge } from "@components/common/ui/badge"
 import { Button } from "@components/common/ui/button"
 import { Checkbox } from "@components/common/ui/checkbox"
@@ -5,8 +6,14 @@ import { Input } from "@components/common/ui/input"
 import { Label } from "@components/common/ui/label"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { HttpApiError } from "@lib/api/api-error"
-import { fetchExternalBusinessInfo } from "@lib/api/users/business/client"
-import { cn } from "@lib/utils"
+import { uploadFile } from "@lib/api/file/upload"
+import {
+  createBusiness,
+  fetchExternalBusinessInfo,
+} from "@lib/api/users/business/client"
+import { BusinessInfo } from "@lib/types/dto/business"
+import { FilesDto } from "@lib/types/dto/files"
+import { useRouter } from "next/navigation"
 import { useRef, useState, useTransition } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { toast } from "sonner"
@@ -23,6 +30,7 @@ type BusinessFormData = z.infer<typeof schema>
 // 사업자 인증 스템 컴포넌트
 export default function BusinessStep({
   onComplete,
+  businessInfo,
 }: {
   onComplete: (data: {
     verified: boolean
@@ -30,14 +38,21 @@ export default function BusinessStep({
     ceoName: string
     file: File | null
   }) => void
+  businessInfo: BusinessInfo
 }) {
+  const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [BusinessCheckStatus, setBusinessCheckStatus] = useState<
     "success" | "failed" | null
   >(null)
 
+  // 외부조회로 사업자 정보 조회
   const [isExternalBusinessPending, startExternalBusinessTransition] =
+    useTransition()
+
+  // 사업자 정보 등록
+  const [isCreateBusinessPending, startCreateBusinessTransition] =
     useTransition()
 
   const form = useForm<BusinessFormData>({
@@ -48,20 +63,52 @@ export default function BusinessStep({
     },
   })
 
-  // todo: 파일업로드처리 및 사업자 조회 후 등록처리
-  // todo: 조회 버튼 엔터로하면 다음단계 버튼으로 넘어가지는거 방지
   const onSubmit = async (data: BusinessFormData) => {
     if (!BusinessCheckStatus && !form.watch("file")) {
       toast.error("사업자 정보 입력 또는 파일 첨부를 해주세요.")
       return
     }
 
-    // onComplete({
-    //   verified: true,
-    //   businessNumber: data.businessNumber,
-    //   ceoName: data.ceoName,
-    //   file: data.file ?? null,
-    // })
+    startCreateBusinessTransition(async () => {
+      let fileRes: FilesDto | null = null
+
+      if (form.watch("file")) {
+        const formData = new FormData()
+
+        formData.append("file", form.watch("file")!)
+        formData.append("context", "business-verification-file")
+
+        try {
+          fileRes = await uploadFile(formData)
+        } catch (error) {
+          console.log("error:", error)
+          if (error instanceof HttpApiError) {
+            toast.error(error.message)
+          } else {
+            toast.error("파일 업로드 중 오류가 발생했습니다.")
+          }
+
+          return
+        }
+      }
+
+      const res = await createBusiness({
+        businessNumber: form.watch("businessNumber") ?? "",
+        representativeName: form.watch("ceoName") ?? "",
+        fileUrl: fileRes?.data?.url ?? undefined,
+      })
+
+      router.refresh()
+
+      if (!form.watch("file")) {
+        onComplete({
+          verified: true,
+          businessNumber: data.businessNumber,
+          ceoName: data.ceoName,
+          file: data.file ?? null,
+        })
+      }
+    })
   }
 
   const handleExternalBusiness = async () => {
@@ -122,6 +169,97 @@ export default function BusinessStep({
       }
     }
     fileInputRef.current?.click()
+  }
+
+  // 사업자 정보 심사중일 때
+  if (businessInfo && businessInfo?.status === "under_review") {
+    return (
+      <div className="flex flex-col items-center justify-center space-y-6 rounded-lg border border-amber-200 bg-amber-50 p-8">
+        <div className="relative">
+          <div className="h-16 w-16 animate-spin rounded-full border-4 border-amber-200 border-t-amber-500"></div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <svg
+              className="h-8 w-8 text-amber-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+          </div>
+        </div>
+
+        {/* 메인 메시지 */}
+        <div className="space-y-2 text-center">
+          <h3 className="text-xl font-bold text-gray-900">
+            사업자 정보 심사중입니다
+          </h3>
+          <p className="text-sm text-gray-600">
+            제출하신 사업자 정보를 검토하고 있습니다.
+          </p>
+        </div>
+
+        {/* 안내 정보 */}
+        <div className="w-full max-w-md space-y-3 rounded-md bg-white p-4">
+          <div className="flex items-start gap-3">
+            <svg
+              className="mt-0.5 h-5 w-5 shrink-0 text-blue-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <div>
+              <p className="text-sm font-medium text-gray-900">
+                심사 소요 시간
+              </p>
+              <p className="text-sm text-gray-600">
+                영업일 기준 1~3일 정도 소요될 수 있습니다.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <svg
+              className="mt-0.5 h-5 w-5 shrink-0 text-green-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+              />
+            </svg>
+            <div>
+              <p className="text-sm font-medium text-gray-900">
+                심사 결과 안내
+              </p>
+              <p className="text-sm text-gray-600">
+                심사 완료 시 등록하신 이메일로 결과를 안내드립니다.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-xs text-gray-500">
+          궁금하신 사항이 있으시면 고객센터로 문의해 주세요.
+        </p>
+      </div>
+    )
   }
 
   return (
@@ -306,8 +444,16 @@ export default function BusinessStep({
         />
       </div>
 
-      <Button type="submit" className="w-full bg-amber-500">
-        다음 단계
+      <Button
+        type="submit"
+        className="w-full bg-amber-500"
+        disabled={isCreateBusinessPending}
+      >
+        {isCreateBusinessPending ? (
+          <Spinner size="sm" color="white" />
+        ) : (
+          "다음 단계"
+        )}
       </Button>
     </form>
   )
