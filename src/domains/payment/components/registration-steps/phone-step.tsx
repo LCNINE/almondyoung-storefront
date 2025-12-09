@@ -11,11 +11,12 @@ import {
   SelectValue,
 } from "@components/common/ui/select"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { updateProfile } from "@lib/api/users/profile/client"
 import { UserDetail } from "@lib/types/ui/user"
 import { cn } from "@lib/utils"
 import { format } from "date-fns"
 import "intl-tel-input/build/css/intlTelInput.css"
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState, useTransition } from "react"
 import { Controller, useForm } from "react-hook-form"
 import PhoneInput, { type Country } from "react-phone-number-input"
 import "react-phone-number-input/style.css"
@@ -37,15 +38,23 @@ type FormData = z.infer<typeof schema>
 
 // 휴대폰 인증 스텝 컴포넌트
 export function PhoneStep({
+  status,
   onComplete,
   user,
 }: {
-  onComplete: (data: { verified: boolean; phoneNumber: string }) => void
+  status: "verified" | "rejected" | "under_review" | "none"
+  onComplete: () => void
   user: UserDetail
 }) {
-  const [verificationCode, setVerificationCode] = useState("") // 인증번호
-
   const verificationCodeRef = useRef<HTMLInputElement>(null)
+  const [verificationCode, setVerificationCode] = useState("") // 인증번호
+  const [isUpdateProfilePending, startUpdateProfileTransition] = useTransition()
+
+  useEffect(() => {
+    if (status === "verified") {
+      onComplete()
+    }
+  }, [status, onComplete])
 
   const {
     sendTwilioMessage,
@@ -90,8 +99,23 @@ export function PhoneStep({
     }
 
     // 인증 확인 API
-    isCodeVerified &&
-      onComplete({ verified: true, phoneNumber: data.phoneNumber })
+    if (isCodeVerified) {
+      try {
+        startUpdateProfileTransition(async () => {
+          const res = await updateProfile({ phoneNumber: data.phoneNumber })
+          if (res.success) {
+            onComplete()
+            return
+          }
+        })
+      } catch (error) {
+        console.error("Failed to update profile:", error)
+        toast.error(
+          "휴대폰 번호 업데이트에 실패했습니다. 잠시 후 다시 시도해주세요"
+        )
+        return
+      }
+    }
   }
   const handleVerifyCode = async () => {
     if (!verificationCode) {
@@ -273,8 +297,16 @@ export function PhoneStep({
 
       {/* 인증 완료 - 다음 단계 */}
       {isCodeVerified && (
-        <Button type="submit" className="w-full bg-amber-500">
-          다음 단계
+        <Button
+          type="submit"
+          className="w-full bg-amber-500"
+          disabled={isUpdateProfilePending}
+        >
+          {isUpdateProfilePending ? (
+            <Spinner size="sm" color="gray" />
+          ) : (
+            "다음 단계"
+          )}
         </Button>
       )}
 

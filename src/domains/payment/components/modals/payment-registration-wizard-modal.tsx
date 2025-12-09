@@ -6,9 +6,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@components/common/ui/dialog"
-import { BusinessInfo } from "@lib/types/dto/business"
+
+import { BusinessInfo, UserVerificationStatusDto } from "@lib/types/dto/users"
 import { UserDetail } from "@lib/types/ui/user"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import AccountStep from "../registration-steps/account-step"
 import BirthdateStep from "../registration-steps/birthdate-step"
 import BusinessStep from "../registration-steps/business-step"
@@ -17,107 +18,90 @@ import { StepIndicator } from "../registration-steps/step-Indicator"
 
 type Step = "birthDate" | "phone" | "business" | "account"
 
-interface RegistrationData {
-  phone?: { verified: boolean; phoneNumber: string }
-  business?: {
-    verified: boolean
-    businessNumber: string
-    ceoName: string
-    file: File | null
-  }
-  account?: { bank: string; accountNumber: string }
-}
-
 // 결제 수단 등록 모달 컴포넌트
 export default function PaymentRegistrationWizardModal({
   open,
   onOpenChange,
-  isUserBirthDate,
   user,
+  verificationStatus,
   businessInfo,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
-  isUserBirthDate: boolean
   user: UserDetail
-  businessInfo: BusinessInfo
+  verificationStatus: UserVerificationStatusDto
+  businessInfo: BusinessInfo | null
 }) {
-  // const [currentStep, setCurrentStep] = useState<Step>(() =>
-  //   isUserBirthDate ? "phone" : "birthDate"
-  // )
-  const [currentStep, setCurrentStep] = useState<Step>(() => "business")
-  const [data, setData] = useState<RegistrationData>({})
+  const [currentStep, setCurrentStep] = useState<Step>("birthDate")
 
-  // useEffect(() => {
-  //   if (isUserBirthDate) {
-  //     setCurrentStep("phone")
-  //   } else {
-  //     setCurrentStep("birthDate")
-  //   }
-  // }, [isUserBirthDate])
+  useEffect(() => {
+    if (!verificationStatus) return
+
+    const { birthDate, phone, business } = verificationStatus
+
+    // 완료된 스텝은 건너뛰고, pending/rejected면 해당 스텝에서 멈춤
+    if (birthDate !== "verified") {
+      setCurrentStep("birthDate")
+    } else if (phone !== "verified") {
+      setCurrentStep("phone")
+    } else if (business.status !== "verified") {
+      setCurrentStep("business")
+    } else {
+      setCurrentStep("account")
+    }
+  }, [verificationStatus])
 
   const steps = [
-    { id: "phone", label: "본인인증" },
-    { id: "business", label: "사업자 확인" },
-    { id: "account", label: "계좌등록 및 동의" },
+    { id: "phone", label: "본인인증", status: verificationStatus?.phone },
+    {
+      id: "business",
+      label: "사업자 확인",
+      status: verificationStatus?.business,
+    },
+    {
+      id: "account",
+      label: "계좌등록 및 동의",
+      status: "verified", // todo : account 상태 추가
+    },
   ] as const
 
-  const handlePhoneComplete = (phoneData: RegistrationData["phone"]) => {
-    setData((prev) => ({ ...prev, phone: phoneData }))
-    setCurrentStep("business")
-  }
-
-  const handleBusinessComplete = (
-    businessData: RegistrationData["business"]
-  ) => {
-    setData((prev) => ({ ...prev, business: businessData }))
-    setCurrentStep("account")
-  }
-
-  const handleAccountComplete = async (
-    accountData: RegistrationData["account"]
-  ) => {
-    setData((prev) => ({ ...prev, account: accountData }))
-    // API 호출 후 완료 처리
-    onOpenChange(false)
-  }
-
-  const handleClose = () => {
-    setCurrentStep(isUserBirthDate ? "phone" : "birthDate")
-    setData({})
-    onOpenChange(false)
-  }
-
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
-        {/* 헤더 */}
         <DialogHeader>
           <DialogTitle>
             {steps.find((step) => step.id === currentStep)?.label}
           </DialogTitle>
         </DialogHeader>
 
-        {/* 단계 표시 */}
         <StepIndicator steps={steps} currentStep={currentStep} />
 
-        {/* 단계별 컨텐츠 */}
         {currentStep === "birthDate" && (
-          <BirthdateStep onComplete={() => setCurrentStep("phone")} />
+          <BirthdateStep
+            status={verificationStatus?.birthDate}
+            onComplete={() => setCurrentStep("phone")}
+          />
         )}
 
         {currentStep === "phone" && (
-          <PhoneStep onComplete={handlePhoneComplete} user={user} />
+          <PhoneStep
+            status={verificationStatus?.phone}
+            onComplete={() => setCurrentStep("business")}
+            user={user}
+          />
         )}
 
         {currentStep === "business" && (
           <BusinessStep
-            onComplete={handleBusinessComplete}
+            status={verificationStatus?.business.status}
+            rejectionReason={verificationStatus?.business.rejectionReason}
+            onComplete={() => setCurrentStep("account")}
             businessInfo={businessInfo}
           />
         )}
+
         {currentStep === "account" && (
-          <AccountStep onComplete={handleAccountComplete} />
+          <AccountStep onComplete={() => onOpenChange(false)} />
         )}
       </DialogContent>
     </Dialog>

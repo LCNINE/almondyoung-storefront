@@ -1,7 +1,14 @@
 import { Spinner } from "@components/common/spinner"
+import { Alert, AlertDescription } from "@components/common/ui/alert"
 import { Badge } from "@components/common/ui/badge"
 import { Button } from "@components/common/ui/button"
 import { Checkbox } from "@components/common/ui/checkbox"
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from "@components/common/ui/dialog"
 import { Input } from "@components/common/ui/input"
 import { Label } from "@components/common/ui/label"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -10,14 +17,61 @@ import { uploadFile } from "@lib/api/file/upload"
 import {
   createBusiness,
   fetchExternalBusinessInfo,
+  updateBusiness,
 } from "@lib/api/users/business/client"
-import { BusinessInfo } from "@lib/types/dto/business"
 import { FilesDto } from "@lib/types/dto/files"
+import { BusinessInfo } from "@lib/types/dto/users"
+import { Clock } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useRef, useState, useTransition } from "react"
+import { useEffect, useRef, useState, useTransition } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
+
+// 사업자 인증 스템 컴포넌트
+export default function BusinessStep({
+  status,
+  rejectionReason,
+  onComplete,
+  businessInfo,
+}: {
+  status: "verified" | "rejected" | "under_review" | "none"
+  rejectionReason: string | null
+  onComplete: () => void
+  businessInfo: BusinessInfo | null
+}) {
+  useEffect(() => {
+    if (status === "verified") {
+      onComplete()
+    }
+  }, [status, onComplete])
+
+  if (status === "under_review") {
+    return (
+      <div className="py-8 text-center">
+        <Clock className="text-muted-foreground mx-auto mb-4" />
+        <p className="font-medium">사업자 인증 심사 중입니다</p>
+        <p className="text-muted-foreground text-sm">
+          영업일 기준 1~2일 내 완료됩니다
+        </p>
+      </div>
+    )
+  }
+
+  if (status === "rejected") {
+    return (
+      <div className="space-y-4">
+        <Alert variant="destructive">
+          <AlertDescription>반려 사유: {rejectionReason}</AlertDescription>
+        </Alert>
+
+        <BusinessForm onComplete={onComplete} businessInfo={businessInfo} />
+      </div>
+    )
+  }
+
+  return <BusinessForm onComplete={onComplete} businessInfo={businessInfo} />
+}
 
 const schema = z.object({
   businessNumber: z.string(),
@@ -27,18 +81,12 @@ const schema = z.object({
 
 type BusinessFormData = z.infer<typeof schema>
 
-// 사업자 인증 스템 컴포넌트
-export default function BusinessStep({
+function BusinessForm({
   onComplete,
   businessInfo,
 }: {
-  onComplete: (data: {
-    verified: boolean
-    businessNumber: string
-    ceoName: string
-    file: File | null
-  }) => void
-  businessInfo: BusinessInfo
+  onComplete: () => void
+  businessInfo: BusinessInfo | null
 }) {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -58,8 +106,9 @@ export default function BusinessStep({
   const form = useForm<BusinessFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      businessNumber: "",
-      ceoName: "",
+      businessNumber: businessInfo?.businessNumber ?? "",
+      ceoName: businessInfo?.representativeName ?? "",
+      file: undefined,
     },
   })
 
@@ -92,21 +141,27 @@ export default function BusinessStep({
         }
       }
 
-      const res = await createBusiness({
-        businessNumber: form.watch("businessNumber") ?? "",
-        representativeName: form.watch("ceoName") ?? "",
-        fileUrl: fileRes?.data?.url ?? undefined,
-      })
-
+      if (businessInfo) {
+        const res = await updateBusiness({
+          business: {
+            businessNumber: form.watch("businessNumber") ?? "",
+            representativeName: form.watch("ceoName") ?? "",
+            fileUrl: fileRes?.data?.url ?? undefined,
+          },
+          businessId: businessInfo.id,
+        })
+      } else {
+        const res = await createBusiness({
+          businessNumber: form.watch("businessNumber") ?? "",
+          representativeName: form.watch("ceoName") ?? "",
+          fileUrl: fileRes?.data?.url ?? undefined,
+        })
+      }
       router.refresh()
 
+      // 파일 첨부면 business의 status가 under_review로 변경되므로 완료 처리하지 않음
       if (!form.watch("file")) {
-        onComplete({
-          verified: true,
-          businessNumber: data.businessNumber,
-          ceoName: data.ceoName,
-          file: data.file ?? null,
-        })
+        onComplete()
       }
     })
   }
@@ -169,97 +224,6 @@ export default function BusinessStep({
       }
     }
     fileInputRef.current?.click()
-  }
-
-  // 사업자 정보 심사중일 때
-  if (businessInfo && businessInfo?.status === "under_review") {
-    return (
-      <div className="flex flex-col items-center justify-center space-y-6 rounded-lg border border-amber-200 bg-amber-50 p-8">
-        <div className="relative">
-          <div className="h-16 w-16 animate-spin rounded-full border-4 border-amber-200 border-t-amber-500"></div>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <svg
-              className="h-8 w-8 text-amber-500"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
-          </div>
-        </div>
-
-        {/* 메인 메시지 */}
-        <div className="space-y-2 text-center">
-          <h3 className="text-xl font-bold text-gray-900">
-            사업자 정보 심사중입니다
-          </h3>
-          <p className="text-sm text-gray-600">
-            제출하신 사업자 정보를 검토하고 있습니다.
-          </p>
-        </div>
-
-        {/* 안내 정보 */}
-        <div className="w-full max-w-md space-y-3 rounded-md bg-white p-4">
-          <div className="flex items-start gap-3">
-            <svg
-              className="mt-0.5 h-5 w-5 shrink-0 text-blue-500"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <div>
-              <p className="text-sm font-medium text-gray-900">
-                심사 소요 시간
-              </p>
-              <p className="text-sm text-gray-600">
-                영업일 기준 1~3일 정도 소요될 수 있습니다.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3">
-            <svg
-              className="mt-0.5 h-5 w-5 shrink-0 text-green-500"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-              />
-            </svg>
-            <div>
-              <p className="text-sm font-medium text-gray-900">
-                심사 결과 안내
-              </p>
-              <p className="text-sm text-gray-600">
-                심사 완료 시 등록하신 이메일로 결과를 안내드립니다.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <p className="text-xs text-gray-500">
-          궁금하신 사항이 있으시면 고객센터로 문의해 주세요.
-        </p>
-      </div>
-    )
   }
 
   return (
@@ -337,8 +301,12 @@ export default function BusinessStep({
         </Button>
       </div>
 
+      {/* 사업자 정보 없음 체크박스와 파일 업로드 UI */}
       <div className="rounded-md border p-4">
-        {/* 사업자 정보 없음 체크박스와 파일 업로드 UI */}
+        {businessInfo?.fileUrl && !form.watch("file") && (
+          <VerifiedAttachmentPreview fileUrl={businessInfo.fileUrl} />
+        )}
+
         <Controller
           name="file"
           control={form.control}
@@ -456,5 +424,32 @@ export default function BusinessStep({
         )}
       </Button>
     </form>
+  )
+}
+
+// 증빙 첨부파일 미리보기 컴포넌트
+function VerifiedAttachmentPreview({ fileUrl }: { fileUrl: string }) {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <div className="bg-gray-10 mb-4 flex cursor-pointer items-center justify-between rounded-md p-3 transition-colors hover:bg-gray-100">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600">📎</span>
+            <span className="text-sm font-medium">증빙 첨부 파일</span>
+            <span className="text-xs text-gray-500">(클릭하여 크게 보기)</span>
+          </div>
+        </div>
+      </DialogTrigger>
+      <DialogContent className="max-w-4xl">
+        <DialogTitle className="sr-only">증빙 첨부 파일</DialogTitle>
+        <div className="flex items-center justify-center">
+          <img
+            src={fileUrl}
+            alt="사업자 증빙 파일"
+            className="max-h-[80vh] w-auto rounded-lg object-contain"
+          />
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }

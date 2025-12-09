@@ -1,9 +1,11 @@
 import { WithHeaderLayout } from "@components/layout"
 import MypageLayout from "@components/layout/mypage-layout"
-import { PaymentManagement } from "domains/payment/payment-management"
 import ProtectedRoute from "@components/protected-route"
-import { fetchMe } from "@lib/api/users/me"
 import { getMyBusiness } from "@lib/api/users/business/server"
+import { fetchMe } from "@lib/api/users/me"
+import { getVerificationStatus } from "@lib/api/users/verification-status"
+import { BusinessInfo } from "@lib/types/dto/users"
+import { PaymentManagement } from "domains/payment/payment-management"
 
 export default function PaymentPage() {
   return (
@@ -26,12 +28,14 @@ export default function PaymentPage() {
 
 async function PaymentContainer() {
   const currentUser = await fetchMe()
+  const verificationStatus = await getVerificationStatus() // step 별 진행 상태
   const businessInfo = await getMyBusiness()
 
   return (
     <PaymentManagement
       currentUser={currentUser}
-      businessInfo={businessInfo.data}
+      verificationStatus={verificationStatus}
+      businessInfo={businessInfo?.data || null}
     />
   )
 }

@@ -1,7 +1,7 @@
 "use server"
 
 import { getCookies } from "@lib/data/cookies"
-import { ProfileDto } from "@lib/types/dto/user"
+import { ProfileDto } from "@lib/types/dto/users"
 import type { UserDetail } from "@lib/types/ui/user"
 import { cache } from "react"
 import { ApiAuthError, HttpApiError } from "../api-error"

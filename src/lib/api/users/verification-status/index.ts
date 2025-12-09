@@ -1,24 +1,18 @@
-"use server"
-
-import { ApiAuthError } from "@lib/api/api-error"
+import { ApiAuthError, HttpApiError } from "@lib/api/api-error"
+import { UserVerificationStatusDto } from "@lib/types/dto/users"
 import { getCookies } from "@lib/data/cookies"
-import { BusinessInfoResponseDto } from "@lib/types/dto/users"
 
-export const getMyBusiness =
-  async (): Promise<BusinessInfoResponseDto | null> => {
+export const getVerificationStatus =
+  async (): Promise<UserVerificationStatusDto> => {
     const cookies = await getCookies()
 
     const response = await fetch(
-      `${process.env.APP_URL}/api/users/business/me`,
+      `${process.env.APP_URL}/api/users/verification-status`,
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
           Cookie: cookies,
-        },
-
-        next: {
-          tags: ["businesses-info"],
         },
       }
     )
@@ -35,7 +29,12 @@ export const getMyBusiness =
         )
       }
 
-      throw new Error(data.message || "Failed to get business")
+      throw new HttpApiError(
+        data.message || "Failed to get verification status",
+        response.status,
+        response.statusText,
+        data
+      )
     }
 
     return data

@@ -1,7 +1,7 @@
 "use client"
 
 import { PageTitle } from "@components/common/page-title"
-import { BusinessInfo } from "@lib/types/dto/business"
+import { BusinessInfo, UserVerificationStatusDto } from "@lib/types/dto/users"
 import type { UserDetail } from "@lib/types/ui/user"
 import { useState } from "react"
 import PaymentRegistrationModal from "./components/modals/payment-registration-wizard-modal"
@@ -13,10 +13,12 @@ import PointSection from "./components/sections/point-section"
 
 export function PaymentManagement({
   currentUser,
+  verificationStatus,
   businessInfo,
 }: {
   currentUser: UserDetail
-  businessInfo: BusinessInfo
+  verificationStatus: UserVerificationStatusDto
+  businessInfo: BusinessInfo | null
 }) {
   const [isPaymentRegisterModalOpen, setIsPaymentRegisterModalOpen] =
     useState(false)
@@ -49,7 +51,7 @@ export function PaymentManagement({
         open={isPaymentRegisterModalOpen}
         onOpenChange={setIsPaymentRegisterModalOpen}
         user={currentUser}
-        isUserBirthDate={currentUser.profile?.birthDate ? true : false}
+        verificationStatus={verificationStatus}
         businessInfo={businessInfo}
       />
     </div>

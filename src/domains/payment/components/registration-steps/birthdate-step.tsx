@@ -22,8 +22,10 @@ type FormData = z.infer<typeof formSchema>
 
 // 사용자 프로필에 생년월일이 없으면 입력하는 단계 컴포넌트
 export default function BirthdateStep({
+  status,
   onComplete,
 }: {
+  status: "verified" | "none"
   onComplete: () => void
 }) {
   const form = useForm<FormData>({

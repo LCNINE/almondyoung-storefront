@@ -2,7 +2,7 @@ import {
   RecentViewDto,
   AddToRecentViewsDto,
   RecentViewsResponseDto,
-} from "@lib/types/dto/user"
+} from "@lib/types/dto/users"
 import { clientApi } from "@lib/api/client-api"
 import { USER_SERVICE_BASE_URL } from "../api.config"
 

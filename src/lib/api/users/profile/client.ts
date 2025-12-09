@@ -1,5 +1,5 @@
 import { ApiAuthError, HttpApiError } from "@lib/api/api-error"
-import { ProfileDto } from "@lib/types/dto/user"
+import { ProfileDto } from "@lib/types/dto/users"
 
 export const updateProfile = async (
   profileData: Omit<Partial<ProfileDto>, "birthDate"> & { birthDate?: string }
