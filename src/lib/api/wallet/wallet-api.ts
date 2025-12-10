@@ -4,6 +4,7 @@
  * 클라이언트 측에서는 credentials: "include"로 쿠키가 자동 전달됩니다.
  */
 
+import { HttpApiError } from "../api-error"
 import type { CreateHmsCardProfileRequest } from "./wallet-types"
 
 const API_BASE = "/api/wallet"
@@ -35,6 +36,34 @@ export interface PinErrorResponse {
   }
 }
 
+// ==========================================
+// APick 관련 API
+// ==========================================
+
+/**
+ * APick 계좌 조회
+ * @param bankCode 은행 코드
+ * @param accountNumber 계좌 번호
+ */
+export async function getApickAccount(bankCode: string, accountNumber: string) {
+  const res = await fetch(`api/apick`, {
+    method: "POST",
+    body: JSON.stringify({ bankCode, accountNumber }),
+  })
+
+  const data = await res.json()
+
+  if (!res.ok) {
+    throw new HttpApiError(
+      data.error || `Failed to fetch APick account: ${res.statusText}`,
+      res.status,
+      res.statusText,
+      data
+    )
+  }
+
+  return data
+}
 // ==========================================
 // 결제 프로필 관련 API
 // ==========================================
