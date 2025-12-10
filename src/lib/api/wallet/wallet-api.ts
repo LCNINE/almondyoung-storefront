@@ -140,66 +140,6 @@ export async function deletePaymentProfile(profileId: string) {
 // ==========================================
 
 /**
- * BNPL 요약 정보 조회
- */
-export async function getBnplSummary() {
-  const res = await fetch(`${API_BASE}/payments/bnpl/summary`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-    cache: "no-store",
-  })
-
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({ message: "Unknown error" }))
-    throw new Error(
-      error.message || `Failed to fetch BNPL summary: ${res.statusText}`
-    )
-  }
-
-  return res.json()
-}
-
-/**
- * BNPL 내역 조회
- * @param params 조회 파라미터 (year, month)
- * - 파라미터 없음: 전체 내역 조회
- * - year, month 지정: 특정 월 내역 조회
- */
-export async function getBnplHistory(params?: {
-  year?: number
-  month?: number
-}) {
-  const queryParams = new URLSearchParams()
-
-  // 파라미터가 있으면 쿼리에 추가, 없으면 전체 내역 조회
-  if (params?.year) queryParams.append("year", params.year.toString())
-  if (params?.month) queryParams.append("month", params.month.toString())
-
-  const url = `${API_BASE}/payments/bnpl/history${queryParams.toString() ? `?${queryParams.toString()}` : ""}`
-
-  const res = await fetch(url, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-    cache: "no-store",
-  })
-
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({ message: "Unknown error" }))
-    throw new Error(
-      error.message || `Failed to fetch BNPL history: ${res.statusText}`
-    )
-  }
-
-  return res.json()
-}
-
-/**
  * HMS BNPL 온보딩 (FormData)
  * @param formData FormData (서명 파일 포함)
  */

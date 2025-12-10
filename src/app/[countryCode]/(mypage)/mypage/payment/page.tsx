@@ -28,7 +28,7 @@ export default function PaymentPage() {
 
 async function PaymentContainer() {
   const currentUser = await fetchMe()
-  const verificationStatus = await getVerificationStatus() // step 별 진행 상태
+  const verificationStatus = await getVerificationStatus() // step 별 진행 상태, 결제 수단 등록할 때 인증 정보 steps 별 진행 상태 확인용
   const businessInfo = await getMyBusiness()
 
   return (

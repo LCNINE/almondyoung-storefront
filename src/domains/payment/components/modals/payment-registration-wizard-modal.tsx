@@ -10,13 +10,13 @@ import {
 import { BusinessInfo, UserVerificationStatusDto } from "@lib/types/dto/users"
 import { UserDetail } from "@lib/types/ui/user"
 import { useEffect, useState } from "react"
-import AccountStep from "../registration-steps/account-step"
 import BirthdateStep from "../registration-steps/birthdate-step"
 import BusinessStep from "../registration-steps/business-step"
+import PaymentAccountStep from "../registration-steps/payment-account-step"
 import { PhoneStep } from "../registration-steps/phone-step"
 import { StepIndicator } from "../registration-steps/step-Indicator"
 
-type Step = "birthDate" | "phone" | "business" | "account"
+type Step = "birthDate" | "phone" | "business" | "paymentAccount"
 
 // 결제 수단 등록 모달 컴포넌트
 export default function PaymentRegistrationWizardModal({
@@ -47,7 +47,7 @@ export default function PaymentRegistrationWizardModal({
     } else if (business.status !== "verified") {
       setCurrentStep("business")
     } else {
-      setCurrentStep("account")
+      setCurrentStep("paymentAccount")
     }
   }, [verificationStatus])
 
@@ -59,7 +59,7 @@ export default function PaymentRegistrationWizardModal({
       status: verificationStatus?.business,
     },
     {
-      id: "account",
+      id: "paymentAccount",
       label: "계좌등록 및 동의",
       status: "verified", // todo : account 상태 추가
     },
@@ -69,8 +69,12 @@ export default function PaymentRegistrationWizardModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>
-            {steps.find((step) => step.id === currentStep)?.label}
+          <DialogTitle
+            className={`${currentStep === "paymentAccount" && "text-center"} `}
+          >
+            {currentStep === "paymentAccount"
+              ? "결제수단 관리"
+              : steps.find((step) => step.id === currentStep)?.label}
           </DialogTitle>
         </DialogHeader>
 
@@ -95,13 +99,16 @@ export default function PaymentRegistrationWizardModal({
           <BusinessStep
             status={verificationStatus?.business.status}
             rejectionReason={verificationStatus?.business.rejectionReason}
-            onComplete={() => setCurrentStep("account")}
+            onComplete={() => setCurrentStep("paymentAccount")}
             businessInfo={businessInfo}
           />
         )}
 
-        {currentStep === "account" && (
-          <AccountStep onComplete={() => onOpenChange(false)} />
+        {currentStep === "paymentAccount" && (
+          <PaymentAccountStep
+            onComplete={() => onOpenChange(false)}
+            user={user}
+          />
         )}
       </DialogContent>
     </Dialog>

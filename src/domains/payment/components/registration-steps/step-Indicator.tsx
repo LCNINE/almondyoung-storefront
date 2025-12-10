@@ -14,7 +14,7 @@ export function StepIndicator({
 }) {
   const currentIndex = steps.findIndex((s) => s.id === currentStep)
 
-  if (currentStep === "birthDate") {
+  if (currentStep === "birthDate" || currentStep === "paymentAccount") {
     return null
   }
 
