@@ -1,19 +1,8 @@
-import React from "react" // (상태 관리를 위해 import)
-// (tailwind-scrollbar-hide 플러그인이 설치되어 있다고 가정합니다)
+import React from "react"
+import type { CategoryTreeNode } from "@lib/api/pim/pim-types"
+import { getShowOnMainCategory } from "@lib/utils/category-display-settings"
 
-// --- 1. 데이터 분리 (DRY 원칙) ---
-const categories = [
-  { id: "hair", label: "헤어" },
-  { id: "nail", label: "네일" },
-  { id: "permanent-makeup", label: "반영구" },
-  { id: "eyelash", label: "속눈썹" },
-  { id: "waxing", label: "왁싱" },
-  { id: "tattoo", label: "타투" },
-  { id: "skin-care", label: "피부미용" },
-  { id: "digital-template", label: "디지털 템플릿" },
-]
-
-// --- 2. [변경] 반응형 스타일 변수 ---
+// --- 반응형 스타일 변수 ---
 
 // 공통 스타일:
 const baseTagStyle = `
@@ -23,41 +12,83 @@ const baseTagStyle = `
   outline outline-[0.50px] outline-offset-[-0.50px] 
   border-gray-200
   font-['Pretendard'] transition-colors
-  whitespace-nowrap // [핵심 수정] 텍스트가 줄바꿈되어 UI가 깨지는 것을 방지
+  whitespace-nowrap
 `
 // 비활성 스타일:
 const inactiveTagStyle = `
-  outline-Grays-Gray-3 text-Grays-Gray font-normal
+  outline-muted text-muted-foreground font-normal
   hover:bg-gray-100
 `
 // 활성 스타일:
 const activeTagStyle = `
-  bg-black outline-black text-zinc-100 font-normal
-  md:bg-zinc-800 md:outline-zinc-800 md:font-bold
+  bg-black outline-black text-white font-normal
+  md:bg-black md:outline-black md:font-bold
 `
 
-export default function CategoryBadgeTabs() {
-  const [activeCategoryId, setActiveCategoryId] = React.useState("nail")
+interface CategoryBadgeTabsProps {
+  categories: CategoryTreeNode[]
+  initialCategoryId?: string | "first" // "first"면 첫 번째 카테고리, 특정 ID면 해당 카테고리
+  onCategorySelect?: (categoryId: string) => void
+}
+
+export function CategoryBadgeTabs({
+  categories,
+  initialCategoryId = "first",
+  onCategorySelect,
+}: CategoryBadgeTabsProps) {
+  // 카테고리 트리에서 실제 표시할 카테고리 추출
+  const displayCategories = React.useMemo(() => {
+    if (categories.length === 0) return []
+    
+    const level0Categories = categories.filter((category) => {
+      if (category.level !== 0) return false
+      if (category.isActive === false) return false
+      if (!getShowOnMainCategory(category)) return false
+      return true
+    })
+    
+    return level0Categories.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
+  }, [categories])
+
+  // 초기 카테고리 ID 결정
+  const defaultCategoryId = initialCategoryId === "first" 
+    ? displayCategories[0]?.id ?? "" 
+    : initialCategoryId
+
+  // 선택된 카테고리 상태
+  const [activeCategoryId, setActiveCategoryId] = React.useState<string>(defaultCategoryId)
+
+  // displayCategories가 로드되면 초기값 설정
+  React.useEffect(() => {
+    if (displayCategories.length > 0 && !activeCategoryId) {
+      const targetId = initialCategoryId === "first" 
+        ? displayCategories[0].id 
+        : initialCategoryId
+      setActiveCategoryId(targetId)
+    }
+  }, [displayCategories, initialCategoryId, activeCategoryId])
+
+  const handleCategoryClick = (categoryId: string) => {
+    setActiveCategoryId(categoryId)
+    onCategorySelect?.(categoryId)
+  }
+
+  if (displayCategories.length === 0) {
+    return null
+  }
 
   return (
     <nav aria-label="카테고리 필터" className="w-full">
-      {/* [핵심 수정]
-        <ul> 태그가 스크롤 컨테이너와 flex 컨테이너 역할을 동시에 수행합니다.
-      */}
       <ul className="scrollbar-hide flex flex-nowrap items-center gap-[5px] overflow-x-auto md:flex-wrap md:gap-1.5 md:overflow-x-visible">
-        {/* [핵심 수정]
-          <li>에 flex-shrink-0을 적용하여,
-          flex-nowrap 컨테이너 안에서 찌그러지지 않도록 합니다.
-        */}
-        {categories.map((category) => (
+        {displayCategories.map((category) => (
           <li key={category.id} className="flex-shrink-0">
             <button
               type="button"
-              onClick={() => setActiveCategoryId(category.id)}
+              onClick={() => handleCategoryClick(category.id)}
               className={` ${baseTagStyle} ${activeCategoryId === category.id ? activeTagStyle : inactiveTagStyle} `}
               aria-pressed={activeCategoryId === category.id}
             >
-              {category.label}
+              {category.name}
             </button>
           </li>
         ))}
@@ -65,3 +96,6 @@ export default function CategoryBadgeTabs() {
     </nav>
   )
 }
+
+// 기본 export로도 사용 가능하도록 별칭 제공
+export default CategoryBadgeTabs
