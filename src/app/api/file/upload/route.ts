@@ -7,16 +7,13 @@ export async function POST(request: NextRequest) {
   const cookieStore = await nextCookies()
   const cookieHeader = cookieStore.toString()
 
-  const response = await fetch(
-    `${process.env.BACKEND_URL}/fs/api/v1/files/upload`,
-    {
-      method: "POST",
-      body: formData,
-      headers: {
-        Cookie: cookieHeader,
-      },
-    }
-  )
+  const response = await fetch(`${process.env.BACKEND_URL}/fs/files/upload`, {
+    method: "POST",
+    body: formData,
+    headers: {
+      Cookie: cookieHeader,
+    },
+  })
 
   const data = await response.json()
   if (!response.ok) {
