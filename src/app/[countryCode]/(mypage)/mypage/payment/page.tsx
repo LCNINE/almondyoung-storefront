@@ -1,10 +1,9 @@
 import { WithHeaderLayout } from "@components/layout"
 import MypageLayout from "@components/layout/mypage-layout"
 import ProtectedRoute from "@components/protected-route"
-import { getMyBusiness } from "@lib/api/users/business/server"
+import { getMyBusiness } from "@lib/api/users/business"
 import { fetchMe } from "@lib/api/users/me"
 import { getVerificationStatus } from "@lib/api/users/verification-status"
-import { BusinessInfo } from "@lib/types/dto/users"
 import { PaymentManagement } from "domains/payment/payment-management"
 
 export default function PaymentPage() {
@@ -35,7 +34,7 @@ async function PaymentContainer() {
     <PaymentManagement
       currentUser={currentUser}
       verificationStatus={verificationStatus}
-      businessInfo={businessInfo?.data || null}
+      businessInfo={businessInfo || null}
     />
   )
 }

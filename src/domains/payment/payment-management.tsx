@@ -1,8 +1,8 @@
 "use client"
 
 import { PageTitle } from "@components/common/page-title"
-import { BusinessInfo, UserVerificationStatusDto } from "@lib/types/dto/users"
-import type { UserDetail } from "@lib/types/ui/user"
+import type { UserVerificationStatusDto } from "@lib/types/dto/users"
+import type { BusinessInfo, UserDetail } from "@lib/types/ui/user"
 import { useState } from "react"
 import PaymentRegistrationModal from "./components/modals/payment-registration-wizard-modal"
 import AccountSection from "./components/sections/account-section"

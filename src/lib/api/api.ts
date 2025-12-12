@@ -61,9 +61,15 @@ export async function api<T>(
     ? `${baseUrl}${path}?${new URLSearchParams(params)}`
     : `${baseUrl}${path}`
 
+  const isFormData = body instanceof FormData
+
   const headers: HeadersInit = {
-    "Content-Type": "application/json",
     ...init.headers,
+  }
+
+  // FormData가 아닐 때만 Content-Type 설정
+  if (!isFormData) {
+    ;(headers as Record<string, string>)["Content-Type"] = "application/json"
   }
 
   if (withAuth) {
@@ -85,7 +91,7 @@ export async function api<T>(
     response = await fetch(fullUrl, {
       ...init,
       headers,
-      body: body ? JSON.stringify(body) : undefined,
+      body: isFormData ? body : body ? JSON.stringify(body) : undefined,
     })
   } catch {
     // 서버 액션에서만 쓸 거면 네트워크 에러 날 일이 거의 없긴 한데, 백엔드 서버가 죽어있거나 URL 잘못됐을 때 대비용으로 넣어둠
@@ -95,10 +101,15 @@ export async function api<T>(
   if (response.ok) {
     const json = await response.json()
 
-    return json.data ?? json
+    // data 필드가 있으면 풀어서 반환 (null 포함)
+    if (json && typeof json === "object" && "data" in json) {
+      return json.data
+    }
+
+    return json
   }
 
-  const errorData = await response.json().catch(() => ({})) // json()이 실패하면 빈 객체 반환, 크게 상관 없는 에러임
+  const errorData = await response.json().catch(() => ({})) // response.json()이 실패하면 빈 객체 반환, 크게 상관 없는 에러임
 
   if (response.status === 401) {
     throw new ApiAuthError(

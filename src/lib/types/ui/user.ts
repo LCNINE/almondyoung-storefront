@@ -1,5 +1,5 @@
 import type { UserBaseType } from "../common/users"
-import type { AddressDto, ShopInfoDto } from "../dto/users"
+import type { AddressDto, BusinessInfoDto, ShopInfoDto } from "../dto/users"
 
 export interface UserDetail extends UserBaseType {
   shop: ShopInfoType | null
@@ -18,3 +18,6 @@ export interface Profile extends UserBaseType {
 export type ShopInfoType = ShopInfoDto
 
 export type Address = AddressDto
+
+// --------------- 사업자 정보 관련 UI Type --------------
+export interface BusinessInfo extends BusinessInfoDto {}

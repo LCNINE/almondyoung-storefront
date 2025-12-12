@@ -73,7 +73,7 @@ export interface RecentViewsResponseDto {
 }
 
 // --------------- 사업자 정보 관련 DTO --------------
-export interface BusinessInfo {
+export interface BusinessInfoDto {
   id: string
   userId: string
   shopId?: string | null
@@ -87,11 +87,6 @@ export interface BusinessInfo {
   updatedAt: Date
 }
 
-export interface BusinessInfoResponseDto {
-  success: boolean
-  data: BusinessInfo
-}
-
 export interface BusinessInfoRequestDto {
   businessNumber?: string
   representativeName?: string
@@ -103,7 +98,7 @@ export interface BusinessInfoRequestDto {
 /** 사업자 정보 외부 조회 응답 DTO */
 export interface ExternalBusinessInfoResponseDto {
   success: boolean
-  data: BusinessInfo
+  data: BusinessInfoDto
 }
 
 /** 사업자 정보 외부 조회 요청 DTO */
@@ -120,4 +115,20 @@ export interface UserVerificationStatusDto {
     status: "verified" | "rejected" | "under_review" | "none"
     rejectionReason: string | null
   }
+}
+
+/**
+ * 휴대폰 인증번호 발송 요청 DTO
+ */
+export type SendTwilioMessageDto = {
+  countryCode: string
+  phoneNumber: string
+}
+
+/**
+ * 휴대폰 인증번호 검증 요청 DTO
+ */
+export type VerifyCodeDto = {
+  code: string
+  phoneNumber: string
 }

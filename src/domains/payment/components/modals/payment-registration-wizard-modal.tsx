@@ -7,8 +7,8 @@ import {
   DialogTitle,
 } from "@components/common/ui/dialog"
 
-import { BusinessInfo, UserVerificationStatusDto } from "@lib/types/dto/users"
-import { UserDetail } from "@lib/types/ui/user"
+import type { UserVerificationStatusDto } from "@lib/types/dto/users"
+import type { BusinessInfo, UserDetail } from "@lib/types/ui/user"
 import { useEffect, useState } from "react"
 import BirthdateStep from "../registration-steps/birthdate-step"
 import BusinessStep from "../registration-steps/business-step"
