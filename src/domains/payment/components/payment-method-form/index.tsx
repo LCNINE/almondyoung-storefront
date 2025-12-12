@@ -52,7 +52,7 @@ export default function PaymentMethodForm({ user }: { user: UserDetail }) {
     defaultValues: {
       bankCode: "",
       accountNumber: "",
-      accountHolderName: "",
+      // accountHolderName: "",
       accountHolderBirthDate: "",
     },
   })
@@ -230,20 +230,13 @@ function BankAccountLookupForm({
 
   const [isPending, startTransition] = useTransition()
 
-  console.log("form.getValues():", form.formState.errors)
-
   const handleSearch = () => {
     const bankCode = form.watch("bankCode")
     const accountNumber = form.watch("accountNumber")
-    const accountHolderName = form.watch("accountHolderName")
 
     if (!bankCode || !accountNumber) {
       form.setError("accountNumber", {
         message: "계좌번호를 입력해주세요",
-      })
-
-      form.setError("accountHolderName", {
-        message: "예금주를 입력해주세요",
       })
 
       return
@@ -252,13 +245,9 @@ function BankAccountLookupForm({
     startTransition(async () => {
       try {
         const data = await getApickAccount(bankCode, accountNumber)
+
         if (data.api.success) {
-          if (accountHolderName !== data.api.data.account_holder_name) {
-            form.setError("accountHolderName", {
-              message: "예금주가 일치하지 않습니다.",
-            })
-            return
-          }
+          // todo : 계좌 조회 성공시 애니메이션주면서 이 예금주가 맞냐유? 불어보기 맞습니다 누르면 다음 스텝으로 이동
         }
       } catch (error) {
         if (error instanceof HttpApiError) {
@@ -291,30 +280,6 @@ function BankAccountLookupForm({
             </SelectContent>
           </Select>
         </div>
-
-        <FormField
-          control={form.control}
-          name="accountHolderName"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-sm font-medium">예금주</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="예금주를 입력해주세요"
-                  maxLength={10}
-                  {...field}
-                  onChange={(e) => {
-                    const value = e.target.value.replace(/\s/g, "")
-                    field.onChange(value)
-                    form.clearErrors("accountHolderName")
-                  }}
-                  type="text"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
         <FormField
           control={form.control}

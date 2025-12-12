@@ -46,8 +46,11 @@ export interface PinErrorResponse {
  * @param accountNumber 계좌 번호
  */
 export async function getApickAccount(bankCode: string, accountNumber: string) {
-  const res = await fetch(`api/apick`, {
+  const res = await fetch("/api/apick", {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({ bankCode, accountNumber }),
   })
 

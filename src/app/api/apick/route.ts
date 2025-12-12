@@ -25,5 +25,5 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  return NextResponse.json({ success: true, data: responseData })
+  return NextResponse.json(responseData)
 }

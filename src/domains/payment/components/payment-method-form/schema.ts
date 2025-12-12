@@ -4,7 +4,6 @@ export const paymentMethodFormSchema = z
   .object({
     bankCode: z.string().min(1, "은행을 선택해주세요"),
     accountNumber: z.string().min(1, "계좌번호를 입력해주세요"),
-    accountHolderName: z.string().min(1, "예금주를 입력해주세요"),
     accountHolderBirthDate: z.string().min(1, "예금주 생년월일을 입력해주세요"),
     electronicTransaction: z.boolean(), // 전자금융거래 이용약관 동의
     privacyPolicy: z.boolean(), // 개인정보 수집 및 이용 동의
