@@ -1,32 +1,35 @@
-import { getAuthHeaders } from "@lib/data/cookies"
-import { DigitalAssetsResponse } from "@lib/types/dto/digital-asset.dto"
+"use server"
 
-export const getDigitalAssets = async (
-  skip: number = 0,
-  take: number = 20
-): Promise<DigitalAssetsResponse> => {
+import { getAuthHeaders } from "@lib/data/cookies"
+import { DigitalAssetsResDto } from "@lib/types/dto/digital-asset.dto"
+import { api } from "../api"
+import { HttpApiError } from "../api-error"
+
+export const getDigitalAssets = async ({
+  skip,
+  take,
+}: {
+  skip: string
+  take: string
+}): Promise<DigitalAssetsResDto> => {
   const headers = await getAuthHeaders()
 
-  return await fetch(
-    `${process.env.APP_URL}/api/medusa/digital-assets?skip=${skip}&take=${take}`,
+  const result = await api<DigitalAssetsResDto>(
+    "medusa",
+    `/store/library?skip=${skip}&take=${take}`,
     {
       method: "GET",
+      withAuth: true,
       headers: {
-        "Content-Type": "application/json",
         ...headers,
+        "Content-Type": "application/json",
+        "x-publishable-api-key":
+          process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY!,
       },
-      credentials: "include",
     }
   )
-    .then(async (res) => {
-      const data = await res.json()
 
-      return data
-    })
-    .catch((error) => {
-      console.error(`Failed to fetch digital assets: ${error.toString()}`)
-      throw new Error(error.toString())
-    })
+  return result
 }
 
 export const updateDigitalAssetExerciseApi = async (
@@ -34,26 +37,23 @@ export const updateDigitalAssetExerciseApi = async (
 ): Promise<void> => {
   const headers = await getAuthHeaders()
 
-  return await fetch(`${process.env.APP_URL}/api/medusa/digital-assets`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...headers,
-    },
-    body: JSON.stringify({ assetId }),
-    credentials: "include",
-  })
-    .then(async (res) => {
-      const data = await res.json()
+  const result = await api<void>(
+    "medusa",
+    `/store/library/${assetId}/exercise`,
+    {
+      method: "POST",
+      withAuth: true,
+      body: { assetId },
+      headers: {
+        ...headers,
+        "Content-Type": "application/json",
+        "x-publishable-api-key":
+          process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY!,
+      },
+    }
+  )
 
-      return data
-    })
-    .catch((error) => {
-      console.error(
-        `Failed to update digital asset exercise: ${error.toString()}`
-      )
-      throw new Error(error.toString())
-    })
+  return result
 }
 
 export const downloadDigitalAssetApi = async (
@@ -61,27 +61,31 @@ export const downloadDigitalAssetApi = async (
 ): Promise<{ blob: Blob; filename: string }> => {
   const headers = await getAuthHeaders()
 
-  const res = await fetch(
-    `${process.env.APP_URL}/api/medusa/digital-assets/download/${assetId}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        ...headers,
-      },
-      credentials: "include",
-    }
-  )
+  const baseUrl =
+    process.env.USE_RAILWAY_BACKEND === "true"
+      ? `${process.env.BACKEND_URL}/medusa`
+      : "http://localhost:9000" // 메두사 server PORT
 
-  if (!res.ok) {
-    const errorData = await res.json()
+  const response = await fetch(`${baseUrl}/store/library/${assetId}/download`, {
+    method: "GET",
+    headers: {
+      ...headers,
+      "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY!,
+    },
+  })
 
-    throw new Error("파일 다운로드 실패")
+  if (!response.ok) {
+    throw new HttpApiError(
+      `다운로드 실패: ${response.status}`,
+      response.status,
+      response.statusText
+    )
   }
 
-  const blob = await res.blob()
+  const blob = await response.blob()
 
-  const contentDisposition = res.headers.get("content-disposition")
+  // content-disposition 헤더에서 파일명 추출
+  const contentDisposition = response.headers.get("content-disposition")
   let filename = "download"
 
   if (contentDisposition) {
@@ -94,7 +98,6 @@ export const downloadDigitalAssetApi = async (
       try {
         filename = decodeURIComponent(filename)
       } catch (e) {
-        // 디코딩 실패시 원본 사용
         console.warn("Failed to decode filename:", e)
       }
     }
