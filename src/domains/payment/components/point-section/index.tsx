@@ -1,3 +1,5 @@
+"use client"
+
 import { Card, CardContent } from "@components/common/ui/card"
 import { Price } from "@components/price"
 

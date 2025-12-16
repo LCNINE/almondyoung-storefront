@@ -17,7 +17,6 @@ interface BnplCardProps {
   onPrevious: () => void
   onNext: () => void
   onViewDetails: () => void // 내역 보기 버튼 클릭 핸들러
-  onChangeAccount: () => void // 출금 계좌 변경 버튼 클릭 핸들러
 }
 
 export function BnplCard({
@@ -29,7 +28,6 @@ export function BnplCard({
   onPrevious,
   onNext,
   onViewDetails,
-  onChangeAccount,
 }: BnplCardProps) {
   return (
     <Card className="border-none shadow-xs">
@@ -97,7 +95,7 @@ export function BnplCard({
               variant="outline"
               size="sm"
               className="cursor-pointer px-4 py-5 text-sm font-normal text-gray-700 hover:bg-transparent hover:text-gray-700"
-              onClick={onChangeAccount}
+              // onClick={onChangeAccount}
             >
               출금 계좌 변경
             </Button>

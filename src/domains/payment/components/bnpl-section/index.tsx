@@ -4,6 +4,7 @@ import { Button } from "@components/common/ui/button"
 import type { BnplProfileDto } from "@lib/types/dto/wallet"
 import { format } from "date-fns"
 import EmptyState from "../empty-state"
+import { useBnplModalStore } from "../store/bnpl-modal-store"
 import { BnplCard } from "./bnpl-card"
 import { useBnplCarousel } from "./hooks/use-bnpl-carousel"
 import {
@@ -15,14 +16,12 @@ import {
 } from "./utils/bnpl-utils"
 
 interface BnplSectionProps {
-  onBnplRegisterClick: () => void
   bnplProfiles: BnplProfileDto[]
 }
 
-export default function BnplSection({
-  onBnplRegisterClick,
-  bnplProfiles,
-}: BnplSectionProps) {
+export default function BnplSection({ bnplProfiles }: BnplSectionProps) {
+  const { openModal } = useBnplModalStore()
+
   const hasBnplProfile = bnplProfiles.length > 0
 
   // 캐러셀 상태 관리
@@ -39,7 +38,7 @@ export default function BnplSection({
           <Button
             variant="default"
             className="w-full cursor-pointer px-6 font-medium sm:w-auto"
-            onClick={onBnplRegisterClick}
+            onClick={openModal}
           >
             + 결제수단 등록
           </Button>
@@ -77,7 +76,6 @@ export default function BnplSection({
       onPrevious={handlePrevious}
       onNext={handleNext}
       onViewDetails={handleViewDetails}
-      onChangeAccount={onBnplRegisterClick}
     />
   )
 }
