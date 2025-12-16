@@ -159,6 +159,7 @@ export default function BankAgreementStep({
         ))}
       </section>
 
+
       <section className="mt-5 space-y-4 border-t pt-5">
         {Object.keys(form.formState.errors).length > 0 ? (
           <p className="text-xs text-red-500">
