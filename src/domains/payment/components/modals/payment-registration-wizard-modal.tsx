@@ -15,6 +15,7 @@ import BusinessStep from "../registration-steps/business-step"
 import PaymentAccountStep from "../registration-steps/payment-account-step"
 import { PhoneStep } from "../registration-steps/phone-step"
 import { StepIndicator } from "../registration-steps/step-Indicator"
+import type { BnplProfileDto } from "@lib/types/dto/wallet"
 
 type Step = "birthDate" | "phone" | "business" | "paymentAccount"
 
@@ -25,12 +26,14 @@ export default function PaymentRegistrationWizardModal({
   user,
   verificationStatus,
   businessInfo,
+  bnplProfiles,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   user: UserDetail
   verificationStatus: UserVerificationStatusDto
   businessInfo: BusinessInfo | null
+  bnplProfiles: BnplProfileDto[]
 }) {
   const [currentStep, setCurrentStep] = useState<Step>("birthDate")
 
@@ -61,7 +64,7 @@ export default function PaymentRegistrationWizardModal({
     {
       id: "paymentAccount",
       label: "계좌등록 및 동의",
-      status: "verified", // todo : account 상태 추가
+      status: "verified",
     },
   ] as const
 
@@ -108,6 +111,7 @@ export default function PaymentRegistrationWizardModal({
           <PaymentAccountStep
             onComplete={() => onOpenChange(false)}
             user={user}
+            bnplProfiles={bnplProfiles}
           />
         )}
       </DialogContent>

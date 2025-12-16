@@ -46,6 +46,7 @@ const getBaseUrl = (service: ServiceType) => {
     pim: "http://localhost:3020",
     wallet: "http://localhost:5000",
   }
+
   return localUrls[service]
 }
 
@@ -67,14 +68,13 @@ export async function api<T>(
     ...init.headers,
   }
 
-  // FormData가 아닐 때만 Content-Type 설정
-  if (!isFormData) {
+  // body가 있고 FormData가 아닐 때만 Content-Type 설정
+  if (body && !isFormData) {
     ;(headers as Record<string, string>)["Content-Type"] = "application/json"
   }
 
   if (withAuth) {
     const cookieString = await getCookies()
-
     const authHeaders = await getAccessToken()
 
     // 쿠키에 jwt 토큰이 없는데도 _medusa_cache_id가 담겨있어서 api요청이 가능한 경우를 방지하고자 추가함
