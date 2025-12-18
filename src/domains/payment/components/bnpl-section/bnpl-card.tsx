@@ -9,7 +9,7 @@ import {
 import { Skeleton } from "@components/common/ui/skeleton"
 import type { BnplHistoryDto, BnplSummaryDto } from "@lib/types/dto/wallet"
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
-import { formatAmount, formatDday, formatPaymentDate } from "./utils/bnpl-utils"
+import { formatAmount, formatDday, formatPaymentDate } from "../utils"
 import { useChangeAccountSheet } from "./hooks/use-change-account-sheet"
 
 interface BnplCardProps {
