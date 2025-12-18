@@ -41,9 +41,14 @@ export default function BnplSection({
     return { year: now.getFullYear(), month: now.getMonth() + 1 }
   })
 
+  const hasBnplProfile = bnplProfiles.length > 0
+
   useEffect(() => {
-    fetchBnplHistory(currentDate.year, currentDate.month)
-  }, [currentDate.year, currentDate.month])
+    // 계좌가 있을 때만 히스토리 요청
+    if (hasBnplProfile) {
+      fetchBnplHistory(currentDate.year, currentDate.month)
+    }
+  }, [currentDate.year, currentDate.month, hasBnplProfile])
 
   // 이전 달로 이동
   const handlePrevious = useCallback(() => {
@@ -64,8 +69,6 @@ export default function BnplSection({
       return { year: prev.year, month: prev.month + 1 }
     })
   }, [])
-
-  const hasBnplProfile = bnplProfiles.length > 0
 
   // Error State
   if (hasError) {

@@ -13,6 +13,7 @@ export const useBnplHistory = () => {
         setData(bnplHistory)
       } catch (error) {
         console.error("Failed to fetch BNPL history:", error)
+        return
       }
     })
   }
