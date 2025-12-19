@@ -1,7 +1,10 @@
 import { WithHeaderLayout } from "@components/layout"
 import MypageLayout from "@components/layout/mypage-layout"
+import { fetchMe } from "@lib/api/users/me"
 
-export default function SecurityPage() {
+export default async function SecurityPage() {
+  const currentUser = await fetchMe()
+
   return (
     <WithHeaderLayout
       config={{
