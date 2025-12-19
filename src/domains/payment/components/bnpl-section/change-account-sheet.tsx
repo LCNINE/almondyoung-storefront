@@ -86,11 +86,11 @@ export default function ChangeAccountSheet({
         </p>
 
         {isPending ? (
-          <div className="flex items-center justify-center">
+          <div className="flex flex-1 items-center justify-center">
             <Spinner size="sm" color="white" />
           </div>
         ) : (
-          <div className="overflow-y-auto pb-4">
+          <div className="flex-1 overflow-y-auto pb-4">
             <BankAccountList
               bnplProfiles={bnplProfiles}
               onSelectAccount={handleSelectAccount}
