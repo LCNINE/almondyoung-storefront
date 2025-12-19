@@ -2,7 +2,7 @@
 
 import { Button } from "@components/common/ui/button"
 import type { BnplProfileDto } from "@lib/types/dto/wallet"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useState } from "react"
 import EmptyState from "../empty-state"
 import { useBnplModalStore } from "../store/bnpl-modal-store"
 import BnplCard from "./bnpl-card"

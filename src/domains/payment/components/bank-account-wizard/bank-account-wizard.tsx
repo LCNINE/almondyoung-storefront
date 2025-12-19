@@ -10,7 +10,7 @@ import {
 import { Form } from "@components/common/ui/form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { getMyBusiness } from "@lib/api/users/business"
-import { onboardHmsBnpl, setDefaultPaymentProfile } from "@lib/api/wallet"
+import { onboardHmsBnpl } from "@lib/api/wallet"
 import { UserDetail } from "@lib/types/ui/user"
 import { cn } from "@lib/utils"
 import { format } from "date-fns"
@@ -19,7 +19,8 @@ import { useRouter } from "next/navigation"
 import { useActionState, useEffect, useState, useTransition } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
-import { useBankAccountModalStore } from "../store/payment-method-modal-store"
+import { useBnplModalStore } from "../store/bnpl-modal-store"
+import { usePaymentMethodModalStore } from "../store/payment-method-modal-store"
 import { paymentMethodFormSchema, PaymentMethodFormSchema } from "./schema"
 import BankSelectorStep from "./step1"
 import BankAccountLookupStep from "./step2"
@@ -29,7 +30,9 @@ type Step = "method" | "bank" | "account" | "agreement"
 
 // 결제 수단 선택 모달 컴포넌트
 export default function BankAccountWizard({ user }: { user: UserDetail }) {
-  const { isOpen, closeModal } = useBankAccountModalStore() // 결제 수단 선택 모달
+  const { isOpen, closeModal } = usePaymentMethodModalStore() // 결제 수단 선택 모달
+  const { closeModal: closeBnplModal } = useBnplModalStore() // 나중결제 결제 수단관리 모달창 닫기
+
   const router = useRouter()
 
   const form = useForm<PaymentMethodFormSchema>({
@@ -64,7 +67,7 @@ export default function BankAccountWizard({ user }: { user: UserDetail }) {
     }
 
     fetchBusinessInfo()
-  }, [])
+  }, [isOpen])
 
   useEffect(() => {
     if (user.profile?.birthDate) {
@@ -74,24 +77,17 @@ export default function BankAccountWizard({ user }: { user: UserDetail }) {
     if (user) {
       form.setValue("email", user.email)
     }
-  }, [user])
+  }, [user, isOpen])
 
   useEffect(() => {
     if (state) {
       if (state && state.success && "profileId" in state) {
         toast.success("정기 결제 등록이 완료되었습니다.")
 
-        startTransition(async () => {
-          try {
-            await setDefaultPaymentProfile(state.profileId)
-          } catch (error) {
-            toast.error("기본 결제 수단 설정에 실패했습니다.")
-            console.error("기본 결제 수단 설정에 실패했습니다.", error) // 실패했지만 일단 무시
-          }
-        })
-
+        form.reset()
         router.refresh()
         closeModal()
+        closeBnplModal()
       } else {
         toast.error(state?.message || "정기결제 신청에 실패했습니다.")
       }
@@ -100,7 +96,9 @@ export default function BankAccountWizard({ user }: { user: UserDetail }) {
 
   const [step, setStep] = useState<Step>("method")
 
-  const handleBankSelect = (nextStep: "bank" | "account" | "agreement") => {
+  const handleBankSelect = (
+    nextStep: "method" | "bank" | "account" | "agreement"
+  ) => {
     setStep(nextStep)
   }
 
@@ -149,6 +147,7 @@ export default function BankAccountWizard({ user }: { user: UserDetail }) {
     formData.append("file", data.signature as File) //  전자서명 파일
     startTransition(async () => {
       formAction(formData)
+      handleBankSelect("method")
     })
   }
 
