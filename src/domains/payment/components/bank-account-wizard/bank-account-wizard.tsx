@@ -10,7 +10,7 @@ import {
 import { Form } from "@components/common/ui/form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { getMyBusiness } from "@lib/api/users/business"
-import { onboardHmsBnpl } from "@lib/api/wallet"
+import { onboardHmsBnpl, setDefaultPaymentProfile } from "@lib/api/wallet"
 import { UserDetail } from "@lib/types/ui/user"
 import { cn } from "@lib/utils"
 import { format } from "date-fns"
@@ -29,7 +29,7 @@ type Step = "method" | "bank" | "account" | "agreement"
 
 // 결제 수단 선택 모달 컴포넌트
 export default function BankAccountWizard({ user }: { user: UserDetail }) {
-  const { isOpen, openModal, closeModal } = useBankAccountModalStore() // 결제 수단 선택 모달
+  const { isOpen, closeModal } = useBankAccountModalStore() // 결제 수단 선택 모달
   const router = useRouter()
 
   const form = useForm<PaymentMethodFormSchema>({
@@ -78,8 +78,18 @@ export default function BankAccountWizard({ user }: { user: UserDetail }) {
 
   useEffect(() => {
     if (state) {
-      if (state && state.success) {
+      if (state && state.success && "profileId" in state) {
         toast.success("정기 결제 등록이 완료되었습니다.")
+
+        startTransition(async () => {
+          try {
+            await setDefaultPaymentProfile(state.profileId)
+          } catch (error) {
+            toast.error("기본 결제 수단 설정에 실패했습니다.")
+            console.error("기본 결제 수단 설정에 실패했습니다.", error) // 실패했지만 일단 무시
+          }
+        })
+
         router.refresh()
         closeModal()
       } else {
@@ -133,10 +143,10 @@ export default function BankAccountWizard({ user }: { user: UserDetail }) {
     formData.append("payerName", data.accountHolderName) // 납부자 명
     formData.append("phone", formattedPhone) // 전화번호
     formData.append("paymentCompany", data.bankCode) // 은행코드
+    formData.append("name", data.bankName) // 은행 명
     formData.append("paymentNumber", data.accountNumber) // 계좌번호
     formData.append("payerNumber", data.payerNumber || "") // 납부자 사업자 번호
     formData.append("file", data.signature as File) //  전자서명 파일
-
     startTransition(async () => {
       formAction(formData)
     })

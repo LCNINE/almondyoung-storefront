@@ -3,7 +3,6 @@
 import { Button } from "@components/common/ui/button"
 import { deletePaymentProfile, setDefaultPaymentProfile } from "@lib/api/wallet"
 import type { BnplProfileDto } from "@lib/types/dto/wallet"
-import { UserDetail } from "@lib/types/ui/user"
 import { CreditCard } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useTransition } from "react"
@@ -12,12 +11,8 @@ import { useBankAccountModalStore } from "../../store/payment-method-modal-store
 
 // 계좌 등록 스텝 컴포넌트
 export default function BankAccountStep({
-  onComplete,
-  user,
   bnplProfiles,
 }: {
-  onComplete: () => void
-  user: UserDetail
   bnplProfiles: BnplProfileDto[]
 }) {
   // 결제수단 등록 모달 오픈
@@ -98,7 +93,7 @@ function BankAccountItem({
 
         <div className="flex-2">
           <p className="font-sans text-sm leading-relaxed font-normal">
-            {paymentProfile.details?.paymentCompanyName} 계좌
+            {paymentProfile.name}
           </p>
           {/* todo: 마스킹 처리 해줘야함 일단 서버에서 안불러오는거같음 */}
           <p className="font-sans text-sm font-normal">1239-*******-****23</p>

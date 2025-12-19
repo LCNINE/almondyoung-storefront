@@ -96,11 +96,7 @@ export default function BnplVerificationWizard({
         )}
 
         {currentStep === "bankAccount" && (
-          <BankAccountStep
-            onComplete={() => closeModal()}
-            user={user}
-            bnplProfiles={bnplProfiles}
-          />
+          <BankAccountStep bnplProfiles={bnplProfiles} />
         )}
       </DialogContent>
     </Dialog>

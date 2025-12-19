@@ -52,24 +52,6 @@ export default function ChangeAccountSheet({
     openBankAccountModal()
   }
 
-  const getAccountDisplayInfo = (profile: BnplProfileDto) => {
-    if (profile.kind === "BANK_ACCOUNT") {
-      return {
-        title: profile.details?.paymentCompanyName || "은행 계좌",
-        subtitle: profile.details?.paymentNumber
-          ? `${profile.details.paymentNumber}`
-          : "계좌번호 정보 없음",
-        holder: profile.details?.payerName || "예금주 정보 없음",
-      }
-    }
-
-    return {
-      title: "결제 수단",
-      subtitle: profile.name || "정보 없음",
-      holder: "",
-    }
-  }
-
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent
@@ -101,7 +83,6 @@ export default function ChangeAccountSheet({
             ) : (
               <div className="space-y-2">
                 {bnplProfiles.map((profile) => {
-                  const displayInfo = getAccountDisplayInfo(profile)
                   const isLoading = loadingProfileId === profile.id
                   const isDefault = profile.isDefault
 
@@ -139,7 +120,8 @@ export default function ChangeAccountSheet({
                                   isDefault ? "text-blue-900" : "text-gray-900"
                                 }`}
                               >
-                                {displayInfo.title}
+                                {/* 계좌 이름 혹은 별칭 */}
+                                {profile.name ?? "계좌"}
                               </p>
                               {isDefault && (
                                 <span className="rounded-full bg-blue-500 px-2 py-0.5 text-xs font-medium text-white">
@@ -152,15 +134,16 @@ export default function ChangeAccountSheet({
                                 isDefault ? "text-blue-700" : "text-gray-600"
                               }`}
                             >
-                              {displayInfo.subtitle}
+                              {/* 계좌 번호 */}
+                              {profile.details?.paymentNumber}
                             </p>
-                            {displayInfo.holder && (
+                            {profile.details?.payerName && (
                               <p
                                 className={`mt-0.5 text-xs ${
                                   isDefault ? "text-blue-600" : "text-gray-500"
                                 }`}
                               >
-                                예금주: {displayInfo.holder}
+                                예금주: {profile.details?.payerName}
                               </p>
                             )}
                           </div>

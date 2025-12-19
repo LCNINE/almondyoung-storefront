@@ -143,19 +143,7 @@ export default function BankAgreementStep({
       {/* 약관 동의 섹션 */}
       <section className="mt-4">
         {agreements.slice(2, 5).map((agreement) => (
-          <AgreementForm
-            key={agreement.id}
-            agreement={agreement}
-            checked={
-              !!form.watch(agreement.id as keyof PaymentMethodFormSchema)
-            }
-            onCheckedChange={(checked) =>
-              form.setValue(
-                agreement.id as keyof PaymentMethodFormSchema,
-                checked
-              )
-            }
-          />
+          <AgreementForm key={agreement.id} agreement={agreement} />
         ))}
       </section>
 
@@ -246,16 +234,12 @@ export default function BankAgreementStep({
 
 function AgreementForm({
   agreement,
-  checked,
-  onCheckedChange,
 }: {
   agreement: {
     id: string
     name: string
     content: string | null
   }
-  checked: boolean
-  onCheckedChange: (checked: boolean) => void
 }) {
   const form = useFormContext<PaymentMethodFormSchema>()
 

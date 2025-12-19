@@ -25,30 +25,25 @@ export default function BnplSection({
   const { isOpen: isChangeAccountSheetOpen, closeSheet } =
     useChangeAccountSheet()
 
-  const { bnplSummary, isPending: isLoadingSummary } = useBnplSummary()
-  const {
-    fetchBnplHistory,
-    data: bnplHistory,
-    isPending: isLoadingHistory,
-  } = useBnplHistory()
-
-  // Sheet 열림 상태
-  const [isSheetOpen, setIsSheetOpen] = useState(false)
-
   // 현재 년월 관리
   const [currentDate, setCurrentDate] = useState(() => {
     const now = new Date()
     return { year: now.getFullYear(), month: now.getMonth() + 1 }
   })
 
+  // Sheet 열림 상태
+  const [isSheetOpen, setIsSheetOpen] = useState(false)
+
   const hasBnplProfile = bnplProfiles.length > 0
 
-  useEffect(() => {
-    // 계좌가 있을 때만 히스토리 요청
-    if (hasBnplProfile) {
-      fetchBnplHistory(currentDate.year, currentDate.month)
-    }
-  }, [currentDate.year, currentDate.month, hasBnplProfile])
+  // 계좌가 있을 때만 요청 (enabled: hasBnplProfile)
+  const { bnplSummary, isPending: isLoadingSummary } =
+    useBnplSummary(hasBnplProfile)
+  const { data: bnplHistory, isPending: isLoadingHistory } = useBnplHistory(
+    currentDate.year,
+    currentDate.month,
+    hasBnplProfile
+  )
 
   // 이전 달로 이동
   const handlePrevious = useCallback(() => {
@@ -79,7 +74,7 @@ export default function BnplSection({
         action={
           <Button
             variant="outline"
-            className="w-full cursor-pointer px-6 font-medium sm:w-auto"
+            className="w-full cursor-pointer px-6 text-sm font-medium sm:w-auto sm:text-base"
             onClick={() => window.location.reload()}
           >
             다시 시도
@@ -98,7 +93,7 @@ export default function BnplSection({
         action={
           <Button
             variant="default"
-            className="w-full cursor-pointer px-6 font-medium sm:w-auto"
+            className="w-full cursor-pointer px-6 text-sm font-medium sm:w-auto sm:text-base"
             onClick={openModal}
           >
             + 결제수단 등록
@@ -118,8 +113,11 @@ export default function BnplSection({
         onPrevious={handlePrevious}
         onNext={handleNext}
         onViewDetails={() => setIsSheetOpen(true)}
+        isLoading={isLoadingSummary}
+        bankName={bnplProfiles[0].name}
       />
 
+      {/* 내역 보기 */}
       <BnplHistorySheet
         isOpen={isSheetOpen}
         onClose={() => setIsSheetOpen(false)}
@@ -130,6 +128,7 @@ export default function BnplSection({
         onNext={handleNext}
       />
 
+      {/* 출금 계좌 변경 */}
       <ChangeAccountSheet
         isOpen={isChangeAccountSheetOpen}
         onClose={closeSheet}
