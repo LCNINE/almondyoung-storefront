@@ -7,8 +7,8 @@ import AccountSection from "./components/account-section"
 import BankAccountWizard from "./components/bank-account-wizard/bank-account-wizard"
 import BnplSection from "./components/bnpl-section"
 import BnplVerificationWizard from "./components/bnpl-verification-wizard/bnpl-verification-wizard"
+import PaymentMenuList from "./components/payment-menu-list"
 import PointSection from "./components/point-section"
-import PaymentMenuList from "./components/sections/payment-menu-list"
 import PendingPointsSection from "./components/sections/pending-points-section"
 
 export default async function PaymentManagement() {
