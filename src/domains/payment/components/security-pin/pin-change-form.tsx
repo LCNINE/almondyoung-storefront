@@ -1,155 +1,233 @@
 "use client"
 
-import { useState } from "react"
-import { KeyRound } from "lucide-react"
+import { Button } from "@components/common/ui/button"
 import { Card } from "@components/common/ui/card"
+import { changePin, verifyPin } from "@lib/api/wallet"
+import { CheckCircle2, Lock } from "lucide-react"
+import { useState, useTransition } from "react"
+import { toast } from "sonner"
+import { usePinKeypad } from "./hooks/use-pin-keypad"
 import PinKeypad from "./pin-keypad"
 import PinDots from "./shared/pin-dots"
-import { usePinKeypad } from "./hooks/use-pin-keypad"
+import Link from "next/link"
 
-type Step = "current" | "new" | "confirm"
+type Step = "question" | "current" | "new" | "confirm" | "success"
 
 export default function PinChangeForm() {
-  const [step, setStep] = useState<Step>("current")
+  const [step, setStep] = useState<Step>("question")
   const [currentPin, setCurrentPin] = useState("")
   const [newPin, setNewPin] = useState("")
   const [confirmPin, setConfirmPin] = useState("")
   const [isShaking, setIsShaking] = useState(false)
   const { shuffledNumbers, shuffleKeypad } = usePinKeypad(true)
+  const [isPending, startTransition] = useTransition()
+
+  // 질문 단계
+  if (step === "question") {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center px-4">
+        <Card className="w-full max-w-md p-8 max-sm:border-none max-sm:shadow-none">
+          <h2 className="mb-3 text-center text-2xl font-semibold text-gray-900">
+            PIN 번호를 변경할까요?
+          </h2>
+          <p className="mb-8 text-center text-sm text-gray-600">
+            보안을 위해 주기적으로 PIN을 변경하는 것을 권장합니다
+          </p>
+
+          <div className="space-y-3">
+            <Button
+              onClick={() => {
+                setStep("current")
+                shuffleKeypad()
+              }}
+              className="h-12 w-full text-base font-medium"
+            >
+              변경하기
+            </Button>
+
+            <div className="flex items-center gap-2">
+              <Link href="/mypage/payment/forget-pin">PIN 비밀번호 찾기</Link>
+              <Button
+                variant="ghost"
+                onClick={() => window.history.back()}
+                className="ml-auto cursor-pointer text-sm font-normal hover:bg-transparent hover:text-gray-700"
+              >
+                나중에 할게요
+              </Button>
+            </div>
+          </div>
+        </Card>
+      </div>
+    )
+  }
+
+  // 성공 단계
+  if (step === "success") {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center px-4">
+        <Card className="w-full max-w-md p-8 text-center max-sm:border-none max-sm:shadow-none">
+          <h2 className="mb-3 text-2xl font-semibold text-gray-900">
+            변경 완료!
+          </h2>
+          <p className="mb-8 text-gray-600">
+            PIN 번호가 안전하게 변경되었습니다
+          </p>
+
+          <Button
+            onClick={() => window.history.back()}
+            className="h-12 w-full text-base"
+          >
+            확인
+          </Button>
+        </Card>
+      </div>
+    )
+  }
 
   const getCurrentPin = () => {
-    switch (step) {
-      case "current":
-        return currentPin
-      case "new":
-        return newPin
-      case "confirm":
-        return confirmPin
-    }
+    if (step === "current") return currentPin
+    if (step === "new") return newPin
+    if (step === "confirm") return confirmPin
+    return ""
   }
 
   const handleNumberClick = async (value: string | number) => {
     const pin = getCurrentPin()
 
     if (value === "backspace") {
-      switch (step) {
-        case "current":
-          setCurrentPin((prev) => prev.slice(0, -1))
-          break
-        case "new":
-          setNewPin((prev) => prev.slice(0, -1))
-          break
-        case "confirm":
-          setConfirmPin((prev) => prev.slice(0, -1))
-          break
-      }
-    } else if (value !== "" && pin.length < 6) {
+      if (step === "current") setCurrentPin((prev) => prev.slice(0, -1))
+      if (step === "new") setNewPin((prev) => prev.slice(0, -1))
+      if (step === "confirm") setConfirmPin((prev) => prev.slice(0, -1))
+      return
+    }
+
+    if (value !== "" && pin.length < 6) {
       const newPinValue = pin + value
 
-      switch (step) {
-        case "current":
-          setCurrentPin(newPinValue)
-          if (newPinValue.length === 6) {
-            const isValid = await verifyCurrentPin(newPinValue)
-            if (isValid) {
+      if (step === "current") {
+        setCurrentPin(newPinValue)
+        if (newPinValue.length === 6) {
+          startTransition(async () => {
+            try {
+              await verifyPin(newPinValue)
               setTimeout(() => {
                 setStep("new")
                 shuffleKeypad()
               }, 300)
-            } else {
-              handleFailure()
+            } catch (error: any) {
+              toast.error("현재 PIN이 맞지 않아요")
+              triggerShake(() => setCurrentPin(""))
             }
-          }
-          break
-        case "new":
-          setNewPin(newPinValue)
-          if (newPinValue.length === 6) {
-            setTimeout(() => {
-              setStep("confirm")
+          })
+        }
+      }
+
+      if (step === "new") {
+        setNewPin(newPinValue)
+        if (newPinValue.length === 6) {
+          setTimeout(() => {
+            setStep("confirm")
+            shuffleKeypad()
+          }, 300)
+        }
+      }
+
+      if (step === "confirm") {
+        setConfirmPin(newPinValue)
+        if (newPinValue.length === 6) {
+          if (newPin === newPinValue) {
+            startTransition(async () => {
+              try {
+                await changePin(currentPin, newPinValue)
+                setStep("success")
+              } catch (error: any) {
+                console.error("PIN 변경 실패:", error)
+
+                toast.error(
+                  error.message ?? "PIN 변경에 실패했어요. 다시 시도해주세요"
+                )
+                triggerShake(() => {
+                  setCurrentPin("")
+                  setNewPin("")
+                  setConfirmPin("")
+                  setStep("current")
+                  shuffleKeypad()
+                })
+              }
+            })
+          } else {
+            toast.error("PIN이 일치하지 않아요. 처음부터 다시 입력해주세요")
+            triggerShake(() => {
+              setCurrentPin("")
+              setNewPin("")
+              setConfirmPin("")
+              setStep("current")
               shuffleKeypad()
-            }, 300)
+            })
           }
-          break
-        case "confirm":
-          setConfirmPin(newPinValue)
-          if (newPinValue.length === 6) {
-            if (newPin === newPinValue) {
-              await updatePin(newPinValue)
-            } else {
-              handleMismatch()
-            }
-          }
-          break
+        }
       }
     }
   }
 
-  const verifyCurrentPin = async (pin: string): Promise<boolean> => {
-    try {
-      const response = await fetch("/api/user/pin/verify", {
-        method: "POST",
-        body: JSON.stringify({ pin }),
-      })
-      return response.ok
-    } catch {
-      return false
-    }
-  }
-
-  const updatePin = async (pin: string) => {
-    try {
-      await fetch("/api/user/pin", {
-        method: "PUT",
-        body: JSON.stringify({ pin }),
-      })
-      // onSuccess()
-    } catch (error) {
-      console.error("PIN 변경 실패:", error)
-    }
-  }
-
-  const handleFailure = () => {
+  const triggerShake = (callback: () => void) => {
     setIsShaking(true)
     setTimeout(() => {
       setIsShaking(false)
-      setCurrentPin("")
+      callback()
     }, 500)
   }
 
-  const handleMismatch = () => {
-    setIsShaking(true)
-    setTimeout(() => {
-      setIsShaking(false)
-      setCurrentPin("")
-      setNewPin("")
-      setConfirmPin("")
-      setStep("current")
-      shuffleKeypad()
-    }, 500)
-  }
-
-  const getTitle = () => {
-    switch (step) {
-      case "current":
-        return "현재 PIN 입력"
-      case "new":
-        return "새로운 PIN 입력"
-      case "confirm":
-        return "새로운 PIN 확인"
+  const getStepInfo = () => {
+    const steps = {
+      current: {
+        title: "현재 PIN을 입력해주세요",
+        description: "본인 확인을 위해 현재 사용 중인 PIN을 입력해주세요",
+        icon: <Lock className="h-6 w-6 text-blue-600" />,
+      },
+      new: {
+        title: "새로운 PIN을 만들어주세요",
+        description: "6자리 숫자로 새로운 PIN을 설정해주세요",
+        icon: <Lock className="h-6 w-6 text-blue-600" />,
+      },
+      confirm: {
+        title: "한 번 더 입력해주세요",
+        description: "방금 입력한 PIN을 다시 한번 확인해주세요",
+        icon: <CheckCircle2 className="h-6 w-6 text-blue-600" />,
+      },
     }
+    return steps[step as keyof typeof steps]
   }
+
+  const stepInfo = getStepInfo()
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-amber-50 to-orange-50 p-4">
-      <Card className="w-full max-w-md p-6 sm:p-8">
+    <div className="flex min-h-[60vh] items-center justify-center px-4">
+      <Card className="w-full max-w-md p-6 max-sm:border-none max-sm:shadow-none sm:p-8">
+        {/* 진행 표시 */}
+        <div className="mb-6 flex items-center justify-center gap-2">
+          <div
+            className={`h-2 w-2 rounded-full ${step === "current" ? "bg-blue-600" : "bg-gray-300"}`}
+          />
+          <div
+            className={`h-2 w-2 rounded-full ${step === "new" ? "bg-blue-600" : "bg-gray-300"}`}
+          />
+          <div
+            className={`h-2 w-2 rounded-full ${step === "confirm" ? "bg-blue-600" : "bg-gray-300"}`}
+          />
+        </div>
+
         <div className="mb-8 flex flex-col items-center">
-          <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">
-            <KeyRound className="h-8 w-8 text-amber-600" />
+          <div className="bg-gray-10 mb-4 rounded-full p-3">
+            {stepInfo.icon}
           </div>
 
-          <h2 className="mb-2 text-center text-xl font-bold text-gray-900">
-            {getTitle()}
+          <h2 className="mb-2 text-center text-xl font-semibold text-gray-900">
+            {stepInfo.title}
           </h2>
+          <p className="mb-6 text-center text-sm text-gray-500">
+            {stepInfo.description}
+          </p>
 
           <PinDots
             length={6}
@@ -162,7 +240,27 @@ export default function PinChangeForm() {
           shuffledNumbers={shuffledNumbers}
           handleNumberClick={handleNumberClick}
           pin={getCurrentPin()}
+          isPending={isPending}
         />
+
+        {/* 취소 버튼 */}
+        <button
+          onClick={() => {
+            if (step === "current") {
+              setStep("question")
+            } else {
+              toast("처음부터 다시 시작할게요")
+              setCurrentPin("")
+              setNewPin("")
+              setConfirmPin("")
+              setStep("current")
+              shuffleKeypad()
+            }
+          }}
+          className="mt-4 w-full py-2 text-sm text-gray-500 hover:text-gray-700"
+        >
+          {step === "current" ? "취소" : "처음으로"}
+        </button>
       </Card>
     </div>
   )

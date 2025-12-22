@@ -38,11 +38,9 @@ type FormData = z.infer<typeof schema>
 
 // 휴대폰 인증 스텝 컴포넌트
 export function PhoneVerificationStep({
-  status,
   onComplete,
   user,
 }: {
-  status: "verified" | "rejected" | "under_review" | "none"
   onComplete: () => void
   user: UserDetail
 }) {

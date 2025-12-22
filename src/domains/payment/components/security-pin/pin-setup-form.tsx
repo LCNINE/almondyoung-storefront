@@ -2,27 +2,33 @@
 
 import { Card } from "@components/common/ui/card"
 import { Form } from "@components/common/ui/form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { registerPin } from "@lib/api/wallet"
+import { AlertCircle, CheckCircle2 } from "lucide-react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useState, useTransition } from "react"
+import { useForm } from "react-hook-form"
+import { toast } from "sonner"
+import { usePinKeypad } from "./hooks/use-pin-keypad"
+import PinKeypad from "./pin-keypad"
 import {
   pinSetupSchema,
   type PinSetupFormValues,
 } from "./schemas/pin-validation"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { KeyRound, CheckCircle2, AlertCircle } from "lucide-react"
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { usePinKeypad } from "./hooks/use-pin-keypad"
-import { useRouter } from "next/navigation"
-import PinKeypad from "./pin-keypad"
 import PinDots from "./shared/pin-dots"
-import { toast } from "sonner"
 
 type Step = "input" | "confirm" | "success"
 
 export default function PinSetupForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get("redirect_to")
+
   const [step, setStep] = useState<Step>("input")
   const [isShaking, setIsShaking] = useState(false)
   const { shuffledNumbers, shuffleKeypad } = usePinKeypad(true)
+
+  const [isPending, startTransition] = useTransition()
 
   const form = useForm<PinSetupFormValues>({
     resolver: zodResolver(pinSetupSchema),
@@ -30,7 +36,7 @@ export default function PinSetupForm() {
       firstPin: "",
       secondPin: "",
     },
-    mode: "onChange", // 실시간 유효성 검사
+    mode: "onChange", 
   })
 
   const currentPin =
@@ -57,14 +63,14 @@ export default function PinSetupForm() {
 
       // 6자리 입력 완료 시
       if (newPin.length === 6) {
-        handlePinComplete(fieldName, newPin)
+        handlePinComplete(fieldName)
       }
     }
   }
 
   const handlePinComplete = async (
     fieldName: "firstPin" | "secondPin",
-    pin: string
+    
   ) => {
     if (fieldName === "firstPin") {
       // 첫 번째 PIN 유효성 검사
@@ -89,10 +95,9 @@ export default function PinSetupForm() {
     } else {
       // 두 번째 PIN 검증
       const result = await form.trigger()
-
       if (result) {
         // 일치하면 저장
-        await savePin(form.getValues())
+        await savePin(form.getValues().secondPin)
       } else {
         // 불일치하면 shake + 초기화
         triggerShakeAndReset()
@@ -106,38 +111,31 @@ export default function PinSetupForm() {
     }
   }
 
-  const savePin = async (values: PinSetupFormValues) => {
-    try {
-      // const response = await fetch("/api/user/pin", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({ pin: values.firstPin }),
-      // })
+  const savePin = async (pin:string) => {
+    startTransition(async () => {
+    try { 
+        await registerPin(pin)
+        // 성공 화면
+        setStep("success")
+        toast.success("PIN 설정 완료")
 
-      // if (!response.ok) {
-      //   throw new Error("PIN 저장 실패")
-      // }
-
-      // 성공 화면
-      setStep("success")
-
-      toast.success("PIN 설정 완료")
-
-      // 2초 후 이동
-      setTimeout(() => {
-        // router.push("/dashboard")
-      }, 2000)
-    } catch (error) {
-      console.error("PIN 저장 실패:", error)
-      toast.error("PIN 저장 실패")
-
-      // 처음부터 다시
-      form.reset()
-      setStep("input")
-      shuffleKeypad()
-    }
+        setTimeout(() => {
+          if (redirectTo) {
+            router.push(redirectTo)
+          } else {
+            router.push("/kr/mypage/payment")
+          }
+        }, 2000)
+      } catch (error: any) {
+        console.error("PIN 저장 실패:", error)
+        toast.error(error.message ??"PIN 저장 실패")
+        
+        // 처음부터 다시 입력
+        form.reset()
+        setStep("input")
+        shuffleKeypad()
+      }
+    })
   }
 
   const triggerShakeAndReset = () => {
@@ -178,8 +176,8 @@ export default function PinSetupForm() {
 
   return (
     <div className="flex h-full items-center justify-center">
-      <Card className="w-full max-w-md p-6 sm:p-8">
-        <Form {...form}>
+      <Card className="w-full max-w-md p-6 sm:p-8 max-sm:border-none max-sm:shadow-none">
+          <Form {...form}>
           <form className="space-y-8">
             {/* Header */}
             <div className="flex flex-col items-center">
@@ -232,6 +230,7 @@ export default function PinSetupForm() {
               shuffledNumbers={shuffledNumbers}
               handleNumberClick={handleNumberClick}
               pin={currentPin}
+              isPending={isPending}
             />
 
             {/* Reset Button (confirm 단계에서만) */}
