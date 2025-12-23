@@ -11,7 +11,7 @@ import PaymentMenuList from "./components/payment-menu-list"
 import PointSection from "./components/point-section"
 import PendingPointsSection from "./components/sections/pending-points-section"
 
-export default async function PaymentManagement() {
+export default async function PaymentManager() {
   const currentUser = await fetchMe()
   const verificationStatus = await getVerificationStatus() // step 별 진행 상태, 결제 수단 등록할 때 인증 정보 steps 별 진행 상태 확인용
   const businessInfo = await getMyBusiness() // 사업자 정보 조회

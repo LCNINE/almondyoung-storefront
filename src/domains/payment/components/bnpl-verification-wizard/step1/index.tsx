@@ -19,11 +19,10 @@ import "intl-tel-input/build/css/intlTelInput.css"
 import { useEffect, useRef, useState, useTransition } from "react"
 import { Controller, useForm } from "react-hook-form"
 import PhoneInput, { type Country } from "react-phone-number-input"
-import "react-phone-number-input/style.css"
 import { toast } from "sonner"
 import { z } from "zod"
 import useTwilio from "../../hooks/use-twilio"
-import "./phone-input.css"
+import CustomPhoneInput from "@components/phone-input"
 
 const schema = z.object({
   name: z.string().min(1, "이름을 입력해주세요"),
@@ -254,18 +253,10 @@ export function PhoneVerificationStep({
             name="phoneNumber"
             control={form.control}
             render={({ field }) => (
-              <PhoneInput
-                required
-                defaultCountry="KR"
-                country={form.watch("countryCode") as Country}
-                placeholder="휴대폰번호 (숫자만 입력하세요)"
+              <CustomPhoneInput
                 value={field.value}
                 onChange={field.onChange}
-                onCountryChange={(country) => {
-                  if (country) {
-                    form.setValue("countryCode", country)
-                  }
-                }}
+                countryCode={form.watch("countryCode")}
               />
             )}
           />

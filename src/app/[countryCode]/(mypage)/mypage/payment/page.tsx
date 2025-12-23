@@ -2,7 +2,7 @@ import { Spinner } from "@components/common/spinner"
 import { WithHeaderLayout } from "@components/layout"
 import MypageLayout from "@components/layout/mypage-layout"
 import ProtectedRoute from "@components/protected-route"
-import PaymentManagement from "domains/payment/payment-management"
+import PaymentManager from "domains/payment/payment-management"
 import { Suspense } from "react"
 
 export default function PaymentPage() {
@@ -24,7 +24,7 @@ export default function PaymentPage() {
               </div>
             }
           >
-            <PaymentManagement />
+            <PaymentManager />
           </Suspense>
         </MypageLayout>
       </WithHeaderLayout>

@@ -33,7 +33,9 @@ export default function BnplVerificationWizard({
 }) {
   const router = useRouter()
   const pathname = usePathname()
-  const isSecurityPage = pathname.includes("security")
+
+  const isSecurityPage =
+    pathname.includes("security") || pathname.includes("forget-pin")
 
   const { isOpen, toggleModal, closeModal } = useBnplModalStore()
 

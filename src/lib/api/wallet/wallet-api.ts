@@ -216,7 +216,7 @@ export async function onboardHmsBnpl(_: any, formData: FormData) {
             "정기결제 신청에 실패했습니다. 입력하신 정보를 확인해주세요.",
           success: false,
         }
-   }
+      }
 
       return {
         message: error.message || "정기결제 신청에 실패했습니다.",
@@ -308,10 +308,7 @@ export async function verifyPin(pin: string): Promise<PinVerifyResponse> {
 /**
  * PIN 재설정 (본인인증 토큰 필요)
  */
-export async function resetPin(
-  newPin: string,
-  verificationToken: string
-): Promise<{ success: boolean }> {
+export async function resetPin(newPin: string): Promise<{ success: boolean }> {
   const result = await api<{ success: boolean }>(
     "wallet",
     "/payments/pin/reset",

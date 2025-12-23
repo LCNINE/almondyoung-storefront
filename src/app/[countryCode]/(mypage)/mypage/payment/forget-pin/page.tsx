@@ -1,7 +1,11 @@
+import { Spinner } from "@components/common/spinner"
 import { WithHeaderLayout } from "@components/layout"
 import MypageLayout from "@components/layout/mypage-layout"
 import ProtectedRoute from "@components/protected-route"
-import ForgetPin from "domains/payment/components/forget-pin"
+import { fetchMe } from "@lib/api/users/me"
+import { Suspense } from "react"
+import SecurityManager from "../(components)/sucurity-manager"
+import ForgetPinForm from "domains/payment/components/forget-pin"
 
 export default async function ForgetPinPage() {
   return (
@@ -15,9 +19,28 @@ export default async function ForgetPinPage() {
         }}
       >
         <MypageLayout>
-          <ForgetPin />
+          <Suspense
+            fallback={
+              <div className="flex h-56 items-center justify-center text-center">
+                <Spinner size="lg" color="gray" />
+              </div>
+            }
+          >
+            <ForgetPinManager />
+          </Suspense>
         </MypageLayout>
       </WithHeaderLayout>
     </ProtectedRoute>
   )
+}
+
+async function ForgetPinManager() {
+  const currentUser = await fetchMe()
+
+  // 핸드폰 인증이 안되어있으면 본인인증 모달 띄움
+  if (!currentUser.profile?.phoneNumber) {
+    return <SecurityManager />
+  }
+
+  return <ForgetPinForm />
 }

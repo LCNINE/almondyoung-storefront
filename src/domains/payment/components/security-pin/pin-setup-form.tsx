@@ -3,7 +3,7 @@
 import { Card } from "@components/common/ui/card"
 import { Form } from "@components/common/ui/form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { registerPin } from "@lib/api/wallet"
+import { registerPin, resetPin } from "@lib/api/wallet"
 import { AlertCircle, CheckCircle2 } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useState, useTransition } from "react"
@@ -19,7 +19,11 @@ import PinDots from "./shared/pin-dots"
 
 type Step = "input" | "confirm" | "success"
 
-export default function PinSetupForm() {
+export default function PinSetupForm({
+  isForgetPinPage = false,
+}: {
+  isForgetPinPage?: boolean
+}) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get("redirect_to")
@@ -36,7 +40,7 @@ export default function PinSetupForm() {
       firstPin: "",
       secondPin: "",
     },
-    mode: "onChange", 
+    mode: "onChange",
   })
 
   const currentPin =
@@ -68,10 +72,7 @@ export default function PinSetupForm() {
     }
   }
 
-  const handlePinComplete = async (
-    fieldName: "firstPin" | "secondPin",
-    
-  ) => {
+  const handlePinComplete = async (fieldName: "firstPin" | "secondPin") => {
     if (fieldName === "firstPin") {
       // 첫 번째 PIN 유효성 검사
       const result = await form.trigger("firstPin")
@@ -95,9 +96,9 @@ export default function PinSetupForm() {
     } else {
       // 두 번째 PIN 검증
       const result = await form.trigger()
+      // 일치하면 저장
       if (result) {
-        // 일치하면 저장
-        await savePin(form.getValues().secondPin)
+        await savePin(form.getValues().secondPin, isForgetPinPage)
       } else {
         // 불일치하면 shake + 초기화
         triggerShakeAndReset()
@@ -111,10 +112,15 @@ export default function PinSetupForm() {
     }
   }
 
-  const savePin = async (pin:string) => {
+  const savePin = async (pin: string, isForgetPinPage: boolean) => {
     startTransition(async () => {
-    try { 
-        await registerPin(pin)
+      try {
+        if (isForgetPinPage) {
+          await resetPin(pin)
+        } else if (!isForgetPinPage) {
+          await registerPin(pin)
+        }
+
         // 성공 화면
         setStep("success")
         toast.success("PIN 설정 완료")
@@ -128,8 +134,8 @@ export default function PinSetupForm() {
         }, 2000)
       } catch (error: any) {
         console.error("PIN 저장 실패:", error)
-        toast.error(error.message ??"PIN 저장 실패")
-        
+        toast.error(error.message ?? "PIN 저장 실패")
+
         // 처음부터 다시 입력
         form.reset()
         setStep("input")
@@ -176,8 +182,8 @@ export default function PinSetupForm() {
 
   return (
     <div className="flex h-full items-center justify-center">
-      <Card className="w-full max-w-md p-6 sm:p-8 max-sm:border-none max-sm:shadow-none">
-          <Form {...form}>
+      <Card className="w-full max-w-md p-6 max-sm:border-none max-sm:shadow-none sm:p-8">
+        <Form {...form}>
           <form className="space-y-8">
             {/* Header */}
             <div className="flex flex-col items-center">
