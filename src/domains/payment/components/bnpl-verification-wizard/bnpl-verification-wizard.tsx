@@ -59,6 +59,7 @@ export default function BnplVerificationWizard({
   }, [verificationStatus])
 
   const handleClose = () => {
+    // 핀 설정하는 페이지라면, 뒤로가기
     if (isSecurityPage) {
       router.back()
     }
@@ -92,11 +93,16 @@ export default function BnplVerificationWizard({
           </DialogTitle>
         </DialogHeader>
 
-        <StepIndicator steps={steps} currentStep={currentStep} />
+        <StepIndicator
+          steps={steps}
+          currentStep={currentStep}
+          isSecurityPage={isSecurityPage}
+        />
 
         {currentStep === "phone" && (
           <PhoneVerificationStep
             onComplete={() => setCurrentStep("business")}
+            isVerification={verificationStatus?.phone === "verified"}
             user={user}
           />
         )}
@@ -107,11 +113,16 @@ export default function BnplVerificationWizard({
             rejectionReason={verificationStatus?.business.rejectionReason}
             onComplete={() => setCurrentStep("bankAccount")}
             businessInfo={businessInfo}
+            isVerification={verificationStatus?.business.status === "verified"}
           />
         )}
 
         {currentStep === "bankAccount" && (
-          <BankAccountStep bnplProfiles={bnplProfiles} />
+          <BankAccountStep
+            bnplProfiles={bnplProfiles}
+            isSecurityPage={isSecurityPage}
+            closeModal={closeModal}
+          />
         )}
       </DialogContent>
     </Dialog>

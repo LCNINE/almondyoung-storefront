@@ -16,7 +16,7 @@ import { UserDetail } from "@lib/types/ui/user"
 import { cn } from "@lib/utils"
 import { format } from "date-fns"
 import "intl-tel-input/build/css/intlTelInput.css"
-import { useRef, useState, useTransition } from "react"
+import { useEffect, useRef, useState, useTransition } from "react"
 import { Controller, useForm } from "react-hook-form"
 import PhoneInput, { type Country } from "react-phone-number-input"
 import "react-phone-number-input/style.css"
@@ -40,9 +40,11 @@ type FormData = z.infer<typeof schema>
 export function PhoneVerificationStep({
   onComplete,
   user,
+  isVerification,
 }: {
   onComplete: () => void
   user: UserDetail
+  isVerification: boolean
 }) {
   const verificationCodeRef = useRef<HTMLInputElement>(null)
   const [verificationCode, setVerificationCode] = useState("") // 인증번호
@@ -69,6 +71,18 @@ export function PhoneVerificationStep({
       carrier: "",
     },
   })
+
+  useEffect(() => {
+    if (user.profile?.phoneNumber) {
+      form.setValue("phoneNumber", user.profile.phoneNumber)
+    }
+  }, [user.profile?.phoneNumber])
+
+  useEffect(() => {
+    if (isVerification) {
+      onComplete()
+    }
+  }, [isVerification])
 
   const onSubmit = async (data: FormData) => {
     const birthDateFormatted = format(user.profile?.birthDate!, "yyMMdd")

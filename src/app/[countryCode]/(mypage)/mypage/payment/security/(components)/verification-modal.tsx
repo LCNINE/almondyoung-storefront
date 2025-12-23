@@ -29,11 +29,13 @@ export default function VerificationModal({
   }, [])
 
   return (
-    <BnplVerificationWizard
-      user={currentUser}
-      verificationStatus={verificationStatus}
-      businessInfo={businessInfo}
-      bnplProfiles={bnplProfiles ?? []}
-    />
+    <div className="min-h-screen">
+      <BnplVerificationWizard
+        user={currentUser}
+        verificationStatus={verificationStatus}
+        businessInfo={businessInfo}
+        bnplProfiles={bnplProfiles ?? []}
+      />
+    </div>
   )
 }
