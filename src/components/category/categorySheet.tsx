@@ -5,7 +5,7 @@ import React, { useRef, useCallback, useState, useEffect } from "react"
 import { X, ChevronRight } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useCategories } from "@lib/providers/category-provider"
-import type { PimCategory } from "@lib/api/pim"
+import type { CategoryTreeNodeDto } from "@lib/types/dto/pim"
 
 import ErrorState from "@components/common/components/error-state"
 import LoadingState from "@components/common/components/loading-state"
@@ -18,7 +18,7 @@ interface CategorySheetProps {
   onHoverIn?: () => void
   onHoverOut?: () => void
   /** 선택: 서버나 상위에서 직접 주입하고 싶을 때 */
-  categories?: PimCategory[]
+  categories?: CategoryTreeNodeDto[]
   countryCode: string
 }
 
@@ -53,7 +53,7 @@ export const CategorySheet: React.FC<CategorySheetProps> = ({
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({})
   const isScrollingRef = useRef(false)
 
-  const handleCategoryNavigation = (category: PimCategory) => {
+  const handleCategoryNavigation = (category: CategoryTreeNodeDto) => {
     const path = category.path || category.slug
     if (path) {
       router.push(`/${countryCode}/${path}`)
@@ -248,26 +248,33 @@ export const CategorySheet: React.FC<CategorySheetProps> = ({
                         activeCat && "children" in activeCat
                           ? activeCat.children
                           : undefined
-                      return (children ?? []).map((sub: PimCategory) => (
-                        <div
-                          key={sub.id}
-                          className="flex cursor-pointer flex-col items-center gap-2 p-2 hover:-translate-y-1 hover:font-bold"
-                          onClick={() => handleSubCategoryClick(activeCat?.slug || "", sub.slug)}
-                        >
-                          <div className="overflow-hidden">
-                            {sub.imageUrl && (
-                              <img
-                                src={sub.imageUrl}
-                                alt={sub.name}
-                                className="h-full w-full object-cover"
-                              />
-                            )}
+                      return (children ?? []).map(
+                        (sub: CategoryTreeNodeDto) => (
+                          <div
+                            key={sub.id}
+                            className="flex cursor-pointer flex-col items-center gap-2 p-2 transition-all duration-300 hover:-translate-y-1 hover:font-bold"
+                            onClick={() =>
+                              handleSubCategoryClick(
+                                activeCat?.slug || "",
+                                sub.slug
+                              )
+                            }
+                          >
+                            <div className="overflow-hidden">
+                              {sub.imageUrl && (
+                                <img
+                                  src={sub.imageUrl}
+                                  alt={sub.name}
+                                  className="h-full w-full object-cover"
+                                />
+                              )}
+                            </div>
+                            <span className="text-center text-sm leading-tight">
+                              {sub.name}
+                            </span>
                           </div>
-                          <span className="text-center text-sm leading-tight">
-                            {sub.name}
-                          </span>
-                        </div>
-                      ))
+                        )
+                      )
                     })()}
                   </div>
                 </div>
@@ -335,7 +342,7 @@ export const CategorySheet: React.FC<CategorySheetProps> = ({
                 <div className="grid grid-cols-3 gap-x-3 gap-y-4 border-b border-gray-200 pb-6">
                   {(() => {
                     const children = "children" in c ? c.children : undefined
-                    return (children ?? []).map((sub: PimCategory) => (
+                    return (children ?? []).map((sub: CategoryTreeNodeDto) => (
                       <button
                         key={sub.id}
                         className="flex flex-col items-center gap-1"
