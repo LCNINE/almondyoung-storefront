@@ -47,23 +47,28 @@ export function CategoryBadgeTabs({
       return true
     })
 
-    return level0Categories.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
+    return level0Categories.sort(
+      (a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)
+    )
   }, [categories])
 
   // 초기 카테고리 ID 결정
-  const defaultCategoryId = initialCategoryId === "first"
-    ? displayCategories[0]?.id ?? ""
-    : initialCategoryId
+  const defaultCategoryId =
+    initialCategoryId === "first"
+      ? (displayCategories[0]?.id ?? "")
+      : initialCategoryId
 
   // 선택된 카테고리 상태
-  const [activeCategoryId, setActiveCategoryId] = React.useState<string>(defaultCategoryId)
+  const [activeCategoryId, setActiveCategoryId] =
+    React.useState<string>(defaultCategoryId)
 
   // displayCategories가 로드되면 초기값 설정
   React.useEffect(() => {
     if (displayCategories.length > 0 && !activeCategoryId) {
-      const targetId = initialCategoryId === "first"
-        ? displayCategories[0].id
-        : initialCategoryId
+      const targetId =
+        initialCategoryId === "first"
+          ? displayCategories[0].id
+          : initialCategoryId
       setActiveCategoryId(targetId)
     }
   }, [displayCategories, initialCategoryId, activeCategoryId])
@@ -81,7 +86,7 @@ export function CategoryBadgeTabs({
     <nav aria-label="카테고리 필터" className="w-full">
       <ul className="scrollbar-hide flex flex-nowrap items-center gap-[5px] overflow-x-auto md:flex-wrap md:gap-1.5 md:overflow-x-visible">
         {displayCategories.map((category) => (
-          <li key={category.id} className="flex-shrink-0">
+          <li key={category.id} className="hrink-0">
             <button
               type="button"
               onClick={() => handleCategoryClick(category.id)}
@@ -97,5 +102,4 @@ export function CategoryBadgeTabs({
   )
 }
 
-// 기본 export로도 사용 가능하도록 별칭 제공
 export default CategoryBadgeTabs

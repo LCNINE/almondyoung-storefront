@@ -8,14 +8,26 @@ import { CustomThemeProvider } from "@lib/providers/custom-theme-provider"
 import { ThemeProvider } from "@lib/providers/theme-provider"
 import { renderSchemaTags } from "@lib/seo"
 import { getAllCategoriesCached } from "@lib/services/pim/category/getCategoryService"
-import { getBaseURL } from "@lib/utils/env"
 import { UserProvider } from "contexts/user-context"
 import { Metadata } from "next"
 import { OverlayProvider } from "overlay-kit"
 import { Toaster } from "sonner"
 import "styles/globals.css"
+
 export const metadata: Metadata = {
-  metadataBase: new URL(getBaseURL()),
+  title: {
+    default: "아몬드영 | 미용재료 MRO 쇼핑몰",
+    template: "%s | 아몬드영", // 다른 페이지에서 title 설정 시 "상품명 | 아몬드영"으로 표시됨
+  },
+  description: "미용 전문가를 위한 최저가 쇼핑몰",
+  openGraph: {
+    siteName: "아몬드영",
+    locale: "ko_KR",
+    type: "website",
+  },
+  icons: {
+    icon: "/favicon.ico",
+  },
 }
 
 export default async function RootLayout(props: { children: React.ReactNode }) {
@@ -30,7 +42,6 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
     categoriesResult.status === "fulfilled" ? categoriesResult.value : []
   const currentUser =
     userResult.status === "fulfilled" ? userResult.value : null
-
 
   return (
     <html lang="ko" suppressHydrationWarning>

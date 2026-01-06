@@ -11,13 +11,21 @@ import { ProductCard } from "@lib/types/ui/product"
 import MembershipBanner from "domains/home/components/banner/membership-banner"
 import ProductIntrestSection from "domains/home/components/report/product-intrest-section"
 import { useEffect, useState } from "react"
-import ProductList from "./components/list/product-list"
-import { ProductListSection } from "./components/list/product-list-section"
-import SectionHeader from "./components/list/section-header"
-import UserReport from "./components/report/user-report"
+import ProductList from "../components/list/product-list"
+import { ProductListSection } from "../components/list/product-list-section"
+import SectionHeader from "../components/list/section-header"
+import UserReport from "../components/report/user-report"
 
-// 로그인한 사용자용 홈페이지 섹션들
-export const HomeLoggedIn = ({ user }: { user: UserDetailDto | null }) => {
+interface HomeLoggedInTemplateProps {
+  user: UserDetailDto | null
+}
+
+/*───────────────────────────────────────────────
+ * 로그인한 사용자용
+ *───────────────────────────────────────────────*/
+export const HomeLoggedInTemplate: React.FC<HomeLoggedInTemplateProps> = ({
+  user,
+}) => {
   // 섹션별 제품 상태 관리
   const [sectionProducts, setSectionProducts] = useState<
     Record<string, ProductCard[]>

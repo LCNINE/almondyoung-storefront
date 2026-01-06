@@ -2,7 +2,7 @@
 // PIM 상세 + (선택) 카테고리 경로/WMS 재고/유저 메타 주입
 // 컴포넌트는 ProductDetail만 의존하도록 보장
 
-import { getProductDetail } from "@lib/api/medusa/products"
+import { getProductDetail } from "@lib/api/medusa/products레거시"
 import { toProductDetail } from "@lib/utils/transformers"
 import type {
   ProductDetail,

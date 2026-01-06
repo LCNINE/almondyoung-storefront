@@ -1,6 +1,6 @@
 "use server"
 
-import { getProductList } from "@lib/api/medusa/products"
+import { getProductList } from "@lib/api/medusa/products레거시"
 import { toProductCard } from "@lib/utils/transformers"
 import type {
   ProductCard,
@@ -63,6 +63,7 @@ export async function getProductListService(
 }
 
 // ---- 3) 카테고리별 목록 ----
+// 삭제할 예정
 export async function getProductsByCategoryService(
   categoryId: string,
   params?: Omit<ProductListParams, "categoryId" | "brand" | "query">,

@@ -14,31 +14,17 @@ import type {
 // 카테고리 트리 조회
 export const getCategoryTree = async (
   maxDepth?: number
-): Promise<ApiResponse<CategoryTreeResponseDto>> => {
-  try {
-    const queryParams: Record<string, string> = {}
-    if (maxDepth !== undefined) queryParams.maxDepth = maxDepth.toString()
+): Promise<CategoryTreeResponseDto> => {
+  const queryParams: Record<string, string> = {}
+  if (maxDepth !== undefined) queryParams.maxDepth = maxDepth.toString()
 
-    const result = await api<CategoryTreeResponseDto>("pim", "/categories", {
-      method: "GET",
-      params: queryParams,
-      withAuth: false,
-    })
+  const result = await api<CategoryTreeResponseDto>("pim", "/categories", {
+    method: "GET",
+    params: queryParams,
+    withAuth: false,
+  })
 
-    return { data: result }
-  } catch (error) {
-    if (error instanceof HttpApiError) {
-      return { error: { message: error.message, status: error.status } }
-    }
-    if (error instanceof ApiNetworkError) {
-      return {
-        error: { message: "네트워크 오류가 발생했습니다.", status: 500 },
-      }
-    }
-    return {
-      error: { message: "알 수 없는 오류가 발생했습니다.", status: 500 },
-    }
-  }
+  return result
 }
 
 // 카테고리 상세 조회

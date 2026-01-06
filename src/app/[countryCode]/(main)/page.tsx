@@ -1,61 +1,35 @@
 import { ThemeManager } from "@components/common/theme-manager"
 import ProtectedRoute from "@components/protected-route"
-import { getCategoryTree } from "@lib/api/pim/categories.server"
-import { getProductsByCategoryService } from "@lib/services/pim/products/getProductListService"
-import type { CategoryTreeNodeDto } from "@lib/api/pim"
-import type { ProductCard } from "@lib/types/ui/product"
-import HomeTemplate from "domains/home/template/home-template"
+import { getProductList } from "@lib/api/medusa/products"
+import { CategoryTreeNodeDto, getCategoryTree } from "@lib/api/pim"
+import { fetchMe } from "@lib/api/users/me"
+import { HomeLogoutTemplate } from "domains/home/template/home-logout-template"
+import { Metadata } from "next"
 
-export default async function Home(props: {
-  params: Promise<{ countryCode: string }>
-}) {
-  const { countryCode } = await props.params
+export const metadata: Metadata = {
+  title: "아몬드영 - 최저가 미용재료 MRO 쇼핑몰",
+  description:
+    "속눈썹, 네일, 왁싱, 반영구 등 미용 전문 재료를 최저가로 빠르게! 아몬드영에서 전문가용 재료를 만나보세요.",
+  keywords: ["미용재료", "왁싱재료", "속눈썹부자재"],
+}
 
+export default async function Home() {
   // 카테고리 트리 조회
   let categories: CategoryTreeNodeDto[] = []
-  let initialCategoryProducts: ProductCard[] = []
-  let initialCategoryId: string | null = null
 
-  try {
-    const result = await getCategoryTree()
-    if (result.error) {
-      console.error("❌ [Home] 카테고리 조회 실패:", result.error)
-    } else {
-      categories = result.data?.categories || []
-    }
+  const result = await getCategoryTree().catch(() => null)
+  categories = result?.categories || []
 
-    // 첫 번째 카테고리 선택 (또는 루트 카테고리의 첫 번째 자식)
-    if (categories.length > 0) {
-      // 루트 카테고리의 첫 번째 자식이 있으면 그것을 사용, 없으면 루트 카테고리 사용
-      const firstCategory = categories[0]
-      initialCategoryId =
-        firstCategory.children && firstCategory.children.length > 0
-          ? firstCategory.children[0].id
-          : firstCategory.id
+  // const productList = await getProductList().catch(() => null)
 
-      // 초기 카테고리의 제품 목록 조회
-      if (initialCategoryId) {
-        const productsResult = await getProductsByCategoryService(
-          initialCategoryId,
-          {
-            page: 1,
-            limit: 20,
-          }
-        )
-        initialCategoryProducts = productsResult.items || []
-      }
-    }
-  } catch (error) {
-    console.error("❌ [Home] 카테고리/제품 로드 실패:", error)
-    // 에러 발생 시 빈 배열로 계속 진행
-  }
+  // todo: 로그인 사용자용 홈페이지 섹션들
+  const user = await fetchMe().catch(() => null)
 
   return (
     <ProtectedRoute>
-      <HomeTemplate
-        categories={categories}
-        initialCategoryId={initialCategoryId}
-        initialCategoryProducts={initialCategoryProducts}
+      <HomeLogoutTemplate
+        initialCategories={categories}
+        // products={productList.products}
       />
 
       {/* 테마 매니저 (개발 모드에서만 표시) */}

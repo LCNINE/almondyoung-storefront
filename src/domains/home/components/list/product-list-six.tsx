@@ -67,14 +67,14 @@ export default function ProductListSix({
             // 1. 각 '페이지' (슬라이드 1개)
             <div
               key={`page-${pageIndex}-${pageIndex * Math.random()}`}
-              className="scroll-snap-align-start w-full flex-shrink-0"
+              className="scroll-snap-align-start w-full shrink-0"
             >
               {/* [핵심] 3x2 그리드 (1 2 3 / 4 5 6) */}
               <div className="grid grid-cols-3 gap-x-2.5 gap-y-4">
                 {pageProducts.map((product, productIndex) => (
                   <div
                     key={productIndex + pageIndex * Math.random()}
-                    className="w-28 flex-shrink-0" // Figma 시안 w-28
+                    className="w-28 shrink-0" // Figma 시안 w-28
                   >
                     {/* 랭킹(index)이 올바르게 계산되도록 수정 */}
                     {renderCard(product, pageIndex * 6 + productIndex)}
