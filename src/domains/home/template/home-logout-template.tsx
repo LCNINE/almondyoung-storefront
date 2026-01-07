@@ -9,9 +9,9 @@ interface HomeLogoutTemplateProps {
   initialCategories: CategoryTreeNodeDto[]
 }
 
-/*───────────────────────────────────────────────
+/*──────────────────
  * 비로그인 사용자용
- *───────────────────────────────────────────────*/
+ *─────────────────*/
 export function HomeLogoutTemplate({
   initialCategories,
 }: HomeLogoutTemplateProps) {

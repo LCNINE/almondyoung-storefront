@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { useRouter } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { Search, X, Clock, ChevronDown, ChevronUp } from "lucide-react"
 import {
   getSearchHistory,
@@ -12,12 +12,9 @@ import {
 import { IoCaretDownSharp, IoCaretUpSharp } from "react-icons/io5"
 import { MdCancel } from "react-icons/md"
 
-interface SearchInputProps {
-  countryCode: string
-}
-
-export function SearchInput({ countryCode }: SearchInputProps) {
+export function SearchInput() {
   const router = useRouter()
+  const { countryCode } = useParams()
   const wrapperRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 

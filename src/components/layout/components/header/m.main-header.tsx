@@ -66,7 +66,9 @@ export const MobileHeader: React.FC<{
     }
 
     const filtered = categories.filter((cat) => getShowOnMainCategory(cat))
-    const sorted = filtered.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
+    const sorted = filtered.sort(
+      (a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)
+    )
     const sliced = sorted.slice(0, 8)
 
     return sliced

@@ -1,6 +1,5 @@
 import { ThemeManager } from "@components/common/theme-manager"
 import ProtectedRoute from "@components/protected-route"
-import { getProductList } from "@lib/api/medusa/products"
 import { CategoryTreeNodeDto, getCategoryTree } from "@lib/api/pim"
 import { fetchMe } from "@lib/api/users/me"
 import { HomeLogoutTemplate } from "domains/home/template/home-logout-template"
@@ -27,10 +26,7 @@ export default async function Home() {
 
   return (
     <ProtectedRoute>
-      <HomeLogoutTemplate
-        initialCategories={categories}
-        // products={productList.products}
-      />
+      <HomeLogoutTemplate initialCategories={categories} />
 
       {/* 테마 매니저 (개발 모드에서만 표시) */}
       {process.env.NODE_ENV === "development" && <ThemeManager />}

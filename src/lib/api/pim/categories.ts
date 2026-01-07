@@ -1,30 +1,25 @@
 "use server"
 
+import type { ApiResponse } from "@lib/api/api"
 import { api } from "@lib/api/api"
 import { ApiNetworkError, HttpApiError } from "@lib/api/api-error"
-import type { ApiResponse } from "@lib/api/api"
 import type {
-  CategoryTreeResponseDto,
   CategoryDetailResponseDto,
-  CategoryResponseDto,
   CategoryPathResponseDto,
+  CategoryResponseDto,
   CategoryTreeNodeDto,
+  CategoryTreeResponseDto,
 } from "@lib/types/dto/pim"
 
 // 카테고리 트리 조회
 export const getCategoryTree = async (
   maxDepth?: number
 ): Promise<CategoryTreeResponseDto> => {
-  const queryParams: Record<string, string> = {}
-  if (maxDepth !== undefined) queryParams.maxDepth = maxDepth.toString()
-
-  const result = await api<CategoryTreeResponseDto>("pim", "/categories", {
+  return api<CategoryTreeResponseDto>("pim", "/categories", {
     method: "GET",
-    params: queryParams,
+    params: { maxDepth: maxDepth?.toString() ?? "" },
     withAuth: false,
   })
-
-  return result
 }
 
 // 카테고리 상세 조회
@@ -118,6 +113,7 @@ export const getCategoryPath = async (
 }
 
 // slug로 카테고리 찾기
+// todo: 리펙토링 대상
 export const getCategoryBySlug = async (
   slug: string
 ): Promise<ApiResponse<CategoryTreeNodeDto | null>> => {

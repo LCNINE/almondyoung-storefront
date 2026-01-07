@@ -1,6 +1,6 @@
 "use server"
 
-import { getCategoryTree } from "@lib/api/pim/categories.server"
+import { getCategoryTree } from "@lib/api/pim/categories"
 import type { CategoryTreeNodeDto } from "@lib/types/dto/pim"
 
 // 메모리 캐시 타입

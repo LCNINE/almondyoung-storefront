@@ -7,7 +7,7 @@ export * from "../medusa/products레거시"
 export * from "./versions.server"
 export * from "./variants.server"
 export * from "./pricing.server"
-export * from "./categories.server"
+export * from "./categories"
 export * from "./search.server"
 
 // 타입 export

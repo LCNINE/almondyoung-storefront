@@ -3,11 +3,9 @@ import { FloatingButtons } from "@components/common/custom-buttons/floating-butt
 import { BottomNavigation } from "@components/layout/components/bottom-nav"
 import Footer from "@components/layout/components/footer"
 import { fetchMe } from "@lib/api/users/me"
-import { CategoryProvider } from "@lib/providers/category-provider"
 import { CustomThemeProvider } from "@lib/providers/custom-theme-provider"
 import { ThemeProvider } from "@lib/providers/theme-provider"
 import { renderSchemaTags } from "@lib/seo"
-import { getAllCategoriesCached } from "@lib/services/pim/category/getCategoryService"
 import { UserProvider } from "contexts/user-context"
 import { Metadata } from "next"
 import { OverlayProvider } from "overlay-kit"
@@ -31,17 +29,7 @@ export const metadata: Metadata = {
 }
 
 export default async function RootLayout(props: { children: React.ReactNode }) {
-  // 병렬 로딩 + 에러 격리
-  const [categoriesResult, userResult] = await Promise.allSettled([
-    getAllCategoriesCached(),
-    fetchMe().catch(() => null),
-  ])
-
-  // Graceful Degradation
-  const categories =
-    categoriesResult.status === "fulfilled" ? categoriesResult.value : []
-  const currentUser =
-    userResult.status === "fulfilled" ? userResult.value : null
+  const user = await fetchMe().catch(() => null)
 
   return (
     <html lang="ko" suppressHydrationWarning>
@@ -50,28 +38,26 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
         className="overflow-x-clip [scrollbar-gutter:stable_both-edges]"
       >
         <OverlayProvider>
-          <CategoryProvider initialCategories={categories}>
-            <UserProvider initialUser={currentUser}>
-              <ThemeProvider
-                attribute="class"
-                defaultTheme="light"
-                enableSystem={false}
-                disableTransitionOnChange
-              >
-                <CustomThemeProvider>
-                  <div className="relative">
-                    {props.children}
+          <UserProvider initialUser={user}>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="light"
+              enableSystem={false}
+              disableTransitionOnChange
+            >
+              <CustomThemeProvider>
+                <div className="relative">
+                  {props.children}
 
-                    <CartQuickButton />
-                    <FloatingButtons />
-                  </div>
-                  <Toaster />
-                </CustomThemeProvider>
-              </ThemeProvider>
-            </UserProvider>
-            <Footer />
-            <BottomNavigation />
-          </CategoryProvider>
+                  <CartQuickButton />
+                  <FloatingButtons />
+                </div>
+                <Toaster />
+              </CustomThemeProvider>
+            </ThemeProvider>
+          </UserProvider>
+          <Footer />
+          <BottomNavigation />
           {renderSchemaTags()}
         </OverlayProvider>
       </body>

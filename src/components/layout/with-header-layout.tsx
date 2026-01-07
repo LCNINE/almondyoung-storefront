@@ -1,7 +1,7 @@
+import { UserDetail } from "@lib/types/ui/user"
 import React from "react"
 import { DesktopHeader } from "./components/header/desktop-header"
 import { MobileGlobalHeader } from "./components/header/m.global-header"
-import { UserBasicInfo } from "@lib/types/ui/user"
 import MobileSubBackHeader from "./components/header/mobile-sub-back-header"
 
 /**
@@ -12,8 +12,7 @@ export type GlobalHeaderConfig = {
   showDesktopHeader?: boolean
   /** 모바일 글로벌 헤더 표시 여부 (기본: false) */
   showMobileHeader?: boolean
-  /** 사용자 정보 */
-  user?: UserBasicInfo | null
+  user?: UserDetail | null
   /** 모바일 서브 헤더 표시 여부 (기본: false) */
   showMobileSubBackHeader?: boolean
   /** 모바일 서브 헤더 제목 */
