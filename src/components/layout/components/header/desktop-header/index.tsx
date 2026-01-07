@@ -1,4 +1,4 @@
-import { CategorySheet1 } from "@components/category/categorySheet1"
+import { CategorySheet } from "@components/category/category-sheet"
 import { getCurrentSubscription } from "@lib/api/membership"
 import { getCategoryTree } from "@lib/api/pim"
 import { SearchInput } from "../search-input"
@@ -28,7 +28,7 @@ export async function DesktopHeader() {
 
         {/* 하단  */}
         <nav aria-label="메인 카테고리" className="flex items-center gap-7">
-          <CategorySheet1 currentSubscription={currentSubscription} />
+          <CategorySheet currentSubscription={currentSubscription} />
 
           <CategoryNavigation mainCategories={mainCategories} />
         </nav>

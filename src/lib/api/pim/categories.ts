@@ -15,7 +15,7 @@ import type {
 export const getCategoryTree = async (
   maxDepth?: number
 ): Promise<CategoryTreeResponseDto> => {
-  return api<CategoryTreeResponseDto>("pim", "/categories", {
+  return await api<CategoryTreeResponseDto>("pim", "/categories", {
     method: "GET",
     params: { maxDepth: maxDepth?.toString() ?? "" },
     withAuth: false,

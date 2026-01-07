@@ -1,9 +1,6 @@
 import { ThemeToggle } from "@components/common/thema-toggle"
 
-import {
-  DesktopHeader,
-  MobileGlobalHeader,
-} from "@components/layout/components/header"
+import { DesktopHeader } from "@components/layout/components/header"
 import { getBaseURL } from "@lib/utils/env"
 import { Metadata } from "next"
 
@@ -26,9 +23,7 @@ export default function MainLayout(props: { children: React.ReactNode }) {
 
       {/* 모바일 글로벌 헤더 */}
       {showMobileHeader && (
-        <div className="block md:hidden">
-          <MobileGlobalHeader />
-        </div>
+        <div className="block md:hidden">{/* <MobileGlobalHeader /> */}</div>
       )}
       {props.children}
 
