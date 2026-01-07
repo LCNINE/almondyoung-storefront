@@ -8,8 +8,8 @@ export function Logo() {
   const { countryCode } = useParams()
 
   return (
-    <Link href={`/${countryCode}`} className="shrink-0">
-      <div className="relative h-10 w-[200px] lg:h-[45px] lg:w-[287px]">
+    <Link href={`/${countryCode}`}>
+      <div className="relative h-10 w-[170px] md:w-[200px] lg:h-[45px] lg:w-[287px]">
         <Image
           src="/images/almond_white_logo.svg"
           alt="아몬드영"

@@ -1,5 +1,7 @@
+"use server"
+
 import { CurrentSubscriptionResDto } from "@lib/types/dto/membership"
-import { ApiResponse, api } from "../api"
+import { api } from "../api"
 
 const API_BASE = "/api/membership"
 
@@ -9,7 +11,10 @@ const API_BASE = "/api/membership"
 export async function getCurrentSubscription(): Promise<CurrentSubscriptionResDto> {
   return await api<CurrentSubscriptionResDto>(
     "membership",
-    `subscriptions/current`
+    `subscriptions/current`,
+    {
+      withAuth: true,
+    }
   )
 }
 

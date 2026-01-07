@@ -23,6 +23,7 @@ import { useCategory } from "../../hooks/use-category"
 import { ShoppingCart } from "lucide-react"
 import Link from "next/link"
 import { useMediaQuery } from "@hooks/use-media-query"
+import { CategorySheet } from "@components/category/category-sheet"
 
 interface CategoryBestSectionProps {
   initialCategories: CategoryTreeNodeDto[]
@@ -32,6 +33,7 @@ export function CategoryBestSection({
   initialCategories,
 }: CategoryBestSectionProps) {
   // const { categories } = useCategory(initialCategories)
+
   const bestCategories = initialCategories.slice(0, 7)
   const [activeTab, setActiveTab] = useState(initialCategories[0].name)
 
@@ -112,13 +114,18 @@ export function CategoryBestSection({
         <h2 className="text-[22px] font-bold md:text-[26px]">
           카테고리 <span className="text-yellow-30">베스트</span>
         </h2>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-gray-40 hover:text-gray-90 hover:bg-transparent md:hidden"
-        >
-          <span className="underline underline-offset-4">더보기</span>
-        </Button>
+
+        <CategorySheet
+          trigger={
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-gray-40 hover:text-gray-90 hover:bg-transparent md:hidden"
+            >
+              <span className="underline underline-offset-4">더보기</span>
+            </Button>
+          }
+        />
       </div>
 
       <div className="mt-4 flex w-full flex-col gap-1.5">

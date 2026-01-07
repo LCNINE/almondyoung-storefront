@@ -1,6 +1,6 @@
 import { UserDetail } from "@lib/types/ui/user"
 import React from "react"
-import { DesktopHeader } from "./components/header/desktop-header"
+import { MainHeader } from "./components/header/main-header"
 import MobileSubBackHeader from "./components/header/mobile-sub-back-header"
 
 /**
@@ -75,13 +75,8 @@ export function WithHeaderLayout({ children, config }: WithHeaderLayoutProps) {
       {/* 데스크탑 글로벌 헤더 */}
       {showDesktopHeader && (
         <div className="hidden md:block">
-          <DesktopHeader />
+          <MainHeader />
         </div>
-      )}
-
-      {/* 모바일 글로벌 헤더 (메뉴 + 검색 + 카테고리 리스트) */}
-      {showMobileHeader && (
-        <div className="block md:hidden">{/* <MobileGlobalHeader /> */}</div>
       )}
 
       {showMobileSubBackHeader && (

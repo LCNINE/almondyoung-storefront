@@ -10,23 +10,24 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@components/common/ui/sheet"
+import { getCurrentSubscription } from "@lib/api/membership"
 import { getCategoryTree } from "@lib/api/pim/categories"
 import { CurrentSubscription } from "@lib/types/ui/membership"
 import { CategoryTree } from "@lib/types/ui/pim"
 import { UserDetail } from "@lib/types/ui/user"
 import { cn } from "@lib/utils"
 import { useUser } from "contexts/user-context"
-import { AlertCircle, ChevronRight, Menu, UserCircle2 } from "lucide-react"
+import { AlertCircle, ChevronRight, UserCircle2 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { useEffect, useMemo, useState, useTransition } from "react"
 
-export function CategorySheet({
-  currentSubscription,
-}: {
-  currentSubscription: CurrentSubscription | null
-}) {
+interface CategorySheetProps {
+  trigger: React.ReactNode
+}
+
+export function CategorySheet({ trigger }: CategorySheetProps) {
   const { countryCode } = useParams()
   const [open, setOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
@@ -62,9 +63,7 @@ export function CategorySheet({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger className="cursor-pointer" asChild>
-        <button className="flex h-10 w-10 items-center justify-center rounded-md transition-colors hover:bg-white/10">
-          <Menu className="h-7 w-7 text-white" />
-        </button>
+        {trigger}
       </SheetTrigger>
 
       <SheetContent
@@ -76,7 +75,7 @@ export function CategorySheet({
           <SheetTitle className="sr-only">카테고리 메뉴</SheetTitle>
 
           <div className="flex flex-col bg-white px-6 py-10">
-            <User user={user} currentSubscription={currentSubscription} />
+            <User user={user} />
           </div>
           <div className="h-[8px] w-full bg-[#F2F2F7]" />
         </SheetHeader>
@@ -263,13 +262,18 @@ function SubCategoryList({
   )
 }
 
-function User({
-  user,
-  currentSubscription,
-}: {
-  user: UserDetail | null
-  currentSubscription: CurrentSubscription | null
-}) {
+function User({ user }: { user: UserDetail | null }) {
+  const [currentSubscription, setCurrentSubscription] =
+    useState<CurrentSubscription | null>(null)
+
+  useEffect(() => {
+    if (!user) return
+
+    getCurrentSubscription()
+      .then(setCurrentSubscription)
+      .catch(() => setCurrentSubscription(null))
+  }, [user])
+
   const UserAvatar = user ? (
     // todo: 프로필 이미지
     <Link href="/mypage">
@@ -292,7 +296,7 @@ function User({
     </Link>
   ) : (
     <Link
-      href=""
+      href="/mypage/membership"
       className="text-[13px] leading-tight font-medium text-gray-400 hover:underline hover:underline-offset-4"
     >
       혜택 가득한 서비스를 경험해보세요.
