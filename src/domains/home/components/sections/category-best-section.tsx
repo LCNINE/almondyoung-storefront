@@ -19,7 +19,7 @@ import { ShoppingCart } from "lucide-react"
 import Link from "next/link"
 import { useMediaQuery } from "@hooks/use-media-query"
 import { CategorySheet } from "@components/category/category-sheet"
-
+import chunk from "lodash/chunk"
 interface CategoryBestSectionProps {
   initialCategories: CategoryTreeNodeDto[]
 }
@@ -88,10 +88,7 @@ export function CategoryBestSection({
   const products = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 
   // 데이터를 6개씩 묶는 함수
-  const chunkedProducts = Array.from(
-    { length: Math.ceil(products.length / 6) },
-    (_, i) => products.slice(i * 6, i * 6 + 6)
-  )
+  const chunkedProducts = chunk(products, 6)
 
   const mockProductData = {
     brand: "아리메스",
