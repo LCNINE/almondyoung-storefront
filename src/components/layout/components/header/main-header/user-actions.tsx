@@ -4,10 +4,14 @@ import Link from "next/link"
 import { useParams } from "next/navigation"
 import { ShoppingCart, User, Bell, Search } from "lucide-react"
 import { useUser } from "contexts/user-context"
+import { useState } from "react"
+import { SearchSheet } from "@components/search/search-sheet"
 
 export function UserActions() {
   const { countryCode } = useParams()
   const { user } = useUser()
+
+  const [open, setOpen] = useState(true)
 
   // todo: 임시임
   const cartItemCount = 1
@@ -15,6 +19,10 @@ export function UserActions() {
 
   return (
     <div className="flex items-center gap-[clamp(0.5px,2vw,1.5rem)]">
+      <SearchSheet isOpen={open} onClose={() => setOpen(false)} />
+      <button onClick={() => setOpen(true)}>
+        <Search className="h-6 w-6 md:h-8 md:w-8" color="white" />
+      </button>
       <div className="flex md:hidden">
         {/* 검색 */}
         <UserActionButton
