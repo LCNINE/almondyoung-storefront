@@ -20,7 +20,7 @@ export async function MainHeader() {
     <header className="bg-header-background overflow-visible">
       <div className="container mx-auto max-w-[1360px] px-3.5 md:px-[40px]">
         {/* 상단 섹션 */}
-        <div className="flex items-center justify-between gap-[clamp(0.5rem,2vw,1.75rem)] py-5 md:justify-normal">
+        <div className="flex items-center justify-between gap-[clamp(0.5rem,2vw,1.75rem)] pt-2 pb-0 md:justify-normal md:py-5">
           <div>
             <Logo />
           </div>
@@ -37,7 +37,7 @@ export async function MainHeader() {
         {/* 하단 섹션 */}
         <nav
           aria-label="메인 카테고리"
-          className="flex items-center gap-[clamp(0.5rem,2vw,1.75rem)] pt-2 pb-4"
+          className="flex items-center gap-[clamp(0.5rem,2vw,1.75rem)] md:pt-2 md:pb-4"
         >
           {/* 햄버거 메뉴 */}
           <div className="hidden md:block">
