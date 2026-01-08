@@ -4,7 +4,7 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-} from "@components/common/ui/carousel"
+} from "@/components/ui/carousel"
 import { useRouter } from "next/navigation"
 import chunk from "lodash/chunk"
 
@@ -24,7 +24,7 @@ const RECOMMEND_LIST = [
   "가발",
 ]
 
-export function PopularKeyword() {
+export function SearchPopularKeyword() {
   const router = useRouter()
 
   const handleHistoryClick = (item: string) => {

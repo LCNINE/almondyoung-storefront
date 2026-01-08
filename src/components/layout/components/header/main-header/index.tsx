@@ -1,11 +1,11 @@
+import { SearchInputGroup } from "@/components/search/search-input-group"
 import { CategorySheet } from "@components/category/category-sheet"
+import { SearchSheet } from "@components/search/search-sheet"
 import { getCategoryTree } from "@lib/api/pim"
 import { Menu } from "lucide-react"
-import { SearchInput } from "../search-input"
 import { CategoryNavigation } from "./category-navigation"
 import { Logo } from "./logo"
 import { UserActions } from "./user-actions"
-import { SearchSheet } from "@components/search/search-sheet"
 
 /*─────────────────────────────────────────────────────────
  * 메인 헤더 컴포넌트
@@ -26,7 +26,7 @@ export async function MainHeader() {
           </div>
 
           <div className="hidden w-full max-w-3xl min-w-[300px] md:block">
-            <SearchInput />
+            <SearchInputGroup />
           </div>
 
           <div className="shrink-0">

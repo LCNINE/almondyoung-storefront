@@ -5,15 +5,10 @@ import {
   CarouselApi,
   CarouselContent,
   CarouselItem,
-} from "@components/common/ui/carousel"
+} from "@/components/ui/carousel"
 import testImg from "@assets/images/test.png"
-import { Button } from "@components/common/ui/button"
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@components/common/ui/tabs"
+import { Button } from "@/components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CategoryTreeNodeDto } from "@lib/api/pim"
 import { cn } from "@lib/utils"
 import { AnimatePresence, motion } from "framer-motion"
@@ -35,7 +30,7 @@ export function CategoryBestSection({
   // const { categories } = useCategory(initialCategories)
 
   const bestCategories = initialCategories.slice(0, 7)
-  const [activeTab, setActiveTab] = useState(initialCategories[0].name)
+  const [activeTab, setActiveTab] = useState(initialCategories[0]?.name || "")
 
   const isMobile = useMediaQuery("(max-width: 768px)")
   const [api, setApi] = useState<CarouselApi>()

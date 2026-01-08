@@ -1,24 +1,23 @@
 "use client"
 
-import { Input } from "@components/common/ui/input"
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
-} from "@components/common/ui/sheet"
-import { ArrowLeft, Search, X } from "lucide-react"
+} from "@/components/ui/sheet"
+import { useSearchHistory } from "@/hooks/ui/use-search-history"
+import { useSearchSheetStore } from "@hooks/ui/use-search-sheet-store"
+import { AnimatePresence, motion } from "framer-motion"
+import { ArrowLeft } from "lucide-react"
 import { useEffect, useState } from "react"
 import { SearchHistory } from "../search-history"
 import { SearchHotKeyword } from "../search-hot-keyword"
-import { useHistory } from "@hooks/ui/use-history"
-import { motion, AnimatePresence } from "framer-motion"
-import { PopularKeyword } from "../popular-keyword"
-import { useSearchSheetStore } from "@hooks/ui/use-search-sheet-store"
+import { SearchInputGroup } from "../search-input-group"
+import { SearchPopularKeyword } from "../search-popular-keyword"
 
 export function SearchSheet() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const { addKeyword, keywords } = useHistory()
+  const { keywords } = useSearchHistory()
   const [isHydrated, setIsHydrated] = useState(false)
 
   const { isOpen, onClose } = useSearchSheetStore()
@@ -38,12 +37,6 @@ export function SearchSheet() {
       document.body.style.overflow = "unset"
     }
   }, [isOpen, onClose])
-
-  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && searchTerm.trim()) {
-      addKeyword(searchTerm.trim())
-    }
-  }
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -65,31 +58,7 @@ export function SearchSheet() {
             >
               <ArrowLeft className="h-6 w-6 text-white" />
             </button>
-
-            <div className="relative mr-4 flex-1">
-              <Input
-                autoFocus
-                type="search"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyDown={handleSearch}
-                placeholder="오늘 뭐 살까? 아몬드영"
-                className="w-full rounded-xl border-none bg-gray-100 py-4 pr-20 pl-5 text-sm transition-all placeholder:text-gray-400 focus-visible:bg-white focus-visible:ring-2 focus-visible:ring-offset-0"
-              />
-
-              <div className="absolute top-1/2 right-3.5 flex -translate-y-1/2 items-center gap-2.5">
-                {searchTerm && (
-                  <button
-                    onClick={() => setSearchTerm("")}
-                    className="rounded-full bg-gray-400 p-1 text-white transition-colors active:bg-gray-600"
-                    aria-label="입력 내용 지우기"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                )}
-                <Search className="h-4.5 w-4.5 text-gray-800" />
-              </div>
-            </div>
+            <SearchInputGroup />
           </header>
 
           {/* 최근 검색어 섹션 */}
@@ -115,7 +84,7 @@ export function SearchSheet() {
 
             {/* 추천(인기) 검색어 */}
             <section className="mb-6 rounded-2xl">
-              <PopularKeyword />
+              <SearchPopularKeyword />
             </section>
 
             {/* 급상승 검색어 섹션 */}

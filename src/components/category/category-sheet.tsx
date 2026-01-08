@@ -1,6 +1,7 @@
 "use client"
 
-import { Button } from "@components/common/ui/button"
+import { useUser } from "@/contexts/user-context"
+import { Button } from "@components/ui/button"
 import {
   Sheet,
   SheetContent,
@@ -9,14 +10,13 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@components/common/ui/sheet"
+} from "@components/ui/sheet"
 import { getCurrentSubscription } from "@lib/api/membership"
 import { getCategoryTree } from "@lib/api/pim/categories"
 import { CurrentSubscription } from "@lib/types/ui/membership"
 import { CategoryTree } from "@lib/types/ui/pim"
 import { UserDetail } from "@lib/types/ui/user"
 import { cn } from "@lib/utils"
-import { useUser } from "contexts/user-context"
 import { AlertCircle, ChevronRight, UserCircle2 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"

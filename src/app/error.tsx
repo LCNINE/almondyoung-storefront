@@ -1,6 +1,6 @@
 "use client"
 
-import { Button } from "@components/common/ui/button"
+import { Button } from "@/components/ui/button"
 import { Home, RefreshCw } from "lucide-react"
 import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"

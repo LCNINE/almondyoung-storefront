@@ -1,7 +1,7 @@
 "use client"
 
 import { useSearchSheetStore } from "@hooks/ui/use-search-sheet-store"
-import { useUser } from "contexts/user-context"
+import { useUser } from "@/contexts/user-context"
 import { Bell, Search, ShoppingCart, User } from "lucide-react"
 import Link from "next/link"
 import { useParams } from "next/navigation"

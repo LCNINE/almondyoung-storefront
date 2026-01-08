@@ -1,17 +1,17 @@
 "use client"
 
-import { Button } from "@components/common/ui/button"
+import { Button } from "@/components/ui/button"
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
-} from "@components/common/ui/carousel"
-import { useHistory } from "@hooks/ui/use-history"
+} from "@/components/ui/carousel"
+import { useSearchHistory } from "@/hooks/ui/use-search-history"
 import { Trash2, X } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 export function SearchHistory() {
-  const { keywords, removeKeyword, clearAll } = useHistory()
+  const { keywords, removeKeyword, clearAll } = useSearchHistory()
   const router = useRouter()
 
   const handleHistoryClick = (item: string) => {

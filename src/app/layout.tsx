@@ -6,11 +6,11 @@ import { fetchMe } from "@lib/api/users/me"
 import { CustomThemeProvider } from "@lib/providers/custom-theme-provider"
 import { ThemeProvider } from "@lib/providers/theme-provider"
 import { renderSchemaTags } from "@lib/seo"
-import { UserProvider } from "contexts/user-context"
+import { UserProvider } from "@/contexts/user-context"
 import { Metadata } from "next"
 import { OverlayProvider } from "overlay-kit"
 import { Toaster } from "sonner"
-import "styles/globals.css"
+import "@/styles/globals.css"
 
 export const metadata: Metadata = {
   title: {

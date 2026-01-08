@@ -3,20 +3,24 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 
-interface SearchHistoryState {
+interface SearchHistoryStore {
   keywords: string[]
   addKeyword: (text: string) => void
   removeKeyword: (text: string) => void
   clearAll: () => void
+  disableSave: boolean
+  setDisableSave: (disable: boolean) => void
 }
 
-export const useHistory = create<SearchHistoryState>()(
+export const useSearchHistory = create<SearchHistoryStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       keywords: [],
+      disableSave: false,
+      setDisableSave: (disable: boolean) => set({ disableSave: disable }), // 검색어 저장 안하기
 
       addKeyword: (text: string) => {
-        if (!text.trim()) return
+        if (!text.trim() || get().disableSave) return
 
         set((state) => {
           // 이미 있으면 지우고 맨 앞으로 보냄 (최신순)
