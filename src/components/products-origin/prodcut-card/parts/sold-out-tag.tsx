@@ -1,7 +1,5 @@
 "use client"
 
-import React from "react"
-
 export const SoldOutTag = ({ isSoldOut }: { isSoldOut: boolean }) => {
   return (
     isSoldOut && (

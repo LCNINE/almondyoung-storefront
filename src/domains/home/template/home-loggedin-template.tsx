@@ -12,7 +12,7 @@ import MembershipBanner from "domains/home/components/banner/membership-banner"
 import ProductIntrestSection from "domains/home/components/report/product-intrest-section"
 import { useEffect, useState } from "react"
 import ProductList from "../components/list/product-list"
-import { ProductListSection } from "../components/list/product-list-section"
+import { ProductListSection } from "../components/common/product-list-section"
 import SectionHeader from "../components/list/section-header"
 import UserReport from "../components/report/user-report"
 
