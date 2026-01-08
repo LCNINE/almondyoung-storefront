@@ -188,21 +188,11 @@ function SubCategoryList({
             className="mb-4 h-10 w-10 text-red-200"
             strokeWidth={1.5}
           />
-          <h3 className="mb-1 text-[15px] font-bold text-gray-900">
-            불러오기 실패
-          </h3>
+
           <p className="mb-6 text-[12px] leading-relaxed text-gray-400">
             카테고리를 불러오는 중<br />
             에러가 발생했습니다.
           </p>
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-9 px-5 text-[12px]"
-            onClick={() => setOpen(false)}
-          >
-            닫기
-          </Button>
         </div>
       ) : (
         /* 정상 데이터 출력 */
