@@ -1,4 +1,4 @@
-import { SearchInputGroup } from "@/components/search/search-input-group"
+import { SearchCombobox } from "@/components/search/search-combobox"
 import { CategorySheet } from "@components/category/category-sheet"
 import { SearchSheet } from "@components/search/search-sheet"
 import { getCategoryTree } from "@lib/api/pim"
@@ -26,7 +26,7 @@ export async function MainHeader() {
           </div>
 
           <div className="hidden w-full max-w-3xl min-w-[300px] md:block">
-            <SearchInputGroup />
+            <SearchCombobox />
           </div>
 
           <div className="shrink-0">

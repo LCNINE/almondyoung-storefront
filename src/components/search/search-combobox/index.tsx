@@ -6,7 +6,7 @@ import { SearchPopover } from "../search-popover"
 import { useRouter } from "next/navigation"
 import { useSearchHistory } from "@/hooks/ui/use-search-history"
 
-export function SearchInputGroup() {
+export function SearchCombobox() {
   const [searchTerm, setSearchTerm] = useState("")
   const [isOpen, setIsOpen] = useState(false)
 

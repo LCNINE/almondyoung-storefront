@@ -11,9 +11,9 @@ import { useSearchSheetStore } from "@hooks/ui/use-search-sheet-store"
 import { AnimatePresence, motion } from "framer-motion"
 import { ArrowLeft } from "lucide-react"
 import { useEffect, useState } from "react"
+import { SearchCombobox } from "../search-combobox"
 import { SearchHistory } from "../search-history"
 import { SearchHotKeyword } from "../search-hot-keyword"
-import { SearchInputGroup } from "../search-input-group"
 import { SearchPopularKeyword } from "../search-popular-keyword"
 
 export function SearchSheet() {
@@ -58,7 +58,7 @@ export function SearchSheet() {
             >
               <ArrowLeft className="h-6 w-6 text-white" />
             </button>
-            <SearchInputGroup />
+            <SearchCombobox />
           </header>
 
           {/* 최근 검색어 섹션 */}
