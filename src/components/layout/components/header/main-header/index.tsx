@@ -5,6 +5,7 @@ import { SearchInput } from "../search-input"
 import { CategoryNavigation } from "./category-navigation"
 import { Logo } from "./logo"
 import { UserActions } from "./user-actions"
+import { SearchSheet } from "@components/search/search-sheet"
 
 /*─────────────────────────────────────────────────────────
  * 메인 헤더 컴포넌트
@@ -52,6 +53,8 @@ export async function MainHeader() {
           <CategoryNavigation mainCategories={mainCategories} />
         </nav>
       </div>
+
+      <SearchSheet />
     </header>
   )
 }

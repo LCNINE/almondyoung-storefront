@@ -14,16 +14,14 @@ import { SearchHotKeyword } from "../search-hot-keyword"
 import { useHistory } from "@hooks/ui/use-history"
 import { motion, AnimatePresence } from "framer-motion"
 import { PopularKeyword } from "../popular-keyword"
+import { useSearchSheetStore } from "@hooks/ui/use-search-sheet-store"
 
-interface SearchSheetProps {
-  isOpen: boolean
-  onClose: () => void
-}
-
-export function SearchSheet({ isOpen, onClose }: SearchSheetProps) {
+export function SearchSheet() {
   const [searchTerm, setSearchTerm] = useState("")
   const { addKeyword, keywords } = useHistory()
   const [isHydrated, setIsHydrated] = useState(false)
+
+  const { isOpen, onClose } = useSearchSheetStore()
 
   useEffect(() => {
     setIsHydrated(true)

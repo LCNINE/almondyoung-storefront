@@ -1,32 +1,27 @@
 "use client"
 
+import { useSearchSheetStore } from "@hooks/ui/use-search-sheet-store"
+import { useUser } from "contexts/user-context"
+import { Bell, Search, ShoppingCart, User } from "lucide-react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
-import { ShoppingCart, User, Bell, Search } from "lucide-react"
-import { useUser } from "contexts/user-context"
-import { useState } from "react"
-import { SearchSheet } from "@components/search/search-sheet"
 
 export function UserActions() {
   const { countryCode } = useParams()
   const { user } = useUser()
 
-  const [open, setOpen] = useState(true)
-
   // todo: 임시임
   const cartItemCount = 1
   const hasNotification = true
 
+  const { onOpen } = useSearchSheetStore()
+
   return (
     <div className="flex items-center gap-[clamp(0.5px,2vw,1.5rem)]">
-      <SearchSheet isOpen={open} onClose={() => setOpen(false)} />
-      <button onClick={() => setOpen(true)}>
-        <Search className="h-6 w-6 md:h-8 md:w-8" color="white" />
-      </button>
       <div className="flex md:hidden">
         {/* 검색 */}
         <UserActionButton
-          href={`/${countryCode}/search`}
+          onClick={onOpen}
           icon={<Search className="h-6 w-6 md:h-8 md:w-8" color="white" />}
           label="검색"
         />
@@ -56,10 +51,11 @@ export function UserActions() {
 }
 
 interface UserActionButtonProps {
-  href: string
+  href?: string
   icon: React.ReactNode
   label: string
   badgeCount?: number
+  onClick?: () => void
 }
 
 function UserActionButton({
@@ -67,29 +63,51 @@ function UserActionButton({
   icon,
   label,
   badgeCount,
+  onClick,
 }: UserActionButtonProps) {
   const displayBadge =
     badgeCount && badgeCount > 0 ? (badgeCount > 99 ? "99+" : badgeCount) : null
 
-  return (
-    <Link
-      href={href}
-      className="group flex-col items-center gap-1 text-white md:flex"
-    >
-      <div className="relative">
-        {icon}
+  switch (Boolean(href)) {
+    case true:
+      return (
+        <Link
+          href={href ?? ""}
+          className="flex-col items-center gap-1 text-white md:flex"
+        >
+          <div className="relative">
+            {icon}
 
-        {displayBadge && (
-          <span className="bg-yellow-30 absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full text-xs font-bold text-white md:h-5 md:w-5">
-            {displayBadge}
+            {displayBadge && (
+              <span className="bg-yellow-30 absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full text-xs font-bold text-white md:h-5 md:w-5">
+                {displayBadge}
+              </span>
+            )}
+          </div>
+          <span className="hidden text-[clamp(0.625rem,1.2vw,0.75rem)] leading-none font-medium whitespace-nowrap md:block">
+            {label}
           </span>
-        )}
-      </div>
-      <span className="hidden text-[clamp(0.625rem,1.2vw,0.75rem)] leading-none font-medium whitespace-nowrap group-hover:underline md:block">
-        {label}
-      </span>
-    </Link>
-  )
+        </Link>
+      )
+
+    default:
+      return (
+        <button onClick={onClick} className="cursor-pointer" type="button">
+          <div className="relative">
+            {icon}
+
+            {displayBadge && (
+              <span className="bg-yellow-30 absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full text-xs font-bold text-white md:h-5 md:w-5">
+                {displayBadge}
+              </span>
+            )}
+          </div>
+          <span className="hidden text-[clamp(0.625rem,1.2vw,0.75rem)] leading-none font-medium whitespace-nowrap md:block">
+            {label}
+          </span>
+        </button>
+      )
+  }
 }
 
 function NotificationButton({
@@ -100,7 +118,7 @@ function NotificationButton({
   label: string
 }) {
   return (
-    <button className="group relative flex cursor-pointer flex-col items-center gap-1 text-white">
+    <button className="relative flex cursor-pointer flex-col items-center gap-1 text-white">
       <div className="relative">
         <Bell className="h-6 w-6 md:h-8 md:w-8" color="white" />
         {hasDot && (
