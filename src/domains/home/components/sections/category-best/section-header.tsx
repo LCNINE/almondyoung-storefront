@@ -1,12 +1,10 @@
 import { Button } from "@/components/ui/button"
 import { CategorySheet } from "@/components/category/sheet"
 
-export function SectionHeader() {
+export function SectionHeader({ title }: { title: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between md:justify-center">
-      <h2 className="text-[22px] font-bold md:text-[26px]">
-        카테고리 <span className="text-yellow-30">베스트</span>
-      </h2>
+      <h2 className="text-[22px] font-bold md:text-[26px]">{title} </h2>
 
       <CategorySheet
         trigger={

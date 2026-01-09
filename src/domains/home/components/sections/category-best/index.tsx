@@ -39,7 +39,13 @@ export function CategoryBestSection({
 
   return (
     <div className="w-full">
-      <SectionHeader />
+      <SectionHeader
+        title={
+          <>
+            카테고리 <span className="text-yellow-30">베스트</span>
+          </>
+        }
+      />
 
       <div className="mt-4 flex w-full flex-col gap-1.5">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

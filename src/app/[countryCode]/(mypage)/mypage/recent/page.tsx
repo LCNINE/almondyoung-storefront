@@ -1,7 +1,7 @@
 import { PageTitle } from "@/components/shared/page-title"
 import { Spinner } from "@/components/shared/spinner"
 import { WithHeaderLayout } from "@components/layout"
-import MypageLayout from "@components/layout/mypage-layout"
+import MypageLayout from "@/app/[countryCode]/(mypage)/_components/mypage-layout"
 import ProtectedRoute from "@components/protected-route"
 import { getRecentViews } from "@lib/api/users/recent-views"
 import { Suspense } from "react"

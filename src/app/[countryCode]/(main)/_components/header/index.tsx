@@ -1,20 +1,15 @@
-import { SearchCombobox } from "@/components/search/search-combobox"
 import { CategorySheet } from "@/components/category/sheet"
-import { SearchSheet } from "@components/search/search-sheet"
-import { getCategoryTree } from "@lib/api/pim"
+import { CategoryNavigation } from "@/components/layout/nav/category-nav"
+import { SearchCombobox } from "@/components/search/search-combobox"
+import { SearchSheet } from "@/components/search/search-sheet"
+import { getCategoryTree } from "@/lib/api/pim"
 import { Menu } from "lucide-react"
-import { CategoryNavigation } from "./category-navigation"
 import { Logo } from "./logo"
 import { UserActions } from "./user-actions"
 
-/*─────────────────────────────────────────────────────────
- * 메인 헤더 컴포넌트
- * main header에서 사용되는 메인 헤더 컴포넌트입니다.
- * ex) 로고, 검색, 사용자 액션 버튼, 카테고리 네비게이션 등을 표시합니다.
- *───────────────────────────────────────────────────────────*/
 export async function MainHeader() {
-  const categories = await getCategoryTree().catch(() => null)
-  const mainCategories = categories?.categories.slice(0, 7) ?? []
+  // const categories = await getCategoryTree().catch(() => null)
+  // const mainCategories = categories?.categories.slice(0, 7) ?? []
 
   return (
     <header className="bg-header-background overflow-visible">
@@ -50,7 +45,7 @@ export async function MainHeader() {
             />
           </div>
 
-          <CategoryNavigation mainCategories={mainCategories} />
+          {/* <CategoryNavigation mainCategories={mainCategories} /> */}
         </nav>
       </div>
 

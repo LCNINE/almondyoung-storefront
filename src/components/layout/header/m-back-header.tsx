@@ -15,36 +15,25 @@ interface MobileBackHeaderProps {
 
 // URL 기반 페이지 제목 매핑
 const getPageTitleFromPath = (pathname: string): string => {
-  console.log("🔍 [getPageTitleFromPath] 전체 경로:", pathname)
-
   const pathSegments = pathname.split("/").filter(Boolean)
-  console.log("🔍 [getPageTitleFromPath] 경로 세그먼트:", pathSegments)
-
   const authIndex = pathSegments.findIndex((segment) => segment === "auth")
   const mypageIndex = pathSegments.findIndex((segment) => segment === "mypage")
 
   // auth 경로 처리
   if (authIndex !== -1) {
     const authSubpage = pathSegments[authIndex + 1]
-    console.log("🔍 [getPageTitleFromPath] auth 서브페이지:", authSubpage)
-
     const authTitleMap: Record<string, string> = {
       login: "로그인",
       signup: "회원가입",
       "find-password": "비밀번호 찾기",
       "find-email": "이메일 찾기",
     }
-
-    const result = authTitleMap[authSubpage] || "로그인"
-    console.log("✅ [getPageTitleFromPath] auth 최종 결과:", result)
-    return result
+    return authTitleMap[authSubpage] || "로그인"
   }
 
   // mypage 경로 처리
   if (mypageIndex !== -1) {
     const mypageSubpage = pathSegments[mypageIndex + 1]
-    console.log("🔍 [getPageTitleFromPath] mypage 서브페이지:", mypageSubpage)
-
     const mypageTitleMap: Record<string, string> = {
       wish: "찜한 상품",
       orders: "주문/배송 내역",
@@ -62,13 +51,9 @@ const getPageTitleFromPath = (pathname: string): string => {
       rebuy: "재주문",
       download: "다운로드",
     }
-
-    const result = mypageTitleMap[mypageSubpage] || "마이페이지"
-    console.log("✅ [getPageTitleFromPath] mypage 최종 결과:", result)
-    return result
+    return mypageTitleMap[mypageSubpage] || "마이페이지"
   }
 
-  console.log("❌ [getPageTitleFromPath] 경로를 찾을 수 없음")
   return "마이페이지"
 }
 
@@ -83,34 +68,23 @@ export function MobileBackHeader({
   const params = useParams() as { countryCode?: string }
   const countryCode = params?.countryCode || "kr"
 
-  // fallbackHref 기본값: /<countryCode>/mypage
   const defaultFallback = `/${countryCode}/mypage`
   const finalFallback = fallbackHref || defaultFallback
 
-  // 초기값을 URL에서 바로 계산 (title prop이 없을 때만)
   const [dynamicTitle, setDynamicTitle] = useState(() => {
     if (title) return title
-    const initialTitle = getPageTitleFromPath(pathname)
-    console.log("🚀 [MobileBackHeader] 초기 제목 계산:", {
-      pathname,
-      initialTitle,
-    })
-    return initialTitle
+    return getPageTitleFromPath(pathname)
   })
 
-  // URL 변경 시 제목 업데이트 (title prop이 없을 때만)
   useEffect(() => {
     if (title) {
       setDynamicTitle(title)
       return
     }
-    const newTitle = getPageTitleFromPath(pathname)
-    console.log("🔄 [MobileBackHeader] URL 변경 감지:", { pathname, newTitle })
-    setDynamicTitle(newTitle)
+    setDynamicTitle(getPageTitleFromPath(pathname))
   }, [pathname, title])
 
   const handleBack = () => {
-    // 히스토리가 있으면 뒤로가기, 없으면 fallback으로 이동
     if (
       (document.referrer &&
         new URL(document.referrer).origin === window.location.origin) ||
@@ -143,7 +117,7 @@ export function MobileBackHeader({
         <div className="w-6" />
       )}
       <h1 className="text-base font-bold">{dynamicTitle}</h1>
-      <div className="w-6" /> {/* 단순 공간 유지용 */}
+      <div className="w-6" />
     </header>
   )
 }
