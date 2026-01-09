@@ -17,6 +17,7 @@ export function HomeLogoutTemplate({
   return (
     <div className="w-full">
       {/* 메인 히어로 배너 */}
+
       <HeroBanner />
 
       {/* 카테고리별 제품 섹션 */}

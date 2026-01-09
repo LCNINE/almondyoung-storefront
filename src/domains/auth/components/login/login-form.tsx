@@ -10,8 +10,8 @@ import {
   FormField,
   FormItem,
   FormMessage,
-} from "@components/common/ui/form"
-import { Label } from "@components/common/ui/label"
+} from "@/components/ui/form"
+import { Label } from "@/components/ui/label"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { login } from "@lib/api/users/login"
 import { useParams, useSearchParams } from "next/navigation"

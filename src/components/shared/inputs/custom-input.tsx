@@ -1,8 +1,8 @@
 import * as React from "react"
 
 import { cn } from "@lib/utils"
-import AlertIcon from "icons/light-icon"
-import ClearIcon from "../../../icons/clear-icon"
+import AlertIcon from "@/icons/light-icon"
+import ClearIcon from "@/icons/clear-icon"
 
 export interface CustomInputProps extends React.ComponentProps<"input"> {
   error?: boolean
