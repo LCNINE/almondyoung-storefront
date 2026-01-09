@@ -11,11 +11,10 @@ export interface twitter {
 }
 
 export interface SEOTags {
-  title?: string
+  title?: string | { default: string; template: string }
   description?: string
-  keywords?: string
+  keywords?: string[]
   openGraph: OpenGraph
-  twitter: twitter
   canonicalUrlRelative?: string
-  extraTags: {}
+  extraTags?: Record<string, any>
 }

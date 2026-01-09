@@ -5,28 +5,29 @@ import Footer from "@components/layout/components/footer"
 import { fetchMe } from "@lib/api/users/me"
 import { CustomThemeProvider } from "@lib/providers/custom-theme-provider"
 import { ThemeProvider } from "@lib/providers/theme-provider"
-import { renderSchemaTags } from "@lib/seo"
+import { getSEOTags, renderSchemaTags } from "@lib/seo"
 import { UserProvider } from "@/contexts/user-context"
 import { Metadata } from "next"
 import { OverlayProvider } from "overlay-kit"
 import { Toaster } from "sonner"
 import "@/styles/globals.css"
 
-export const metadata: Metadata = {
+export const metadata: Metadata = getSEOTags({
   title: {
     default: "아몬드영 | 미용재료 MRO 쇼핑몰",
-    template: "%s | 아몬드영", // 다른 페이지에서 title 설정 시 "상품명 | 아몬드영"으로 표시됨
+    template: "%s | 아몬드영",
   },
   description: "미용 전문가를 위한 최저가 쇼핑몰",
   openGraph: {
-    siteName: "아몬드영",
-    locale: "ko_KR",
-    type: "website",
+    title: "아몬드영 | 미용재료 MRO 쇼핑몰",
+    description: "미용 전문가를 위한 최저가 쇼핑몰",
   },
-  icons: {
-    icon: "/favicon.ico",
+  extraTags: {
+    icons: {
+      icon: "/favicon.ico",
+    },
   },
-}
+})
 
 export default async function RootLayout(props: { children: React.ReactNode }) {
   const user = await fetchMe().catch(() => null)
