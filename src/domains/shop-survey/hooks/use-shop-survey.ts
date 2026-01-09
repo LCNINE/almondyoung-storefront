@@ -1,5 +1,5 @@
 import { HttpApiError } from "@lib/api/api-error"
-import { getShopSurveyApi, modifyShopSurveyApi } from "@lib/data/shop-suvery"
+import { getShopSurvey, modifyShopSurvey } from "@lib/data/shop-suvery"
 import { useState } from "react"
 import { toast } from "sonner"
 import { ShopSurveySchema } from "../schemas/suvery-schema"
@@ -8,7 +8,7 @@ export const useShopSurvey = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
-  const modifyShopSurvey = async (data: ShopSurveySchema) => {
+  const modifyShopSurveyAction = async (data: ShopSurveySchema) => {
     try {
       setIsSubmitting(true)
 
@@ -17,7 +17,7 @@ export const useShopSurvey = () => {
         shopType: data.shopType ?? undefined,
       }
 
-      const response = await modifyShopSurveyApi(transformedData)
+      const response = await modifyShopSurvey(transformedData)
 
       return response
     } catch (error) {
@@ -33,10 +33,10 @@ export const useShopSurvey = () => {
     }
   }
 
-  const getShopSurvey = async () => {
+  const getShopSurveyAction = async () => {
     try {
       setIsLoading(true)
-      const response = await getShopSurveyApi()
+      const response = await getShopSurvey()
       return response
     } catch (error) {
       if (error instanceof HttpApiError) {
@@ -51,5 +51,10 @@ export const useShopSurvey = () => {
     }
   }
 
-  return { modifyShopSurvey, isLoading, isSubmitting, getShopSurvey }
+  return {
+    modifyShopSurveyAction,
+    isLoading,
+    isSubmitting,
+    getShopSurveyAction,
+  }
 }

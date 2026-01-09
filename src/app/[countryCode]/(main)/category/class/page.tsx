@@ -2,11 +2,11 @@
 
 import { useState } from "react"
 import { overlay } from "overlay-kit"
-import { CategoryCircleTabs } from "@components/category-circle-tabs"
+import { CategoryCircleTabs } from "@/components/category/category-circle-tabs"
 import { BannerCarousel } from "@components/layout/components/banner/banner-carousel"
 import { BasicProductCard } from "@components/products/product-card"
-import ProductFilterSidebar from "@components/product-filter-sidebar"
-import ProductSortToolbar from "@components/product-sort-toolbar"
+import ProductFilterSidebar from "@/components/products/product-filter-sidebar"
+import ProductSortToolbar from "@/components/products/product-sort-toolbar"
 import { SlidersHorizontal } from "lucide-react"
 import { SectionSliderHorizontal } from "@components/section-sliders-horizontal"
 

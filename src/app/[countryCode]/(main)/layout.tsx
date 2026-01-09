@@ -1,4 +1,4 @@
-import { ThemeToggle } from "@components/common/thema-toggle"
+import { ThemeToggle } from "@/components/shared/thema-toggle"
 
 import { MainHeader } from "@components/layout/components/header/main-header"
 import { getBaseURL } from "@lib/utils/env"

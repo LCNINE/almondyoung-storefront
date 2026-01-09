@@ -2,7 +2,7 @@ import { useShopSurvey } from "@components/shop-survey/hooks/use-shop-survey"
 import { useFormContext } from "react-hook-form"
 import { StepOne } from "./step-one"
 import { StepTwoForm } from "./step-two/with-form"
-import { CustomButton } from "@components/common/custom-buttons/custom-button"
+import { CustomButton } from "@/components/shared/custom-buttons/custom-button"
 
 /**
  * 샵 설문조사 Step Manager
@@ -49,11 +49,7 @@ function StepTwoView({ onPrevStep }: { onPrevStep: () => void }) {
 
       {/* 2. 스텝 2 푸터 영역 */}
       <footer className="mt-8 flex w-full gap-2">
-        <CustomButton
-          variant="outline"
-          size="lg"
-          disabled={isSubmitDisabled}
-        >
+        <CustomButton variant="outline" size="lg" disabled={isSubmitDisabled}>
           건너뛰기
         </CustomButton>
       </footer>

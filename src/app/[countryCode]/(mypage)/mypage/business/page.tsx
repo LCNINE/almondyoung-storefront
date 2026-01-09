@@ -1,5 +1,5 @@
-import { PageTitle } from "@components/common/page-title"
-import { Spinner } from "@components/common/spinner"
+import { PageTitle } from "@/components/shared/page-title"
+import { Spinner } from "@/components/shared/spinner"
 import { WithHeaderLayout } from "@components/layout"
 import MypageLayout from "@components/layout/mypage-layout"
 import { getMyBusiness } from "@lib/api/users/business"

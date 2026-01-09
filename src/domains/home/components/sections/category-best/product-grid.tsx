@@ -1,4 +1,4 @@
-import { ProductCard } from "@/components/products-origin/prodcut-card"
+import { ProductCard } from "@/components/products/prodcut-card"
 
 interface ProductGridProps {
   products: number[]
@@ -14,4 +14,3 @@ export function ProductGrid({ products, mockProductData }: ProductGridProps) {
     </div>
   )
 }
-

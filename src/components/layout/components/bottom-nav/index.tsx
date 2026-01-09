@@ -10,7 +10,7 @@ import {
   MyPageNavButton,
   SearchNavButton,
   CartNavButton,
-} from "@components/common/Icon-text/icon-texts"
+} from "@/components/shared/Icon-text/icon-texts"
 
 export function BottomNavigation({ className }: { className?: string }) {
   const pathname = (usePathname() ?? "/").split("?")[0]

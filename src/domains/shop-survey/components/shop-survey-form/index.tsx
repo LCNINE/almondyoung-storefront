@@ -1,13 +1,13 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Form } from "@components/common/ui/form"
+import { Form } from "@/components/ui/form"
 
-import { useShopSurvey } from "@components/shop-survey/hooks/use-shop-survey"
+import { useShopSurvey } from "@/domains/shop-survey/hooks/use-shop-survey"
 import {
   ShopSurveySchema,
   shopSurveySchema,
-} from "@components/shop-survey/schemas/suvery-schema"
+} from "@/domains/shop-survey/schemas/suvery-schema"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
@@ -21,7 +21,8 @@ export default function ShopSurveyForm({
   redirectTo: string | undefined
 }) {
   const [currentStep, setCurrentStep] = useState(0)
-  const { modifyShopSurvey, isLoading, getShopSurvey } = useShopSurvey()
+  const { modifyShopSurveyAction, isLoading, getShopSurveyAction } =
+    useShopSurvey()
 
   const router = useRouter()
 
@@ -47,18 +48,19 @@ export default function ShopSurveyForm({
   }
 
   const onSubmit = async (data: ShopSurveySchema) => {
-    const res = await modifyShopSurvey(data)
-
-    if (res.success) {
+    try {
+      await modifyShopSurveyAction(data)
       toast.success("정보가 저장되었습니다.")
       router.push(redirectTo ?? "/")
+    } catch (error) {
+      toast.error("정보 저장에 실패했습니다. 잠시 후 다시 시도해주세요.")
     }
   }
 
   useEffect(() => {
     const getShopSurveyData = async () => {
-      const res = await getShopSurvey()
-      form.reset(res)
+      const res = await getShopSurveyAction()
+      form.reset(res) // todo: 해결해야함 ..
     }
     getShopSurveyData()
   }, [])
@@ -73,7 +75,6 @@ export default function ShopSurveyForm({
         onSubmit={form.handleSubmit(onSubmit)}
         className="max-[600px] relative flex flex-col gap-10 p-2"
       >
-
         <StepsManager
           currentStep={currentStep}
           onNextStep={handleNext}

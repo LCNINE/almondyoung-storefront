@@ -1,9 +1,9 @@
 "use client"
 
-import { CustomButton } from "@components/common/custom-buttons"
-import { CustomCheckbox } from "@components/common/checkbox"
-import { CustomInput } from "@components/common/inputs/custom-input"
-import { Spinner } from "@components/common/spinner"
+import { CustomButton } from "@/components/shared/custom-buttons"
+import { CustomCheckbox } from "@/components/shared/checkbox"
+import { CustomInput } from "@/components/shared/inputs/custom-input"
+import { Spinner } from "@/components/shared/spinner"
 import {
   Form,
   FormControl,

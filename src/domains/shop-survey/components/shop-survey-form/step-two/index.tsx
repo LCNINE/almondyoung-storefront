@@ -1,5 +1,5 @@
 import { cn } from "@lib/utils"
-import { NumberStepper } from "@components/common/number-stepper"
+import { NumberStepper } from "@/components/shared/number-stepper"
 import { Checkbox } from "@components/common/ui/checkbox"
 import { Label } from "@components/common/ui/label"
 import { TARGET_CUSTOMERS, DAYS_OF_WEEK, SHOP_TYPES } from "./constants"

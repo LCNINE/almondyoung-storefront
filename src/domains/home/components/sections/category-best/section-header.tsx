@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { CategorySheet } from "@components/category/category-sheet"
+import { CategorySheet } from "@/components/category/sheet"
 
 export function SectionHeader() {
   return (
@@ -22,4 +22,3 @@ export function SectionHeader() {
     </div>
   )
 }
-

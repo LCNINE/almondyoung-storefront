@@ -1,5 +1,5 @@
 import { CartQuickButton } from "@components/cart/mobile-cart-quickButton"
-import { FloatingButtons } from "@components/common/custom-buttons/floating-buttons"
+import { FloatingButtons } from "@/components/shared/custom-buttons/floating-buttons"
 import { BottomNavigation } from "@components/layout/components/bottom-nav"
 import Footer from "@components/layout/components/footer"
 import { fetchMe } from "@lib/api/users/me"

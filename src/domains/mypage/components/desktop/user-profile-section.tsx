@@ -1,7 +1,7 @@
 "use client"
 
-import { CustomButton } from "@components/common/custom-buttons/custom-button"
-import { Spinner } from "@components/common/spinner"
+import { CustomButton } from "@/components/shared/custom-buttons/custom-button"
+import { Spinner } from "@/components/shared/spinner"
 import { signout } from "@lib/api/users/signout"
 import { useUser } from "contexts/user-context"
 import { ChevronRight, Coins, Crown, User } from "lucide-react"

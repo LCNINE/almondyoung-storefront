@@ -1,7 +1,7 @@
 import { Metadata } from "next"
 import React from "react"
 
-import { ThemeToggle } from "@components/common/thema-toggle"
+import { ThemeToggle } from "@/components/shared/thema-toggle"
 import { DesktopHeader } from "@components/layout/components/header"
 import { getBaseURL } from "@lib/utils/env"
 

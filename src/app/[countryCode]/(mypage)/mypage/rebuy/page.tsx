@@ -1,5 +1,5 @@
 import { Metadata } from "next"
-import { PageTitle } from "@components/common/page-title"
+import { PageTitle } from "@/components/shared/page-title"
 import MypageLayout from "@components/layout/mypage-layout"
 import { WithHeaderLayout } from "@components/layout"
 import { BasicProductCard } from "@components/products/product-card"

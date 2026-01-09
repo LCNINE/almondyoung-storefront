@@ -1,4 +1,4 @@
-import { ThemeManager } from "@components/common/theme-manager"
+import { ThemeManager } from "@/components/shared/theme-manager"
 import ProtectedRoute from "@components/protected-route"
 import { CategoryTreeNodeDto, getCategoryTree } from "@lib/api/pim"
 import { fetchMe } from "@lib/api/users/me"

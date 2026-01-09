@@ -1,30 +1,19 @@
-// import { ShopSurveySchema } from "@modules/shop-survey/schemas/suvery-schema"
+import { ShopSurveySchema } from "@/domains/shop-survey/schemas/suvery-schema"
+import { api } from "../api/api"
 
-// 임시 타입 정의
-type ShopSurveySchema = {
-  [key: string]: any
-}
-
-export const modifyShopSurveyApi = async (data: ShopSurveySchema) => {
-  // todo: 라우트핸들러 만들어야함
-  const response = await fetch(`${process.env.APP_URL}/api/shop/info`, {
+export const modifyShopSurvey = async (data: ShopSurveySchema) => {
+  const response = await api("users", `/shop/info`, {
     method: "POST",
-    body: JSON.stringify(data),
-    headers: {
-      "Content-Type": "application/json",
-    },
+    body: data,
+    withAuth: true,
   })
 
   return response
 }
 
-export const getShopSurveyApi = async () => {
-  // todo: 라우트핸들러 만들어야함
-  const response = await fetch(`${process.env.APP_URL}/api/shop/info`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
+export const getShopSurvey = async () => {
+  const response = await api("users", `/shop/info`, {
+    withAuth: true,
   })
 
   return response

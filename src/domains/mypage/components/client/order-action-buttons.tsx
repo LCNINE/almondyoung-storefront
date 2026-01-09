@@ -1,6 +1,6 @@
 "use client"
 
-import { CustomButton } from "@components/common/custom-buttons/custom-button"
+import { CustomButton } from "@/components/shared/custom-buttons/custom-button"
 
 import type { OrderStatus } from "@components/orders/types"
 
@@ -111,7 +111,7 @@ function ActionButtonsList({ type }: OrderActionButtonsProps) {
         교환, 반품 신청
       </CustomButton>
       <CustomButton
-        variant="secondary" 
+        variant="secondary"
         size="lg"
         onClick={handleInquiryClick}
         {...commonButtonProps}

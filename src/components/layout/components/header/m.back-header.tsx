@@ -1,7 +1,7 @@
 "use client"
 
 import { cn } from "@lib/utils"
-import { CustomButton } from "@components/common/custom-buttons/custom-button"
+import { CustomButton } from "@/components/shared/custom-buttons/custom-button"
 import { ArrowLeft } from "lucide-react"
 import { useRouter, usePathname, useParams } from "next/navigation"
 import { useState, useEffect } from "react"
