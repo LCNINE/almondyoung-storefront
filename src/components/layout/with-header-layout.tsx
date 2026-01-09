@@ -1,6 +1,6 @@
 import { UserDetail } from "@lib/types/ui/user"
 import React from "react"
-import { MainHeader } from "./header"
+import { MainHeader } from "@/components/layout/header/main-header"
 import MobileSubBackHeader from "./header/m-sub-back-header"
 
 /**

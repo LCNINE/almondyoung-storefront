@@ -1,6 +1,6 @@
 import { getBaseURL } from "@lib/utils/env"
 import { Metadata } from "next"
-import { MainHeader } from "./_components/header"
+import { MainHeader } from "../../../components/layout/header/main-header"
 
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),

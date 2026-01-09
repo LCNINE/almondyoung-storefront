@@ -4,7 +4,6 @@ import { useState } from "react"
 import { overlay } from "overlay-kit"
 import { CategoryCircleTabs } from "@/components/category/category-circle-tabs"
 import { BannerCarousel } from "@/components/banner/banner-carousel"
-import { BasicProductCard } from "@/components/products/prodcut-card"
 import ProductFilterSidebar from "@/components/products/product-filter-sidebar"
 import ProductSortToolbar from "@/components/products/product-sort-toolbar"
 import { SlidersHorizontal } from "lucide-react"
@@ -158,7 +157,7 @@ export default function ClassPage() {
                   key={product.id}
                   className="w-[calc(40%-0.375rem)] shrink-0 snap-start sm:w-[45%] md:w-[calc(25%-12px)] lg:w-[calc(20%-12.8px)]"
                 >
-                  <BasicProductCard
+                  {/* <BasicProductCard
                     product={{
                       ...product,
                       basePrice: 150000,
@@ -166,7 +165,7 @@ export default function ClassPage() {
                       isMembershipOnly: false,
                       status: "active",
                     }}
-                  />
+                  /> */}
                 </div>
               ))}
             </SectionSliderHorizontal>
@@ -207,12 +206,12 @@ export default function ClassPage() {
               {paginatedProducts.length > 0 && (
                 <>
                   <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-                    {paginatedProducts.map((product, idx) => (
+                    {/* {paginatedProducts.map((product, idx) => (
                       <BasicProductCard
                         key={`${product.id}-${idx}`}
                         product={product}
                       />
-                    ))}
+                    ))} */}
                   </div>
                 </>
               )}

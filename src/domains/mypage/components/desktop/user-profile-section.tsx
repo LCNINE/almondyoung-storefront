@@ -2,8 +2,8 @@
 
 import { CustomButton } from "@/components/shared/custom-buttons/custom-button"
 import { Spinner } from "@/components/shared/spinner"
+import { useUser } from "@/contexts/user-context"
 import { signout } from "@lib/api/users/signout"
-import { useUser } from "contexts/user-context"
 import { ChevronRight, Coins, Crown, User } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useTransition } from "react"
