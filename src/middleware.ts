@@ -39,27 +39,22 @@ async function getRegionMap(cacheId: string) {
         cache: "force-cache",
       }).then(async (response) => {
         const json = await response.json()
-
         if (!response.ok) {
           throw new Error(json.message)
         }
-
         return json
       })
-
       if (!regions?.length) {
         throw new Error(
           "No regions found. Please set up regions in your Medusa Admin."
         )
       }
-
       // Create a map of country codes to regions.
       regions.forEach((region: HttpTypes.StoreRegion) => {
         region.countries?.forEach((c) => {
           regionMapCache.regionMap.set(c.iso_2 ?? "", region)
         })
       })
-
       regionMapCache.regionMapUpdated = Date.now()
     } catch (error) {
       // API 호출 실패 시 기본 리전만 사용
@@ -128,9 +123,9 @@ export async function middleware(request: NextRequest) {
 
   let cacheId = cacheIdCookie?.value || crypto.randomUUID()
 
-  const regionMap = await getRegionMap(cacheId)
-
-  const countryCode = regionMap && (await getCountryCode(request, regionMap))
+  // const regionMap = await getRegionMap(cacheId)
+  // const countryCode = regionMap && (await getCountryCode(request, regionMap))
+  const countryCode = "kr" // 임시
 
   const urlHasCountryCode =
     countryCode && request.nextUrl.pathname.split("/")[1].includes(countryCode)

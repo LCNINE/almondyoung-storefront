@@ -36,13 +36,13 @@ export async function MainHeader() {
         >
           {/* 햄버거 메뉴 */}
           <div className="hidden md:block">
-            <CategorySheet
+            {/* <CategorySheet
               trigger={
                 <button className="flex h-10 w-10 items-center justify-center rounded-md transition-colors hover:bg-white/10">
                   <Menu className="h-7 w-7 text-white" />
                 </button>
               }
-            />
+            /> */}
           </div>
 
           {/* <CategoryNavigation mainCategories={mainCategories} /> */}
