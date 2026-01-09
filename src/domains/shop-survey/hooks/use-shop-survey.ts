@@ -1,5 +1,5 @@
 import { HttpApiError } from "@lib/api/api-error"
-import { getShopSurvey, modifyShopSurvey } from "@lib/data/shop-suvery"
+import { getShopSurvey, modifyShopSurvey } from "@/lib/api/users/shop-suvery"
 import { useState } from "react"
 import { toast } from "sonner"
 import { ShopSurveySchema } from "../schemas/suvery-schema"

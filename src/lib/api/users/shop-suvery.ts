@@ -1,5 +1,7 @@
+"use server"
+
 import { ShopSurveySchema } from "@/domains/shop-survey/schemas/suvery-schema"
-import { api } from "../api/api"
+import { api } from "../api"
 
 export const modifyShopSurvey = async (data: ShopSurveySchema) => {
   const response = await api("users", `/shop/info`, {
