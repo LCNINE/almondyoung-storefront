@@ -5,12 +5,20 @@ import type { ProductsResponseDto } from "@lib/types/dto/medusa"
 
 import type { StoreProduct } from "@medusajs/types"
 
-// 상품 목록 조회
-export const getProductList = async (
-  page: number = 1,
-  limit: number = 10,
+interface GetProductListParams {
+  page?: number
+  limit?: number
   categoryId?: string
-): Promise<ProductsResponseDto> => {
+  country_code?: string
+}
+
+// 상품 목록 조회
+export const getProductList = async ({
+  page = 1,
+  limit = 10,
+  categoryId,
+  country_code = "kr",
+}: GetProductListParams): Promise<ProductsResponseDto> => {
   const offset = (page - 1) * limit
 
   try {
@@ -23,7 +31,8 @@ export const getProductList = async (
         limit,
         offset,
         category_id: categoryId,
-        fields: "*variants,+categories,+metadata,+tags",
+        fields: "*variants.calculated_price,+categories,+metadata,+tags",
+        country_code: country_code,
       },
       {
         next: {

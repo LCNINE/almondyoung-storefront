@@ -123,9 +123,8 @@ export async function middleware(request: NextRequest) {
 
   let cacheId = cacheIdCookie?.value || crypto.randomUUID()
 
-  // const regionMap = await getRegionMap(cacheId)
-  // const countryCode = regionMap && (await getCountryCode(request, regionMap))
-  const countryCode = "kr" // 임시
+  const regionMap = await getRegionMap(cacheId)
+  const countryCode = regionMap && (await getCountryCode(request, regionMap))
 
   const urlHasCountryCode =
     countryCode && request.nextUrl.pathname.split("/")[1].includes(countryCode)

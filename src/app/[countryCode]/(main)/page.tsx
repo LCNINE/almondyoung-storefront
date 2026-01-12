@@ -14,14 +14,21 @@ export const metadata = getSEOTags({
   extraTags: {},
 })
 
-export default async function Home() {
+export default async function Home({
+  params,
+}: {
+  params: { countryCode: string }
+}) {
+  const { countryCode } = await params
   // 카테고리 트리 조회
   let categories: CategoryTreeNodeDto[] = []
 
   const result = await getCategoryTree().catch(() => null)
   categories = result?.categories || []
 
-  // const productList = await getProductList().catch(() => null)
+  const productList = await getProductList({
+    country_code: countryCode,
+  }).catch(() => null)
 
   // todo: 로그인 사용자용 홈페이지 섹션들
   const user = await fetchMe().catch(() => null)

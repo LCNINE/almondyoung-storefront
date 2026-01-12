@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 export function LoginPromptBanner() {
-  const { countryCode } = useParams()
+  const { countryCode } = useParams<{ countryCode: string }>()
 
   return (
     <Link
