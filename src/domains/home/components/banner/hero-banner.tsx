@@ -107,21 +107,15 @@ export async function HeroBanner() {
   // todo: master 다중조회 api 완성시 연결
 
   return (
-    <HeroBannerCarousel
-      banners={MOCK_BANNER_GROUP.banners}
-      pcWidth={MOCK_BANNER_GROUP.pcWidth}
-      pcHeight={MOCK_BANNER_GROUP.pcHeight}
-      mobileWidth={MOCK_BANNER_GROUP.mobileWidth}
-      mobileHeight={MOCK_BANNER_GROUP.mobileHeight}
-      // bannersWithProducts={bannersWithProducts} // todo: add bannersWithProducts
-    />
-  )
-}
-
-HeroBanner.Skeleton = function HeroBannerSkeleton() {
-  return (
-    <div>
-      <h1>Hero Banner Skeleton</h1>
+    <div className="pt-4 pb-4 md:pb-[87px]">
+      <HeroBannerCarousel
+        banners={MOCK_BANNER_GROUP.banners}
+        pcWidth={MOCK_BANNER_GROUP.pcWidth}
+        pcHeight={MOCK_BANNER_GROUP.pcHeight}
+        mobileWidth={MOCK_BANNER_GROUP.mobileWidth}
+        mobileHeight={MOCK_BANNER_GROUP.mobileHeight}
+        // bannersWithProducts={bannersWithProducts} // todo: add bannersWithProducts
+      />
     </div>
   )
 }

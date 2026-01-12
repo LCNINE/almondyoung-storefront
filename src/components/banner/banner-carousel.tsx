@@ -55,7 +55,7 @@ export function HeroBannerCarousel({
   }, [isPlaying, api])
 
   return (
-    <div className="bg-background relative w-full overflow-hidden border-b border-gray-100 pt-4 pb-[87px]">
+    <div className="bg-background relative w-full overflow-hidden border-b border-gray-100">
       <Carousel
         setApi={setApi}
         plugins={[autoplay.current]}

@@ -3,6 +3,7 @@ import { HeroBanner } from "../components/banner/hero-banner"
 import { MembershipBanner } from "../components/banner/membership-banner"
 import { ProductListSection } from "../components/shared/product-list-section"
 import { CategoryBestSection } from "../components/sections/category-best"
+import { LoginPromptBanner } from "../components/banner/login-prompt-banner"
 
 interface HomeLogoutTemplateProps {
   initialCategories: CategoryTreeNodeDto[]
@@ -18,6 +19,9 @@ export function HomeLogoutTemplate({
     <div className="w-full">
       {/* 메인 히어로 배너 */}
       <HeroBanner />
+
+      {/* 로그인 유도 배너 */}
+      <LoginPromptBanner />
 
       {/* 카테고리별 제품 섹션 */}
       <ProductListSection>
