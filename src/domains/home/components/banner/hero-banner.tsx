@@ -1,15 +1,19 @@
-import { HeroBannerCarousel2 } from "@/components/banner/banner-carousel2"
-import type { BannerGroup } from "@/lib/types/ui/product"
+import { HeroBannerCarousel } from "@/components/banner/banner-carousel"
+import { getBannerGroupByCode } from "@/lib/api/pim/banner"
+import { getProductByMasterId } from "@/lib/api/pim/products"
+import type { BannerDto } from "@/lib/types/dto/pim"
+import type { Banner, BannerGroup } from "@/lib/types/ui/product"
+import sortBy from "lodash/sortBy"
 
 export const MOCK_BANNER_GROUP: BannerGroup = {
   id: "group_001",
   code: "MAIN_HERO",
   title: "메인 히어로 배너",
   category: "MAIN",
-  pcWidth: 1920,
-  pcHeight: 600,
-  mobileWidth: 720,
-  mobileHeight: 720,
+  pcWidth: 0,
+  pcHeight: 0,
+  mobileWidth: 0,
+  mobileHeight: 0,
   description: "홈페이지 최상단 메인 배너 그룹입니다.",
   isActive: true,
   sortOrder: 1,
@@ -88,9 +92,30 @@ export const MOCK_BANNER_GROUP: BannerGroup = {
 }
 
 export async function HeroBanner() {
-  // const bannerGroup = await getBannerGroupByCode("MAIN_HERO")
-  // console.log("bannerGroup", bannerGroup)
-  return <HeroBannerCarousel2 bannerGroup={MOCK_BANNER_GROUP} />
+  // const bannerGroup: BannerGroup = await getBannerGroupByCode("MAIN_HERO")
+  // const activeBanners: BannerDto[] = sortBy(bannerGroup.banners, [
+  //   "sortOrder",
+  // ]).filter((banner) => {
+  //   const now = new Date().getTime()
+  //   const start = new Date(banner.displayStartAt ?? 0).getTime()
+  //   const end = new Date(banner.displayEndAt ?? 0).getTime()
+
+  //   return banner.isActive && start <= now && end >= now
+  // })
+
+  // // 배너마다 연결된 상품 상세 정보 가져오기
+  // todo: master 다중조회 api 완성시 연결
+
+  return (
+    <HeroBannerCarousel
+      banners={MOCK_BANNER_GROUP.banners}
+      pcWidth={MOCK_BANNER_GROUP.pcWidth}
+      pcHeight={MOCK_BANNER_GROUP.pcHeight}
+      mobileWidth={MOCK_BANNER_GROUP.mobileWidth}
+      mobileHeight={MOCK_BANNER_GROUP.mobileHeight}
+      // bannersWithProducts={bannersWithProducts} // todo: add bannersWithProducts
+    />
+  )
 }
 
 HeroBanner.Skeleton = function HeroBannerSkeleton() {

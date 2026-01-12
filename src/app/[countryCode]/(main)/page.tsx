@@ -1,11 +1,12 @@
 import { ThemeManager } from "@/components/shared/theme-manager"
 import ProtectedRoute from "@components/protected-route"
-import { CategoryTreeNodeDto, getCategoryTree } from "@lib/api/pim"
+import { getCategoryTree } from "@lib/api/pim"
+import type { CategoryTreeNodeDto } from "@lib/types/dto/pim"
 import { fetchMe } from "@lib/api/users/me"
 import { HomeLogoutTemplate } from "domains/home/template/home-logout-template"
-
 import { siteConfig } from "@/lib/config/site"
 import { getSEOTags } from "@/lib/seo"
+import { getProductList } from "@/lib/api/medusa/products"
 
 export const metadata = getSEOTags({
   title: `${siteConfig.appName} | 최저가 미용재료 MRO 쇼핑몰`,

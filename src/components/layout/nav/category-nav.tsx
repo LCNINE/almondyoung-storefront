@@ -55,8 +55,7 @@ export function CategoryNavigation({
 
   return (
     <nav className="w-full">
-      {/* ─── 모바일: 가로 스크롤 네비게이션 ─── */}레이아웃 컴포넌트의 임포트
-      경로를 수정하고 사용하지 않는 파일을 삭제함
+      {/* ─── 모바일: 가로 스크롤 네비게이션 ─── */}
       <div
         ref={scrollRef}
         onMouseDown={onDragStart}

@@ -5,11 +5,11 @@ import { SearchSheet } from "@/components/search/search-sheet"
 import { getCategoryTree } from "@/lib/api/pim"
 import { Menu } from "lucide-react"
 import { Logo } from "./logo"
-import { UserActions } from "./user-actions"
+import { AccountMenu } from "./user-actions"
 
 export async function MainHeader() {
-  // const categories = await getCategoryTree().catch(() => null)
-  // const mainCategories = categories?.categories.slice(0, 7) ?? []
+  const categories = await getCategoryTree().catch(() => null)
+  const mainCategories = categories?.categories.slice(0, 7) ?? []
 
   return (
     <header className="bg-header-background overflow-visible">
@@ -25,7 +25,7 @@ export async function MainHeader() {
           </div>
 
           <div className="shrink-0">
-            <UserActions />
+            <AccountMenu />
           </div>
         </div>
 
@@ -36,16 +36,16 @@ export async function MainHeader() {
         >
           {/* 햄버거 메뉴 */}
           <div className="hidden md:block">
-            {/* <CategorySheet
+            <CategorySheet
               trigger={
                 <button className="flex h-10 w-10 items-center justify-center rounded-md transition-colors hover:bg-white/10">
                   <Menu className="h-7 w-7 text-white" />
                 </button>
               }
-            /> */}
+            />
           </div>
 
-          {/* <CategoryNavigation mainCategories={mainCategories} /> */}
+          <CategoryNavigation mainCategories={mainCategories} />
         </nav>
       </div>
 

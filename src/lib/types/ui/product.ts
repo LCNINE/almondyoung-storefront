@@ -258,11 +258,16 @@ export interface SearchProductResult {
   }
 }
 
-/**
- * Banner
- */
+// ==========================================
+// Banner
+// ==========================================
 
 /**
  * BannerGroup
  */
 export interface BannerGroup extends BannerGroupDto {}
+
+/**
+ * Banner
+ */
+export interface Banner extends BannerDto {}

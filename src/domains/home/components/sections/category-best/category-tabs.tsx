@@ -6,7 +6,7 @@ import { motion } from "framer-motion"
 interface CategoryTabsProps {
   categories: CategoryTreeNodeDto[]
   activeTab: string
-  dragHandlers: any // For simplicity, though React.HTMLAttributes<HTMLDivElement> would be more precise
+  dragHandlers: React.HTMLAttributes<HTMLDivElement>
 }
 
 export function CategoryTabs({
@@ -48,4 +48,3 @@ export function CategoryTabs({
     </TabsList>
   )
 }
-

@@ -1,7 +1,7 @@
 "use client"
 
 import { Tabs, TabsContent } from "@/components/ui/tabs"
-import { CategoryTreeNodeDto } from "@lib/api/pim"
+import type { CategoryTreeNodeDto } from "@lib/types/dto/pim"
 import { AnimatePresence, motion } from "framer-motion"
 import testImg from "@assets/images/test.png"
 import { useCategoryBest } from "../../../hooks/use-category-best"

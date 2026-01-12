@@ -1,240 +1,175 @@
 "use client"
 
-import * as React from "react"
+import testImage from "@/assets/images/test.png"
+import { useMediaQuery } from "@/hooks/use-media-query"
+import { PauseIcon } from "@/icons/pause-icon"
+import type { Banner } from "@/lib/types/ui/product"
+import Autoplay from "embla-carousel-autoplay"
+import { Play } from "lucide-react"
 import Image from "next/image"
-import { cn } from "@lib/utils"
-import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react"
+import Link from "next/link"
+import { useEffect, useRef, useState } from "react"
+import { Button } from "../ui/button"
+import {
+  Carousel,
+  CarouselApi,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "../ui/carousel"
 
-export type Slide = {
-  id: string | number
-  image: {
-    src: string
-    alt: string
-    priority?: boolean
-  }
-  title?: React.ReactNode
-  subtitle?: React.ReactNode
-  href?: string
-  ctaLabel?: string
-  // 배경/오버레이 커스터마이즈
-  className?: string // 섹션 배경용
-  overlayClassName?: string // 텍스트 영역 박스용
+interface HeroBannerCarouselProps {
+  banners: Banner[]
+  pcWidth: number | null
+  pcHeight: number | null
+  mobileWidth: number | null
+  mobileHeight: number | null
 }
 
-type BannerCarouselProps = {
-  slides: Slide[]
-  autoPlay?: boolean
-  autoPlayInterval?: number // ms
-  aspectRatio?: `${number}/${number}` // ex) "21/9", "16/9"
-  height?: string | number // 직접 높이 지정 (ex: "400px", 400)
-  className?: string
-}
+export function HeroBannerCarousel({
+  banners,
+  pcWidth,
+  pcHeight,
+  mobileWidth,
+  mobileHeight,
+}: HeroBannerCarouselProps) {
+  const [api, setApi] = useState<CarouselApi>()
+  const [isPlaying, setIsPlaying] = useState(true)
 
-export function BannerCarousel({
-  slides,
-  autoPlay = true,
-  autoPlayInterval = 4000,
-  aspectRatio = "21/9",
-  height,
-  className,
-}: BannerCarouselProps) {
-  const [index, setIndex] = React.useState(0)
-  const [isPlaying, setIsPlaying] = React.useState(autoPlay)
-  const containerRef = React.useRef<HTMLDivElement | null>(null)
-  const touchStartX = React.useRef<number | null>(null)
-  const touchDeltaX = React.useRef(0)
+  const isMobile = useMediaQuery("(max-width: 768px)")
 
-  const count = slides.length
+  const autoplay = useRef(Autoplay({ delay: 4000, stopOnInteraction: false }))
 
-  // 이동 함수
-  const goTo = React.useCallback(
-    (next: number) => {
-      const safe = ((next % count) + count) % count
-      setIndex(safe)
-    },
-    [count]
-  )
-  const next = React.useCallback(() => goTo(index + 1), [goTo, index])
-  const prev = React.useCallback(() => goTo(index - 1), [goTo, index])
+  useEffect(() => {
+    if (!api) return
 
-  // 자동재생 (사용자 선호: 감소된 모션 고려)
-  React.useEffect(() => {
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)")
-    if (!isPlaying || media.matches) return
-    const id = window.setInterval(next, autoPlayInterval)
-    return () => window.clearInterval(id)
-  }, [isPlaying, autoPlayInterval, next])
+    const autoplayInstance = api.plugins().autoplay
+    if (!autoplayInstance) return
 
-  // hover 시 일시정지
-  const onMouseEnter = () => setIsPlaying(false)
-  const onMouseLeave = () => setIsPlaying(true)
-
-  // 키보드 내비게이션
-  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === "ArrowRight") next()
-    if (e.key === "ArrowLeft") prev()
-  }
-
-  // 터치 스와이프
-  const onTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX
-    touchDeltaX.current = 0
-  }
-  const onTouchMove = (e: React.TouchEvent) => {
-    if (touchStartX.current == null) return
-    touchDeltaX.current = e.touches[0].clientX - touchStartX.current
-  }
-  const onTouchEnd = () => {
-    const delta = touchDeltaX.current
-    touchStartX.current = null
-    touchDeltaX.current = 0
-    if (Math.abs(delta) > 50) {
-      delta < 0 ? next() : prev()
+    if (isPlaying) {
+      autoplayInstance.play()
+    } else {
+      autoplayInstance.stop()
     }
-  }
+  }, [isPlaying, api])
 
   return (
-    <section
-      ref={containerRef}
-      className={cn("relative w-full select-none", className)}
-      aria-roledescription="carousel"
-      aria-label="프로모션 배너"
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-      onKeyDown={onKeyDown}
-      tabIndex={0}
-    >
-      {/* 뷰포트 */}
-      <div className="overflow-hidden">
-        <ul
-          className="flex transition-transform duration-500 ease-out"
-          style={{ transform: `translateX(-${index * 100}%)` }}
-        >
-          {slides.map((s, i) => (
-            <li
-              key={s.id}
-              className={cn(
-                "relative min-w-full",
-                // 원하는 비율 유지
-                "grid"
-              )}
+    <div className="bg-background relative w-full overflow-hidden border-b border-gray-100 pt-4 pb-[87px]">
+      <Carousel
+        setApi={setApi}
+        plugins={[autoplay.current]}
+        opts={{
+          loop: true,
+          align: isMobile ? "start" : "center",
+          skipSnaps: false,
+        }}
+        className="w-full"
+        onMouseEnter={() => isPlaying && autoplay.current.stop()}
+        onMouseLeave={() => isPlaying && autoplay.current.play()}
+      >
+        <CarouselContent className="-ml-6">
+          {banners.map((banner) => (
+            <CarouselItem
+              key={banner.id}
+              className="basis-[85%] pl-6 md:basis-[55%] lg:basis-[50%]"
             >
-              <div
-                className={cn(
-                  "relative w-full",
-                  // aspect-ratio 유지를 위한 컨테이너
-                  "overflow-hidden",
-                  s.className
-                )}
-                style={{
-                  ...(height
-                    ? {
-                        height:
-                          typeof height === "number" ? `${height}px` : height,
-                      }
-                    : { aspectRatio }),
-                }}
+              <Link
+                href={banner.linkUrl ?? "#"}
+                className="relative block h-[304px] w-full overflow-hidden rounded-[24px] bg-gray-100 shadow-sm md:h-[518px]"
               >
-                <Image
-                  src={s.image.src}
-                  alt={s.image.alt}
-                  fill
-                  priority={s.image.priority}
-                  className="object-cover"
-                  sizes="100vw"
-                />
+                {/* 모바일 이미지 */}
+                <div className="relative block h-full w-full md:hidden">
+                  <Image
+                    src={banner.mobileImageFileId}
+                    alt={banner.title}
+                    fill
+                    sizes="(max-width: 768px) 85vw, 100vw"
+                    className="object-cover transition-transform duration-500 hover:scale-105"
+                    priority
+                  />
+                </div>
 
-                {/* 텍스트 오버레이 */}
-                <div
-                  className={cn(
-                    "absolute inset-0",
-                    "flex items-center",
-                    "bg-gradient-to-r from-black/40 via-black/20 to-transparent"
-                  )}
-                >
-                  <div
-                    className={cn(
-                      "mx-auto px-6",
-                      "max-w-[1200px] text-center text-white"
+                {/* 데스크탑 이미지 */}
+                <div className="relative hidden h-full w-full md:block">
+                  <Image
+                    src={banner.pcImageFileId}
+                    alt={banner.title}
+                    fill
+                    sizes="(max-width: 1024px) 55vw, 50vw"
+                    className="object-cover transition-transform duration-500 hover:scale-105"
+                    priority
+                  />
+                </div>
+
+                {/* 그라데이션 오버레이*/}
+                <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
+
+                {/* 콘텐츠 영역 */}
+                <div className="absolute inset-x-0 bottom-0 p-6 text-white md:p-12">
+                  <div className="max-w-[85%] md:max-w-[60%]">
+                    <h2 className="text-xl leading-[1.2] font-bold tracking-tight md:text-4xl lg:text-5xl">
+                      {banner.title}
+                    </h2>
+                    {banner.description && (
+                      <p className="mt-2 line-clamp-1 text-xs font-medium opacity-80 md:mt-4 md:line-clamp-2 md:text-lg">
+                        {banner.description}
+                      </p>
                     )}
-                  >
-                    <div
-                      className={cn(
-                        "inline-flex max-w-[720px] flex-col gap-1",
-                        "backdrop-blur-[0px]",
-                        s.overlayClassName
-                      )}
-                    >
-                      {s.title ? (
-                        <span className="text-[24px] leading-tight font-extrabold md:text-[30px]">
-                          {s.title}
-                        </span>
-                      ) : null}
-                      {s.subtitle ? (
-                        <p className="text-base opacity-90 md:text-lg/relaxed">
-                          {s.subtitle}
-                        </p>
-                      ) : null}
-                      {/* {s.href && s.ctaLabel ? (
-                        <div className="pt-2">
-                          <Button asChild size="lg" className="rounded-full">
-                            <a href={s.href} aria-label={`${s.ctaLabel} 이동`}>
-                              {s.ctaLabel}
-                            </a>
-                          </Button>
+
+                    {/* subProduct */}
+                    <div className="mt-4 md:mt-8">
+                      <p className="mb-2 text-xs font-medium opacity-80 md:text-sm">
+                        검색 연관 제품
+                      </p>
+                      <div className="flex gap-2 md:gap-4">
+                        <div className="relative aspect-square w-[103px] overflow-hidden rounded-lg bg-white/20 md:w-[131px] md:rounded-xl">
+                          <Image
+                            src={testImage}
+                            alt="product"
+                            fill
+                            className="object-cover"
+                          />
                         </div>
-                      ) : null} */}
+                        <div className="relative aspect-square w-[103px] overflow-hidden rounded-lg bg-white/20 md:w-[131px] md:rounded-xl">
+                          <Image
+                            src={testImage}
+                            alt="product"
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </li>
+              </Link>
+            </CarouselItem>
           ))}
-        </ul>
-      </div>
+        </CarouselContent>
 
-      {/* 좌우 화살표 */}
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-between px-2 opacity-50">
-        <Button
-          variant="secondary"
-          size="icon"
-          className="pointer-events-auto rounded-full shadow-lg"
-          onClick={prev}
-          aria-label="이전 배너"
-        >
-          <ChevronLeft className="h-5 w-5" />
-        </Button>
-        <Button
-          variant="secondary"
-          size="icon"
-          className="pointer-events-auto rounded-full shadow-lg"
-          onClick={next}
-          aria-label="다음 배너"
-        >
-          <ChevronRight className="h-5 w-5" />
-        </Button>
-      </div>
+        {/* 컨트롤 영역 */}
+        <div className="absolute right-8 -bottom-14 z-20 hidden items-center gap-3 md:flex">
+          <div className="flex h-11 items-center overflow-hidden rounded-full border border-white/40 bg-white/80 shadow-md backdrop-blur-md transition-all hover:bg-white">
+            <CarouselPrevious className="static h-full w-12 translate-y-0 cursor-pointer border-none bg-transparent text-black shadow-none transition-colors hover:bg-white/80 hover:text-black" />
+            <div className="h-4 w-px bg-gray-300" />
+            <CarouselNext className="static h-full w-12 translate-y-0 cursor-pointer border-none bg-transparent text-black shadow-none transition-colors hover:bg-white/80 hover:text-black" />
+          </div>
 
-      {/* 하단 컨트롤: 점 + 재생/일시정지
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2">
-        <div className="flex items-center gap-1">
-          {slides.map((_, i) => {
-            const active = i === index;
-            return (
-              <button
-                key={i}
-                onClick={() => goTo(i)}
-                aria-label={`${i + 1}번째 배너로 이동`}
-                className={cn(
-                  "h-2 w-2 rounded-full transition-all",
-                  active ? "w-6 bg-white" : "bg-white/60 hover:bg-white/90"
-                )}
-              />
-            );
-          })}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-11 w-11 cursor-pointer rounded-full bg-white/80 text-black shadow-md backdrop-blur-md transition-all hover:bg-white hover:text-black active:scale-90"
+            onClick={() => setIsPlaying(!isPlaying)}
+          >
+            {isPlaying ? (
+              <PauseIcon className="h-5 w-5" />
+            ) : (
+              <Play className="h-5 w-5 fill-current" />
+            )}
+          </Button>
         </div>
-      </div> */}
-    </section>
+      </Carousel>
+    </div>
   )
 }

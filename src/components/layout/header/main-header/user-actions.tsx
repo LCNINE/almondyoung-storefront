@@ -6,7 +6,7 @@ import { Bell, Search, ShoppingCart, User } from "lucide-react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 
-export function UserActions() {
+export function AccountMenu() {
   const { countryCode } = useParams()
   const { user } = useUser()
 
@@ -18,9 +18,9 @@ export function UserActions() {
 
   return (
     <div className="flex items-center gap-[clamp(0.5px,2vw,1.5rem)]">
+      {/* 모바일 검색 */}
       <div className="flex md:hidden">
-        {/* 검색 */}
-        <UserActionButton
+        <AccountMenuItem
           onClick={onOpen}
           icon={<Search className="h-6 w-6 md:h-8 md:w-8" color="white" />}
           label="검색"
@@ -28,7 +28,7 @@ export function UserActions() {
       </div>
 
       {/* 장바구니 */}
-      <UserActionButton
+      <AccountMenuItem
         href={`/${countryCode}/cart`}
         icon={<ShoppingCart className="h-6 w-6 md:h-8 md:w-8" color="white" />}
         label="장바구니"
@@ -37,98 +37,88 @@ export function UserActions() {
 
       {/* 로그인 / 마이페이지 */}
       <div className="hidden md:flex">
-        <UserActionButton
+        <AccountMenuItem
           href={user ? `/${countryCode}/mypage` : `/${countryCode}/login`}
           icon={<User className="h-6 w-6 md:h-8 md:w-8" color="white" />}
           label={user ? "마이" : "로그인"}
         />
       </div>
 
-      {/* 알림 */}
-      <NotificationButton hasDot={hasNotification} label="알림" />
+      {/* 알림  */}
+      <AccountMenuItem
+        onClick={() => console.log("알림 열기")}
+        icon={<Bell className="h-6 w-6 md:h-8 md:w-8" color="white" />}
+        label="알림"
+        showDot={hasNotification}
+      />
     </div>
   )
 }
 
-interface UserActionButtonProps {
+interface AccountMenuItemProps {
   href?: string
   icon: React.ReactNode
   label: string
   badgeCount?: number
+  showDot?: boolean // 알림용 점 표시 여부 추가
   onClick?: () => void
 }
 
-function UserActionButton({
+function AccountMenuItem({
   href,
   icon,
   label,
   badgeCount,
+  showDot,
   onClick,
-}: UserActionButtonProps) {
+}: AccountMenuItemProps) {
   const displayBadge =
     badgeCount && badgeCount > 0 ? (badgeCount > 99 ? "99+" : badgeCount) : null
+
+  const content = (
+    <>
+      <div className="relative">
+        {icon}
+
+        {/*  숫자가 있는 배지 (장바구니 등) */}
+        {displayBadge && (
+          <span className="bg-yellow-30 absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full text-xs font-bold text-white md:h-5 md:w-5">
+            {displayBadge}
+          </span>
+        )}
+
+        {/*  숫자 없이 점만 있는 배지 (알림 등) */}
+        {showDot && !displayBadge && (
+          <span className="bg-yellow-30 absolute -top-1 -right-1 h-2 w-2 rounded-full md:h-2.5 md:w-2.5" />
+        )}
+      </div>
+
+      <span className="hidden text-[clamp(0.625rem,1.2vw,0.75rem)] leading-none font-medium whitespace-nowrap md:block">
+        {label}
+      </span>
+    </>
+  )
 
   switch (Boolean(href)) {
     case true:
       return (
         <Link
           href={href ?? ""}
-          className="flex-col items-center gap-1 text-white md:flex"
+          className="flex flex-col items-center gap-1 text-white"
         >
-          <div className="relative">
-            {icon}
-
-            {displayBadge && (
-              <span className="bg-yellow-30 absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full text-xs font-bold text-white md:h-5 md:w-5">
-                {displayBadge}
-              </span>
-            )}
-          </div>
-          <span className="hidden text-[clamp(0.625rem,1.2vw,0.75rem)] leading-none font-medium whitespace-nowrap md:block">
-            {label}
-          </span>
+          {content}
         </Link>
       )
 
     default:
       return (
-        <button onClick={onClick} className="cursor-pointer" type="button">
-          <div className="relative">
-            {icon}
-
-            {displayBadge && (
-              <span className="bg-yellow-30 absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full text-xs font-bold text-white md:h-5 md:w-5">
-                {displayBadge}
-              </span>
-            )}
-          </div>
-          <span className="hidden text-[clamp(0.625rem,1.2vw,0.75rem)] leading-none font-medium whitespace-nowrap md:block">
-            {label}
-          </span>
+        <button
+          onClick={onClick}
+          className="flex cursor-pointer flex-col items-center gap-1 text-white"
+          type="button"
+        >
+          {content}
         </button>
       )
   }
-}
-
-function NotificationButton({
-  hasDot,
-  label,
-}: {
-  hasDot: boolean
-  label: string
-}) {
-  return (
-    <button className="relative flex cursor-pointer flex-col items-center gap-1 text-white">
-      <div className="relative">
-        <Bell className="h-6 w-6 md:h-8 md:w-8" color="white" />
-        {hasDot && (
-          <span className="bg-yellow-30 absolute -top-1 -right-1 h-2 w-2 rounded-full" />
-        )}
-      </div>
-
-      <span className="hidden text-[clamp(0.625rem,1.2vw,0.75rem)] leading-none font-medium whitespace-nowrap group-hover:underline md:block">
-        {label}
-      </span>
-    </button>
-  )
 }
