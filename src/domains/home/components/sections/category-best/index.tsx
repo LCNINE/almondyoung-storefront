@@ -96,7 +96,7 @@ export function CategoryBestSection({
                                     src={product.imageSrc}
                                     alt={product.title}
                                     rank={<ProductCard.Rank rank={rank} />}
-                                    className="rounded-sm"
+                                    className="rounded-tl-sm rounded-tr-xl rounded-br-xl rounded-bl-md"
                                   />
                                   <ProductCard.Info {...product} />
                                 </ProductCard>

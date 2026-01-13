@@ -29,7 +29,7 @@ export function HomeLogoutTemplate({
         <CategoryBestSection initialCategories={initialCategories} />
       </ProductListSection>
 
-      {/* 멤버십 배너 */}
+      {/* 멤버십 배너 (데스크탑) */}
       <div className="hidden w-full border-t border-gray-200 md:block">
         <ProductListSection.Inner className="px-0 pt-5 md:container md:mx-auto md:max-w-[1360px] md:px-[40px]">
           <MembershipBanner />
@@ -40,6 +40,13 @@ export function HomeLogoutTemplate({
       <ProductListSection className="border-t md:border-t-0">
         <WelcomeDealSection />
       </ProductListSection>
+
+      {/* 래쉬 배너 (모바일) */}
+      <div className="w-full border-t border-gray-200 md:hidden">
+        <ProductListSection.Inner className="px-0 pt-5 md:container md:mx-auto md:max-w-[1360px] md:px-[40px]">
+          <MembershipBanner />
+        </ProductListSection.Inner>
+      </div>
     </div>
   )
 }

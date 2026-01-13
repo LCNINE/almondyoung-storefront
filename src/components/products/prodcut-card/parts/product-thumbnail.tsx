@@ -6,7 +6,7 @@ export function ProductThumbnail({
   alt,
   action,
   rank,
-  className = "rounded-tl-sm rounded-tr-xl rounded-br-xl rounded-bl-md",
+  className,
 }: {
   src: string
   alt: string

@@ -25,7 +25,7 @@ export function WelcomeDealSection() {
 
   return (
     <div className="w-full">
-      <SectionHeader className="mb-8 justify-between md:justify-start">
+      <SectionHeader className="mb-6 justify-between md:justify-start">
         <SectionHeader.Title>
           <span>웰컴딜 전체 제품 100원</span>
         </SectionHeader.Title>
@@ -38,13 +38,13 @@ export function WelcomeDealSection() {
           opts={{ align: "start", containScroll: "trimSnaps" }}
           className="md:hidden"
         >
-          <ProductCarousel.List className="-ml-3">
-            {products.map((product) => (
+          <ProductCarousel.List className="ml-0">
+            {products.map((product, index) => (
               <ProductCarousel.Item
                 key={product.id}
-                className="basis-[30%] pl-3"
+                className="basis-[42%] pl-0"
               >
-                <ProductCard>
+                <ProductCard className="border-r-[0.5px] border-r-gray-100 pr-4 last:border-r-0">
                   <ProductCard.Thumbnail
                     src={product.imageSrc}
                     alt={product.title}
@@ -56,7 +56,7 @@ export function WelcomeDealSection() {
             ))}
           </ProductCarousel.List>
 
-          <ProductCarousel.Indicator />
+          <ProductCarousel.Indicator itemsPerGroup={3} />
         </ProductCarousel>
       </div>
 
