@@ -1,23 +1,26 @@
-import { ProductCardProps } from "@/lib/types/ui/product"
-import testImg from "@assets/images/test.png"
-import Link from "next/link"
-import { ProductInfo } from "./parts/product-info"
+import { cn } from "@lib/utils"
 import { ProductThumbnail } from "./parts/product-thumbnail"
-import { QuickCartButton } from "./parts/quick-cart-button"
+import { ProductInfo } from "./parts/product-info"
+import { ProductRank } from "./parts/product-rank"
 
-export function ProductCard(props: ProductCardProps) {
+interface ProductCardProps {
+  children: React.ReactNode
+  className?: string
+}
+
+export function ProductCard({ children, className }: ProductCardProps) {
   return (
-    <div className="group flex cursor-pointer flex-col gap-2">
-      {/* todo: 상품 상세 페이지 링크 추가 */}
-      <Link href={`#`}>
-        <ProductThumbnail
-          src={testImg.src} // todo: 이미지 소스 추가
-          alt={props.title}
-          rank={props.rank}
-          action={<QuickCartButton />}
-        />
-        <ProductInfo {...props} />
-      </Link>
+    <div
+      className={cn(
+        "group relative flex cursor-pointer flex-col gap-2",
+        className
+      )}
+    >
+      {children}
     </div>
   )
 }
+
+ProductCard.Thumbnail = ProductThumbnail
+ProductCard.Info = ProductInfo
+ProductCard.Rank = ProductRank

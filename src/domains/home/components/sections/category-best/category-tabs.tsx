@@ -1,5 +1,5 @@
 import { TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { CategoryTreeNodeDto } from "@lib/api/pim"
+import type { CategoryTreeNodeDto } from "@lib/types/dto/pim"
 import { cn } from "@lib/utils"
 import { motion } from "framer-motion"
 
@@ -27,7 +27,7 @@ export function CategoryTabs({
       {categories.map((category) => (
         <TabsTrigger
           key={category.id}
-          value={category.name}
+          value={category.slug}
           className={cn(
             "relative cursor-pointer rounded-xl border border-gray-200 px-5 transition-colors",
             "data-[state=active]:text-gray-10 data-[state=active]:border-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none",
@@ -36,7 +36,7 @@ export function CategoryTabs({
         >
           <span className="relative z-10">{category.name}</span>
 
-          {activeTab === category.name && (
+          {activeTab === category.slug && (
             <motion.div
               layoutId="active-pill-bg"
               className="bg-gray-80 absolute inset-0 z-0 rounded-xl"

@@ -53,6 +53,7 @@ export interface RecentViewProductThumbnail {
  * ProductCardProps - 상품 카드 타입
  */
 export interface ProductCardProps {
+  id: string
   rank?: number
   title: string
   price: number

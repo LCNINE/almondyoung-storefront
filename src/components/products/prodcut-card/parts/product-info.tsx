@@ -13,7 +13,7 @@ export function ProductInfo({
 }: Omit<ProductCardProps, "imageSrc" | "rank">) {
   return (
     <div className="flex flex-col gap-0.5 px-1">
-      <h3 className="line-clamp-2 text-[14px] leading-tight text-gray-600">
+      <h3 className="mt-2 line-clamp-2 text-[14px] leading-tight text-gray-600">
         {title}
       </h3>
 

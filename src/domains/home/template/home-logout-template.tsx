@@ -1,9 +1,10 @@
 import type { CategoryTreeNodeDto } from "@lib/types/dto/pim"
 import { HeroBanner } from "../components/banner/hero-banner"
 import { LoginPromptBanner } from "../components/banner/login-prompt-banner"
-import MiddleBanner from "../components/banner/middle-banner"
+import MembershipBanner from "../components/banner/membership-banner"
 import { CategoryBestSection } from "../components/sections/category-best"
 import { ProductListSection } from "../components/shared/product-list-section"
+import { WelcomeDealSection } from "../components/sections/welcome-deal"
 
 interface HomeLogoutTemplateProps {
   initialCategories: CategoryTreeNodeDto[]
@@ -28,9 +29,16 @@ export function HomeLogoutTemplate({
         <CategoryBestSection initialCategories={initialCategories} />
       </ProductListSection>
 
-      {/* 중간 배너 섹션 */}
-      <ProductListSection>
-        <MiddleBanner className="mb-4" />
+      {/* 멤버십 배너 */}
+      <div className="hidden w-full border-t border-gray-200 md:block">
+        <ProductListSection.Inner className="px-0 pt-5 md:container md:mx-auto md:max-w-[1360px] md:px-[40px]">
+          <MembershipBanner />
+        </ProductListSection.Inner>
+      </div>
+
+      {/* 웰컴 딜 섹션 */}
+      <ProductListSection className="border-t md:border-t-0">
+        <WelcomeDealSection />
       </ProductListSection>
     </div>
   )

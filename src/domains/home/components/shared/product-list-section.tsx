@@ -10,7 +10,7 @@ interface ProductSectionProps {
 export function ProductListSection({
   children,
   background = "white",
-  className = "",
+  className,
 }: ProductSectionProps) {
   return (
     <section
@@ -20,9 +20,26 @@ export function ProductListSection({
         className
       )}
     >
-      <div className="container mx-auto max-w-[1360px] px-4 md:px-[40px]">
-        {children}
-      </div>
+      <ProductListSection.Inner>{children}</ProductListSection.Inner>
     </section>
+  )
+}
+
+ProductListSection.Inner = function Inner({
+  children,
+  className,
+}: {
+  children: React.ReactNode
+  className?: string
+}) {
+  return (
+    <div
+      className={cn(
+        "container mx-auto max-w-[1360px] px-4 md:px-[40px]",
+        className
+      )}
+    >
+      {children}
+    </div>
   )
 }
