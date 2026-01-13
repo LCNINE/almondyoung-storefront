@@ -55,6 +55,8 @@ async function getRegionMap(cacheId: string) {
           regionMapCache.regionMap.set(c.iso_2 ?? "", region)
         })
       })
+
+      console.log("regions::", regions)
       regionMapCache.regionMapUpdated = Date.now()
     } catch (error) {
       // API 호출 실패 시 기본 리전만 사용

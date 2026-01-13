@@ -1,12 +1,13 @@
 import { ThemeManager } from "@/components/shared/theme-manager"
-import ProtectedRoute from "@components/protected-route"
-import { getCategoryTree } from "@lib/api/pim"
-import type { CategoryTreeNodeDto } from "@lib/types/dto/pim"
-import { fetchMe } from "@lib/api/users/me"
-import { HomeLogoutTemplate } from "domains/home/template/home-logout-template"
+import { getProductList } from "@/lib/api/medusa/products"
+import { getRegion } from "@/lib/api/medusa/regions"
 import { siteConfig } from "@/lib/config/site"
 import { getSEOTags } from "@/lib/seo"
-import { getProductList } from "@/lib/api/medusa/products"
+import ProtectedRoute from "@components/protected-route"
+import { getCategoryTree } from "@lib/api/pim"
+import { fetchMe } from "@lib/api/users/me"
+import type { CategoryTreeNodeDto } from "@lib/types/dto/pim"
+import { HomeLogoutTemplate } from "domains/home/template/home-logout-template"
 
 export const metadata = getSEOTags({
   title: `${siteConfig.appName} | 최저가 미용재료 MRO 쇼핑몰`,
@@ -20,6 +21,8 @@ export default async function Home({
   params: { countryCode: string }
 }) {
   const { countryCode } = await params
+  const region = await getRegion(countryCode)
+
   // 카테고리 트리 조회
   let categories: CategoryTreeNodeDto[] = []
 
@@ -27,8 +30,14 @@ export default async function Home({
   categories = result?.categories || []
 
   const productList = await getProductList({
-    country_code: countryCode,
-  }).catch(() => null)
+    region_id: region?.id,
+    // categoryId: categories[0]?.id,
+  }).catch((err) => {
+    console.error("getProductList failed:", err)
+    return null
+  })
+
+  // console.log("productList::::::", productList)
 
   // todo: 로그인 사용자용 홈페이지 섹션들
   const user = await fetchMe().catch(() => null)

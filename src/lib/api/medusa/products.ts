@@ -9,7 +9,7 @@ interface GetProductListParams {
   page?: number
   limit?: number
   categoryId?: string
-  country_code?: string
+  region_id?: string
 }
 
 // 상품 목록 조회
@@ -17,7 +17,7 @@ export const getProductList = async ({
   page = 1,
   limit = 10,
   categoryId,
-  country_code = "kr",
+  region_id,
 }: GetProductListParams): Promise<ProductsResponseDto> => {
   const offset = (page - 1) * limit
 
@@ -32,7 +32,7 @@ export const getProductList = async ({
         offset,
         category_id: categoryId,
         fields: "*variants.calculated_price,+categories,+metadata,+tags",
-        country_code: country_code,
+        region_id: region_id,
       },
       {
         next: {
@@ -56,11 +56,13 @@ export const getProductList = async ({
 }
 // 상품 상세 조회
 export const getProductDetail = async (
-  productId: string
+  productId: string,
+  regionId?: string
 ): Promise<StoreProduct> => {
   try {
     const { product } = await sdk.store.product.retrieve(productId, {
       fields: "*variants.calculated_price",
+      region_id: regionId,
     })
 
     return product

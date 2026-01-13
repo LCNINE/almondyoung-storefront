@@ -8,7 +8,7 @@ import {
 import { getProductListService } from "@lib/services/pim/products/getProductListService"
 import type { UserDetailDto } from "@lib/types/dto/users"
 import { ProductCard } from "@lib/types/ui/product"
-import MembershipBanner from "domains/home/components/banner/membership-banner"
+import MembershipBanner from "@/domains/home/components/banner/middle-banner"
 import ProductIntrestSection from "domains/home/components/report/product-intrest-section"
 import { useEffect, useState } from "react"
 import ProductList from "../components/list/product-list"

@@ -14,7 +14,7 @@ export function LoginPromptBanner() {
       href={`/${countryCode}/login`}
       className="mb-3.5 block px-4 py-2 md:hidden"
     >
-      <Card className="overflow-hidden border-[0.5px] shadow-sm transition-colors">
+      <Card className="overflow-hidden border-[0.5px] shadow-none transition-colors">
         <CardContent className="flex items-center justify-between p-4">
           <div className="flex items-center gap-4">
             {/* 유저 아이콘 영역 */}
