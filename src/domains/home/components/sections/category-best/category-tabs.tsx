@@ -7,12 +7,14 @@ interface CategoryTabsProps {
   categories: CategoryTreeNodeDto[]
   activeTab: string
   dragHandlers: React.HTMLAttributes<HTMLDivElement>
+  layoutId: string
 }
 
 export function CategoryTabs({
   categories,
   activeTab,
   dragHandlers,
+  layoutId,
 }: CategoryTabsProps) {
   return (
     <TabsList
@@ -38,7 +40,7 @@ export function CategoryTabs({
 
           {activeTab === category.slug && (
             <motion.div
-              layoutId="active-pill-bg"
+              layoutId={layoutId}
               className="bg-gray-80 absolute inset-0 z-0 rounded-xl"
               transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
             />

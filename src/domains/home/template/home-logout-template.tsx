@@ -5,6 +5,8 @@ import MembershipBanner from "../components/banner/membership-banner"
 import { CategoryBestSection } from "../components/sections/category-best"
 import { ProductListSection } from "../components/shared/product-list-section"
 import { WelcomeDealSection } from "../components/sections/welcome-deal"
+import LashBannerBanner from "../components/banner/lashbanner-banner"
+import { TimeSaleSection } from "../components/sections/time-sale"
 
 interface HomeLogoutTemplateProps {
   initialCategories: CategoryTreeNodeDto[]
@@ -44,9 +46,14 @@ export function HomeLogoutTemplate({
       {/* 래쉬 배너 (모바일) */}
       <div className="w-full border-t border-gray-200 md:hidden">
         <ProductListSection.Inner className="px-0 pt-5 md:container md:mx-auto md:max-w-[1360px] md:px-[40px]">
-          <MembershipBanner />
+          <LashBannerBanner />
         </ProductListSection.Inner>
       </div>
+
+      {/* 타임 세일 섹션 */}
+      <ProductListSection>
+        <TimeSaleSection initialCategories={initialCategories} />
+      </ProductListSection>
     </div>
   )
 }

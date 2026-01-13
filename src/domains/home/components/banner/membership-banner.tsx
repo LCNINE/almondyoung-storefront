@@ -3,9 +3,9 @@ import { BannerDto } from "@/lib/types/dto/pim"
 import { BannerGroup } from "@/lib/types/ui/product"
 import { cn } from "@/lib/utils"
 import { getActiveBanners } from "@/lib/utils/banner"
-import Image from "next/image"
 import Link from "next/link"
 import React from "react"
+import { Banner } from "../shared/banner"
 
 interface MembershipBannerProps {
   className?: string
@@ -49,31 +49,11 @@ export default async function MembershipBanner({
   }
 
   return (
-    <div
-      className={cn(
-        "relative h-[89px] w-full overflow-hidden md:h-[120px]",
-        className
-      )}
-    >
-      <Link href="/mypage/membership" className="block h-full w-full">
-        {/* mobile image */}
-        <Image
-          className="object-cover transition-transform duration-300 hover:scale-105 md:hidden"
-          src={"/images/banner/membership_banner.png"} // todo: 배너 이미지 연동 후 수정
-          alt="아몬드영 멤버십 가입하고 추가혜택 받으세요!" // todo: 배너 텍스트 연동 후 수정
-          fill
-          priority
-        />
-
-        {/* desktop image */}
-        <Image
-          className="hidden object-cover transition-transform duration-300 hover:scale-105 md:block"
-          src={"/images/banner/membership_banner.png"} // todo: 배너 이미지 연동 후 수정
-          alt="아몬드영 멤버십 가입하고 추가혜택 받으세요!" // todo: 배너 텍스트 연동 후 수정
-          fill
-          priority
-        />
-      </Link>
-    </div>
+    <Banner
+      href="/mypage/membership"
+      pcSrc="/images/banner/membership_banner.png"
+      mobileSrc="/images/banner/membership_banner.png"
+      alt="아몬드영 멤버십 가입하고 추가혜택 받으세요!"
+    />
   )
 }
