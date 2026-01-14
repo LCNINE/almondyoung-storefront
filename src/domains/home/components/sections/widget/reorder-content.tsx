@@ -9,7 +9,7 @@ import { ProductCarousel } from "../../shared/product-carousel"
 /**
  * 최근 구매 제품
  */
-export function ReorderContent() {
+export function ReorderContent({ onClose }: { onClose: () => void }) {
   const items = [1, 2, 3] // 예시 데이터
 
   return (
@@ -39,6 +39,7 @@ export function ReorderContent() {
           장바구니 담기
         </Button>
         <Button
+          onClick={onClose}
           variant="outline"
           className="cursor-pointer hover:bg-transparent hover:text-black"
         >

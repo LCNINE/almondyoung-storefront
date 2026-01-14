@@ -68,7 +68,7 @@ export function WidgetSection() {
               title="최근 구매 제품 중 3종, 다시 필요하신가요?"
               onClose={() => setShowReorder(false)}
             >
-              <ReorderContent />
+              <ReorderContent onClose={() => setShowReorder(false)} />
             </WidgetCard>
           </motion.div>
         )}
