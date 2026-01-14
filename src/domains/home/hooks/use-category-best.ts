@@ -12,6 +12,7 @@ export function useCategoryBest(initialActiveTab: string) {
       if (prev.has(tab)) return prev
       const next = new Set(prev)
       next.add(tab)
+
       return next
     })
   }, [])

@@ -2,7 +2,6 @@
 
 import { sdk } from "@/lib/config/medusa"
 import type { ProductsResponseDto } from "@lib/types/dto/medusa"
-
 import type { StoreProduct } from "@medusajs/types"
 
 interface GetProductListParams {

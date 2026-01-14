@@ -14,7 +14,6 @@ import { useSearchHistory } from "@/hooks/ui/use-search-history"
  * 검색 기록(addKeyword)에 해당 키워드가 저장됩니다.
  * 팝오버(SearchPopover)는 검색어를 입력할 때 보이며, 최근 검색어, 인기 검색어 등
  * 확장적인 검색 관련 정보를 보여줄 수 있습니다.
- *
  */
 export function SearchCombobox() {
   const [searchTerm, setSearchTerm] = useState("")
