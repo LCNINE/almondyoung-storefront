@@ -1,4 +1,5 @@
 import type { UserDetail } from "@/lib/types/ui/user"
+import { HeroBanner } from "../components/banner/hero-banner"
 
 interface HomeLoggedInTemplateProps {
   user: UserDetail
@@ -8,5 +9,10 @@ interface HomeLoggedInTemplateProps {
  * 로그인한 사용자용
  *───────────────────────────────────────────────*/
 export function HomeLoggedInTemplate({ user }: HomeLoggedInTemplateProps) {
-  return <div>HomeLoggedInTemplate</div>
+  return (
+    <div className="w-full">
+      {/* 메인 히어로 배너 */}
+      <HeroBanner />
+    </div>
+  )
 }
