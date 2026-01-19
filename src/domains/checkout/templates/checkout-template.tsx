@@ -1,6 +1,7 @@
 "use client"
 
 import type { UserDetail } from "@lib/types/ui/user"
+import { StoreCart } from "@medusajs/types"
 import { loadTossPayments } from "@tosspayments/tosspayments-sdk"
 import { MobileCTA, PCFixedCTA } from "domains/checkout/components/cta"
 import { MobileHeader, PCHeader } from "domains/checkout/components/header"
@@ -15,11 +16,15 @@ import { ShippingSection } from "domains/checkout/components/sections/shipping-s
 import { useParams, useRouter } from "next/navigation"
 import { useRef, useState } from "react"
 
-export default function CheckoutTemplate({ user }: { user: UserDetail }) {
+interface CheckoutTemplateProps {
+  user: UserDetail
+  storeCart: StoreCart | null
+}
+
+export default function CheckoutTemplate({ user, storeCart }: CheckoutTemplateProps) {
   const router = useRouter()
   const params = useParams()
   const countryCode = params.countryCode as string
-  console.log("user:", user)
 
   const [selectedMethod, setSelectedMethod] = useState("payLater")
   const [cashReceiptOption, setCashReceiptOption] = useState("noapply")
@@ -183,24 +188,15 @@ export default function CheckoutTemplate({ user }: { user: UserDetail }) {
 
         const responseData = await authorizeResponse.json()
 
-        // 응답이 { data: { ... } } 형태로 감싸져 있을 수 있으므로 처리
         const result = responseData.data || responseData
 
-        // 디버깅: 응답 확인
-        console.log("🔍 Authorize 응답:", {
-          status: authorizeResponse.status,
-          responseData,
-          result,
-          hasSuccess: result?.success,
-          hasIntentId: result?.intentId,
-        })
 
         if (result.success && result.intentId) {
           router.push(`/${countryCode}/checkout/success/${result.intentId}`)
         } else {
           throw new Error(
             result.message ||
-              `결제 승인 실패: success=${result?.success}, intentId=${result?.intentId}`
+            `결제 승인 실패: success=${result?.success}, intentId=${result?.intentId}`
           )
         }
       }
@@ -222,7 +218,7 @@ export default function CheckoutTemplate({ user }: { user: UserDetail }) {
         <div className="md:flex md:w-full md:justify-between md:gap-9">
           {/* 왼쪽 섹션 */}
           <div className="md:max-w-[820px] md:min-w-[420px] md:flex-1">
-            <ShippingSection />
+            <ShippingSection shippingAddress={storeCart?.shipping_address || null} />
             <OrderProductsSection />
             <DiscountSection />
             <PaymentInfoSection />
