@@ -1,13 +1,12 @@
 "use server"
 
+import { unstable_cache } from "next/cache"
 import { getBestOrderMetricsByCategory } from "@/lib/api/analytics"
 import { getProductList } from "@/lib/api/medusa/products"
 import { getReviewsByProductId } from "@/lib/api/ugc"
 import { ProductCardProps } from "@/lib/types/ui/product"
 
-export async function getCategoryBestProducts(
-  categoryId: string
-): Promise<ProductCardProps[]> {
+const fetchCategoryBestProducts = async (categoryId: string): Promise<ProductCardProps[]> => {
   if (!categoryId) {
     return []
   }
@@ -91,5 +90,21 @@ export async function getCategoryBestProducts(
     })
     .filter((props): props is ProductCardProps => props !== null)
 
-  return transformedProducts
+    return transformedProducts
+  }
+
+export const getCategoryBestProducts = async (categoryId: string): Promise<ProductCardProps[]> => {
+  if (!categoryId) {
+    return []
+  }
+
+  return unstable_cache(
+    () => fetchCategoryBestProducts(categoryId),
+    [`category-best-products-${categoryId}`],
+    {
+      tags: [`category-best-${categoryId}`, "category-best"],
+      revalidate: 3600, // 1시간
+    }
+  )()
 }
+
