@@ -37,7 +37,7 @@ export default async function Home({
     console.error("getProductList failed:", err)
     return null
   })
-
+  // console.log("productList:", productList)
   // todo: 로그인 사용자용 홈페이지 섹션들
   const user = await fetchMe().catch(() => null)
 

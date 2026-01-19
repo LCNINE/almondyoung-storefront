@@ -1,54 +1,30 @@
+"use server"
+
 import { getBestOrderMetricsByCategory } from "@/lib/api/analytics"
 import { getProductList } from "@/lib/api/medusa/products"
 import { getReviewsByProductId } from "@/lib/api/ugc"
 import { ProductCardProps } from "@/lib/types/ui/product"
-import type { CategoryTreeNodeDto } from "@lib/types/dto/pim"
-import { CategoryBestSection } from "./category-best-section"
 
-interface CategoryBestSectionContainerProps {
-  initialCategories: CategoryTreeNodeDto[]
-}
-
-export async function CategoryBestSectionContainer({
-  initialCategories,
-}: CategoryBestSectionContainerProps) {
-  // 카테고리가 없으면 빈 상태로 반환
-  if (!initialCategories[0]?.id) {
-    return (
-      <CategoryBestSection
-        initialCategories={initialCategories}
-        initialProducts={undefined}
-      />
-    )
+export async function getCategoryBestProducts(
+  categoryId: string
+): Promise<ProductCardProps[]> {
+  if (!categoryId) {
+    return []
   }
 
-  const bestOrderMetrics = await getBestOrderMetricsByCategory(
-    initialCategories[0].id
-  )
+  const bestOrderMetrics = await getBestOrderMetricsByCategory(categoryId)
   const masterIds = bestOrderMetrics.map((metric) => metric.masterId)
 
-  // 마스터 ID가 없으면 빈 상태로 반환
   if (masterIds.length === 0) {
-    return (
-      <CategoryBestSection
-        initialCategories={initialCategories}
-        initialProducts={undefined}
-      />
-    )
+    return []
   }
 
   const bestProducts = await getProductList({
     handle: masterIds,
   })
 
-  // 제품이 없으면 빈 상태로 반환
   if (!bestProducts?.products || bestProducts.products.length === 0) {
-    return (
-      <CategoryBestSection
-        initialCategories={initialCategories}
-        initialProducts={undefined}
-      />
-    )
+    return []
   }
 
   const reviews = await Promise.all(
@@ -59,6 +35,7 @@ export async function CategoryBestSectionContainer({
     )
   )
 
+  // 리뷰 데이터 변환
   const reviewsMap = new Map<string, { rating: number; reviewCount: number }>()
   reviews.forEach((review) => {
     if (review.data.length > 0) {
@@ -70,7 +47,7 @@ export async function CategoryBestSectionContainer({
           : 0
 
       reviewsMap.set(productId, {
-        rating: Math.round(averageRating * 10) / 10, // 소수점 1자리
+        rating: Math.round(averageRating * 10) / 10,
         reviewCount: review.data.length,
       })
     }
@@ -84,15 +61,11 @@ export async function CategoryBestSectionContainer({
 
       const variant = product.variants[0] as any
 
-      // 기본 가격: prices[0].amount
       const basePrice = (variant.prices?.[0]?.amount as number) || 0
-
-      // 멤버십 가격: metadata.membershipPrice
       const membershipPrice =
         (variant.metadata as { membershipPrice?: number })?.membershipPrice ||
         null
 
-      // 할인율 계산: ((기본가격 - 멤버십가격) / 기본가격) * 100
       const discount =
         membershipPrice && basePrice > membershipPrice && basePrice > 0
           ? Math.round(((basePrice - membershipPrice) / basePrice) * 100)
@@ -101,7 +74,6 @@ export async function CategoryBestSectionContainer({
       const displayPrice = membershipPrice || basePrice
       const imageUrl = product.thumbnail || ""
 
-      // 리뷰 정보
       const reviewData = reviewsMap.get(product.id)
       const rating = reviewData?.rating || 0
       const reviewCount = reviewData?.reviewCount || 0
@@ -119,10 +91,5 @@ export async function CategoryBestSectionContainer({
     })
     .filter((props): props is ProductCardProps => props !== null)
 
-  return (
-    <CategoryBestSection
-      initialCategories={initialCategories}
-      initialProducts={transformedProducts}
-    />
-  )
+  return transformedProducts
 }
