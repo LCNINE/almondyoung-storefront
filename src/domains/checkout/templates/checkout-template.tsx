@@ -12,7 +12,7 @@ import { OrderProductsSection } from "domains/checkout/components/sections/order
 import { PaymentMethodSection } from "domains/checkout/components/sections/payment-method-section"
 import { PaymentInfoSection } from "domains/checkout/components/sections/paymentInfo-section"
 import { ReceiptSection } from "domains/checkout/components/sections/receipt-section"
-import { ShippingSection } from "domains/checkout/components/sections/shipping-section"
+import { ShippingSection } from "@/domains/checkout/components/sections/shipping-section"
 import { useParams, useRouter } from "next/navigation"
 import { useRef, useState } from "react"
 
@@ -21,7 +21,10 @@ interface CheckoutTemplateProps {
   storeCart: StoreCart | null
 }
 
-export default function CheckoutTemplate({ user, storeCart }: CheckoutTemplateProps) {
+export default function CheckoutTemplate({
+  user,
+  storeCart,
+}: CheckoutTemplateProps) {
   const router = useRouter()
   const params = useParams()
   const countryCode = params.countryCode as string
@@ -190,13 +193,12 @@ export default function CheckoutTemplate({ user, storeCart }: CheckoutTemplatePr
 
         const result = responseData.data || responseData
 
-
         if (result.success && result.intentId) {
           router.push(`/${countryCode}/checkout/success/${result.intentId}`)
         } else {
           throw new Error(
             result.message ||
-            `결제 승인 실패: success=${result?.success}, intentId=${result?.intentId}`
+              `결제 승인 실패: success=${result?.success}, intentId=${result?.intentId}`
           )
         }
       }
@@ -218,7 +220,12 @@ export default function CheckoutTemplate({ user, storeCart }: CheckoutTemplatePr
         <div className="md:flex md:w-full md:justify-between md:gap-9">
           {/* 왼쪽 섹션 */}
           <div className="md:max-w-[820px] md:min-w-[420px] md:flex-1">
-            <ShippingSection shippingAddress={storeCart?.shipping_address || null} />
+            <ShippingSection
+              shippingAddress={storeCart?.shipping_address || null}
+              addressName={
+                (storeCart?.metadata?.shipping_address_name as string) || null
+              }
+            />
             <OrderProductsSection />
             <DiscountSection />
             <PaymentInfoSection />

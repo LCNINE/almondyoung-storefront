@@ -8785,7 +8785,7 @@ __metadata:
     overlay-kit: ^1.8.6
     pg: ^8.11.3
     postcss: ^8.4.35
-    prettier: ^3.6.2
+    prettier: 3.8.0
     prettier-plugin-tailwindcss: ^0.6.14
     qs: ^6.12.1
     react: 19.0.0-rc-66855b96-20241106
@@ -10123,7 +10123,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:^3.6.2":
+"prettier@npm:3.8.0":
   version: 3.8.0
   resolution: "prettier@npm:3.8.0"
   bin:
