@@ -37,16 +37,17 @@ export default async function Home({
     console.error("getProductList failed:", err)
     return null
   })
-  
-  const user = await fetchMe().catch(() => null)
+
+  // const user = await fetchMe().catch(() => null)
 
   return (
     <ProtectedRoute>
-      {user ? (
+      {/* {user ? (
         <HomeLoggedInTemplate user={user} />
       ) : (
         <HomeLogoutTemplate initialCategories={categories} />
-      )}
+      )} */}
+      <HomeLogoutTemplate initialCategories={categories} />
 
       {/* 테마 매니저 (개발 모드에서만 표시) */}
       {process.env.NODE_ENV === "development" && <ThemeManager />}
