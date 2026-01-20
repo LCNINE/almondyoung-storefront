@@ -2,6 +2,7 @@
 
 import React from "react"
 import { MembershipTag } from "./membership-tag"
+import { SoldOutTag } from "@/components/products/prodcut-card/parts/sold-out-tag"
 import AnimatedMembershipText from "@components/products/atomics/animated-membership-text"
 import { SoldOutTag } from "../prodcut-card/parts/sold-out-tag"
 
