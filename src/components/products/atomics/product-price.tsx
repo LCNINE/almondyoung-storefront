@@ -2,8 +2,8 @@
 
 import React from "react"
 import { MembershipTag } from "./membership-tag"
-import { SoldOutTag } from "../../products-origin/prodcut-card/parts/sold-out-tag"
 import AnimatedMembershipText from "@components/products/atomics/animated-membership-text"
+import { SoldOutTag } from "../prodcut-card/parts/sold-out-tag"
 
 /**
  * ProductPrice - 순수 표시 컴포넌트
