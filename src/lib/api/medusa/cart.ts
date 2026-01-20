@@ -224,26 +224,6 @@ export async function deleteLineItem(lineId: string) {
     .catch(medusaError)
 }
 
-export async function setShippingMethod({
-  cartId,
-  shippingMethodId,
-}: {
-  cartId: string
-  shippingMethodId: string
-}) {
-  const headers = {
-    ...(await getAuthHeaders()),
-  }
-
-  return sdk.store.cart
-    .addShippingMethod(cartId, { option_id: shippingMethodId }, {}, headers)
-    .then(async () => {
-      const cartCacheTag = await getCacheTag("carts")
-      revalidateTag(cartCacheTag)
-    })
-    .catch(medusaError)
-}
-
 export async function initiatePaymentSession(
   cart: HttpTypes.StoreCart,
   data: HttpTypes.StoreInitializePaymentSession

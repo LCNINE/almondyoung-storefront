@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -37,9 +37,6 @@ import {
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Constants & Utilities
-// ─────────────────────────────────────────────────────────────────────────────
 const PHONE_MAX_LENGTH = 13
 const INPUT_CLASSNAME = "h-12 rounded-md border border-gray-300 px-4"
 
@@ -74,9 +71,6 @@ const extractAddressParts = (
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Schema & Types
-// ─────────────────────────────────────────────────────────────────────────────
 const shippingAddressSchema = z.object({
   addressName: z.string().optional(),
   name: z.string().min(1, "받는 분 이름을 입력해주세요"),
@@ -227,7 +221,7 @@ function PostalCodeField({ control, onOpenPostcode }: PostalCodeFieldProps) {
       <Button
         type="button"
         variant="outline"
-        className="h-12 shrink-0 px-4"
+        className="h-12 shrink-0 px-4 hover:bg-transparent hover:text-black"
         onClick={onOpenPostcode}
       >
         주소 검색
@@ -294,10 +288,7 @@ function SaveAsDefaultField({ control, isEditMode }: SaveAsDefaultFieldProps) {
       render={({ field }) => (
         <FormItem className="flex items-center gap-2 space-y-0">
           <FormControl>
-            <Checkbox
-              checked={field.value}
-              onCheckedChange={field.onChange}
-            />
+            <Checkbox checked={field.value} onCheckedChange={field.onChange} />
           </FormControl>
           <label
             htmlFor="saveAsDefault"
@@ -349,7 +340,9 @@ export function ShippingAddressModal({
       form.reset({
         addressName: defaultValues.addressName ?? "",
         name: defaultValues.name ?? "",
-        phone: defaultValues.phone ? formatPhoneNumber(defaultValues.phone) : "",
+        phone: defaultValues.phone
+          ? formatPhoneNumber(defaultValues.phone)
+          : "",
         postalCode: defaultValues.postalCode ?? "",
         address1: defaultValues.address1 ?? "",
         address2: defaultValues.address2 ?? "",
@@ -374,6 +367,7 @@ export function ShippingAddressModal({
       setIsSubmitting(true)
 
       try {
+        // 데이터 변환 (동기 함수이므로 직접 호출)
         const { firstName, lastName } = splitName(data.name)
         const phoneNumber = extractPhoneNumbers(data.phone)
         const { province, city } = extractAddressParts(data.address1)
@@ -397,59 +391,65 @@ export function ShippingAddressModal({
           if (!result.success) {
             console.error("배송지 수정 실패:", result.error)
             toast.error("배송지 수정에 실패했습니다.")
+            setIsSubmitting(false)
             return
           }
 
           toast.success("배송지가 수정되었습니다.")
-        } else {
-          // 생성 모드: Cart 업데이트 + Customer 주소 생성
-          await updateCart({
-            shipping_address: {
-              first_name: firstName,
-              last_name: lastName,
-              phone: phoneNumber,
-              province,
-              city,
-              address_1: data.address1,
-              address_2: data.address2 ?? "",
-              postal_code: data.postalCode,
-              country_code: "kr",
-            },
-            metadata: {
-              shipping_address_name: data.addressName || null,
-            },
-          })
-
-          if (data.saveAsDefault) {
-            const result = await createCustomerShippingAddress({
-              address_name: data.addressName || undefined,
-              first_name: firstName,
-              last_name: lastName,
-              phone: phoneNumber,
-              province,
-              city,
-              address_1: data.address1,
-              address_2: data.address2 ?? "",
-              postal_code: data.postalCode,
-              country_code: "kr",
-              is_default_shipping: true,
-            })
-
-            if (!result.success) {
-              console.error("기본 배송지 저장 실패:", result.error)
-              toast.error("배송지는 저장되었지만, 기본 배송지 등록에 실패했습니다.")
-              onOpenChange(false)
-              return
-            }
-          }
-
-          toast.success(
-            data.saveAsDefault
-              ? "배송지가 기본 배송지로 저장되었습니다."
-              : "배송지가 저장되었습니다."
-          )
+          onOpenChange(false)
+          router.refresh()
+          return
         }
 
+        // 생성 모드: Cart 업데이트 + Customer 주소 생성
+        await updateCart({
+          shipping_address: {
+            first_name: firstName,
+            last_name: lastName,
+            phone: phoneNumber,
+            province,
+            city,
+            address_1: data.address1,
+            address_2: data.address2 ?? "",
+            postal_code: data.postalCode,
+            country_code: "kr",
+          },
+          metadata: {
+            shipping_address_name: data.addressName || null,
+          },
+        })
+
+        if (data.saveAsDefault) {
+          const result = await createCustomerShippingAddress({
+            address_name: data.addressName || undefined,
+            first_name: firstName,
+            last_name: lastName,
+            phone: phoneNumber,
+            province,
+            city,
+            address_1: data.address1,
+            address_2: data.address2 ?? "",
+            postal_code: data.postalCode,
+            country_code: "kr",
+            is_default_shipping: true,
+          })
+
+          if (!result.success) {
+            console.error("기본 배송지 저장 실패:", result.error)
+            toast.error(
+              "배송지는 저장되었지만, 기본 배송지 등록에 실패했습니다."
+            )
+            onOpenChange(false)
+            setIsSubmitting(false)
+            return
+          }
+        }
+
+        toast.success(
+          data.saveAsDefault
+            ? "배송지가 기본 배송지로 저장되었습니다."
+            : "배송지가 저장되었습니다."
+        )
         onOpenChange(false)
         router.refresh()
       } catch (error) {
@@ -495,33 +495,39 @@ export function ShippingAddressModal({
     }).open()
   }, [form])
 
-  const modalTitle = isEditMode ? "배송지 수정" : "배송지 등록"
-  const submitButtonText = isSubmitting
-    ? isEditMode
-      ? "수정 중..."
-      : "저장 중..."
-    : isEditMode
-      ? "수정"
-      : "저장"
+  const modalTitle = useMemo(
+    () => (isEditMode ? "배송지 수정" : "배송지 등록"),
+    [isEditMode]
+  )
 
-  const formContent = (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(handleSubmit)}
-        className="space-y-4"
-        id="shipping-address-form"
-      >
-        <AddressNameField control={form.control} />
-        <NameField control={form.control} />
-        <PhoneField control={form.control} />
-        <PostalCodeField
-          control={form.control}
-          onOpenPostcode={handleOpenPostcode}
-        />
-        <AddressFields control={form.control} />
-        <SaveAsDefaultField control={form.control} isEditMode={isEditMode} />
-      </form>
-    </Form>
+  const submitButtonText = useMemo(() => {
+    if (isSubmitting) {
+      return isEditMode ? "수정 중..." : "저장 중..."
+    }
+    return isEditMode ? "수정" : "저장"
+  }, [isSubmitting, isEditMode])
+
+  const formContent = useMemo(
+    () => (
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(handleSubmit)}
+          className="space-y-4"
+          id="shipping-address-form"
+        >
+          <AddressNameField control={form.control} />
+          <NameField control={form.control} />
+          <PhoneField control={form.control} />
+          <PostalCodeField
+            control={form.control}
+            onOpenPostcode={handleOpenPostcode}
+          />
+          <AddressFields control={form.control} />
+          <SaveAsDefaultField control={form.control} isEditMode={isEditMode} />
+        </form>
+      </Form>
+    ),
+    [form, handleSubmit, handleOpenPostcode, isEditMode]
   )
 
   // Desktop: Dialog

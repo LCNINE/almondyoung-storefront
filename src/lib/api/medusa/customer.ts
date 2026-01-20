@@ -12,23 +12,6 @@ import {
   getCartId,
 } from "../../data/cookies"
 
-type MedusaSignupRequest = {
-  email: string
-  first_name: string
-  last_name: string
-  almond_user_id: string
-  almond_login_id: string
-}
-
-type MedusaSignupResponse = {
-  authIdentity: {
-    id: string
-  }
-  customer: {
-    id: string
-  }
-}
-
 export const retrieveCustomer =
   async (): Promise<HttpTypes.StoreCustomer | null> => {
     const authHeaders = await getAuthHeaders()
@@ -160,7 +143,7 @@ export const createCustomerShippingAddress = async (address: {
     ...(await getAuthHeaders()),
   }
 
-  return sdk.store.customer
+  return await sdk.store.customer
     .createAddress(
       {
         ...address,
@@ -238,7 +221,15 @@ export const updateCustomerShippingAddress = async (
   }
 
   return sdk.store.customer
-    .updateAddress(addressId, address, {}, headers)
+    .updateAddress(
+      addressId,
+      {
+        ...address,
+        metadata: { shipping_address_name: address.address_name || null },
+      },
+      {},
+      headers
+    )
     .then(async () => {
       const customerCacheTag = await getCacheTag("customers")
       revalidateTag(customerCacheTag)

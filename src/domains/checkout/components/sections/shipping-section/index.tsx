@@ -1,11 +1,22 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { cn } from "@/lib/utils"
 import { HttpTypes, StoreCartAddress } from "@medusajs/types"
+import debounce from "lodash/debounce"
 import { MapPin } from "lucide-react"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState, useTransition } from "react"
 import { ShippingAddressModal } from "./shipping-address-modal"
 import { ShippingAddressSelector } from "./shipping-address-selector"
+import { updateCart } from "@/lib/api/medusa/cart"
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -14,6 +25,10 @@ import { ShippingAddressSelector } from "./shipping-address-selector"
 interface ShippingSectionProps {
   shippingAddress: StoreCartAddress | null
   addressName?: string | null
+  /** 배송메모 타입: "door" | "security" | "parcel-box" | "direct" | "other" */
+  shippingMemoType?: string | null
+  /** 기타 선택 시 직접 입력한 메모 */
+  shippingMemoCustom?: string | null
 }
 
 interface EditAddressState {
@@ -79,18 +94,47 @@ const formatAddress = (
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Constants
+// ─────────────────────────────────────────────────────────────────────────────
+
+const SHIPPING_MEMO_OPTIONS = [
+  { value: "door", label: "문 앞에 놓아주세요" },
+  { value: "security", label: "경비실에 맡겨주세요" },
+  { value: "parcel-box", label: "택배함에 넣어주세요" },
+  { value: "direct", label: "직접 받겠습니다" },
+  { value: "other", label: "기타 (직접 입력)" },
+] as const
+
+type ShippingMemoValue = (typeof SHIPPING_MEMO_OPTIONS)[number]["value"]
+
+const DEBOUNCE_DELAY = 800
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Main Component
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const ShippingSection = ({
   shippingAddress,
   addressName,
+  shippingMemoType,
+  shippingMemoCustom,
 }: ShippingSectionProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isSelectorOpen, setIsSelectorOpen] = useState(false)
   const [modalMode, setModalMode] = useState<"create" | "edit">("create")
   const [editAddressState, setEditAddressState] =
     useState<EditAddressState | null>(null)
+
+  const [selectedMemoType, setSelectedMemoType] = useState<
+    ShippingMemoValue | ""
+  >((shippingMemoType as ShippingMemoValue) || "")
+  const [customMemo, setCustomMemo] = useState(shippingMemoCustom || "")
+  const [isPending, startTransition] = useTransition()
+
+  useEffect(() => {
+    setSelectedMemoType((shippingMemoType as ShippingMemoValue) || "")
+    setCustomMemo(shippingMemoCustom || "")
+  }, [shippingMemoType, shippingMemoCustom])
 
   const isValid = useMemo(
     () => isValidAddress(shippingAddress),
@@ -101,6 +145,34 @@ export const ShippingSection = ({
     () => formatAddress(shippingAddress),
     [shippingAddress]
   )
+
+  const isOtherSelected = selectedMemoType === "other"
+
+  // 배송메모 저장
+  const saveShippingMemo = useMemo(
+    () =>
+      debounce((type: ShippingMemoValue | "", custom: string) => {
+        startTransition(async () => {
+          try {
+            await updateCart({
+              metadata: {
+                shipping_memo_type: type,
+                shipping_memo_custom: type === "other" ? custom : "",
+              },
+            })
+          } catch (error) {
+            console.error("배송메모 저장 실패:", error)
+          }
+        })
+      }, DEBOUNCE_DELAY),
+    []
+  )
+
+  useEffect(() => {
+    return () => {
+      saveShippingMemo.cancel()
+    }
+  }, [saveShippingMemo])
 
   // 새 배송지 추가 핸들러
   const handleAddNewAddress = useCallback(() => {
@@ -137,11 +209,35 @@ export const ShippingSection = ({
   const handleModalOpenChange = useCallback((open: boolean) => {
     setIsModalOpen(open)
     if (!open) {
-      // 모달이 닫힐 때 상태 초기화
       setEditAddressState(null)
       setModalMode("create")
     }
   }, [])
+
+  // 배송메모 타입 변경 핸들러
+  const handleMemoTypeChange = useCallback(
+    (value: string) => {
+      const memoType = value as ShippingMemoValue
+      setSelectedMemoType(memoType)
+
+      // 기타가 아닌 경우 즉시 저장
+      if (memoType !== "other") {
+        setCustomMemo("")
+        saveShippingMemo(memoType, "")
+      }
+    },
+    [saveShippingMemo]
+  )
+
+  // 커스텀 메모 입력 핸들러 (debounced 저장)
+  const handleCustomMemoChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value
+      setCustomMemo(value)
+      saveShippingMemo("other", value)
+    },
+    [saveShippingMemo]
+  )
 
   return (
     <section aria-labelledby="shipping-heading" className="mb-8">
@@ -186,27 +282,73 @@ export const ShippingSection = ({
                   </address>
                 )}
               </div>
-              <button
+              <Button
                 type="button"
+                variant="outline"
                 onClick={() => setIsSelectorOpen(true)}
-                className="h-fit rounded border border-gray-300 px-3 py-1 text-[12px] font-medium text-gray-700 transition-colors hover:bg-gray-50 md:rounded-[3px] md:px-2.5 md:py-[5px] md:text-[13px]"
               >
                 변경
-              </button>
+              </Button>
             </div>
-            <div className="mt-3">
-              <label htmlFor="shipping-memo" className="sr-only">
-                배송메모
-              </label>
-              <select
-                id="shipping-memo"
-                className="w-full rounded border border-gray-300 bg-white px-3 py-2 text-[13px] text-gray-700 md:rounded-[5px] md:px-4 md:py-3.5 md:text-sm"
-                defaultValue=""
+            {/* 배송메모 섹션 */}
+            <div className="mt-4 space-y-3">
+              <Select
+                value={selectedMemoType}
+                onValueChange={handleMemoTypeChange}
               >
-                <option value="" disabled>
-                  배송메모를 선택해주세요
-                </option>
-              </select>
+                <SelectTrigger
+                  className={cn(
+                    "h-auto w-full rounded border border-gray-300 bg-white px-3 py-2.5 text-[13px] text-gray-700 md:rounded-[5px] md:px-4 md:py-3.5 md:text-sm",
+                    !selectedMemoType && "text-gray-400"
+                  )}
+                  aria-label="배송메모 선택"
+                >
+                  <SelectValue placeholder="배송메모를 선택해주세요" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SHIPPING_MEMO_OPTIONS.map((option) => (
+                    <SelectItem
+                      key={option.value}
+                      value={option.value}
+                      className="cursor-pointer py-2.5 text-[13px] md:text-sm"
+                    >
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {/* 기타 직접 입력 필드 */}
+              <div
+                className={cn(
+                  "grid transition-all duration-200 ease-in-out",
+                  isOtherSelected
+                    ? "grid-rows-[1fr] opacity-100"
+                    : "grid-rows-[0fr] opacity-0"
+                )}
+              >
+                <div className="overflow-hidden">
+                  <div className="relative">
+                    <Input
+                      type="text"
+                      value={customMemo}
+                      onChange={handleCustomMemoChange}
+                      placeholder="배송 시 요청사항을 입력해주세요"
+                      maxLength={50}
+                      className="h-auto w-full rounded border border-gray-300 px-3 py-2.5 pr-14 text-[13px] text-gray-700 placeholder:text-gray-400 focus:border-gray-400 focus:bg-white md:rounded-[5px] md:px-4 md:py-3.5 md:text-sm"
+                      aria-label="배송메모 직접 입력"
+                    />
+                    <span className="absolute top-1/2 right-3 -translate-y-1/2 text-[11px] text-gray-400 md:text-xs">
+                      {customMemo.length}/50
+                    </span>
+                  </div>
+                  {isPending && (
+                    <p className="mt-1.5 text-[11px] text-gray-500 md:text-xs">
+                      저장 중...
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
           </>
         ) : (

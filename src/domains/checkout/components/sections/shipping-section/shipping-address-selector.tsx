@@ -247,6 +247,7 @@ export function ShippingAddressSelector({
   const fetchAddresses = useCallback(async () => {
     setIsLoading(true)
     const result = await getCustomerAddresses()
+    
     if (result) {
       setAddresses(result)
       // 기본 배송지가 있으면 선택 (currentAddressId가 없을 때만)

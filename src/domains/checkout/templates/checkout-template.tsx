@@ -221,10 +221,16 @@ export default function CheckoutTemplate({
           {/* 왼쪽 섹션 */}
           <div className="md:max-w-[820px] md:min-w-[420px] md:flex-1">
             <ShippingSection
-              shippingAddress={storeCart?.shipping_address || null}
-              addressName={
-                (storeCart?.metadata?.shipping_address_name as string) || null
+              shippingMemoType={
+                storeCart?.metadata?.shipping_memo_type as string | null
               }
+              shippingMemoCustom={
+                storeCart?.metadata?.shipping_memo_custom as string | null
+              }
+              addressName={
+                storeCart?.metadata?.shipping_address_name as string | null
+              }
+              shippingAddress={storeCart?.shipping_address || null}
             />
             <OrderProductsSection />
             <DiscountSection />

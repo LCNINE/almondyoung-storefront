@@ -6,7 +6,6 @@ import CheckoutTemplate from "domains/checkout/templates/checkout-template"
 
 export default async function CheckoutPage() {
   const currentUser = await fetchMe()
-
   const storeCart: StoreCart | null = await retrieveCart()
 
   return (
