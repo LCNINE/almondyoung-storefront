@@ -9,7 +9,7 @@ import { notFound } from "next/navigation"
 export default async function CheckoutPage() {
   const currentUser = await fetchMe()
   const cart: StoreCart | null = await retrieveCart()
-
+  console.log("cart::", cart)
   if (!cart) {
     return notFound()
   }

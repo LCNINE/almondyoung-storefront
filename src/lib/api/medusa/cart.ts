@@ -26,7 +26,6 @@ export async function retrieveCart(cartId?: string, fields?: string) {
   fields ??=
     "*items, *region, *items.product, *items.variant, *items.thumbnail, *items.metadata, +items.total, *promotions, +shipping_methods.name"
 
-  console.log("id::", id)
   if (!id) {
     return null
   }

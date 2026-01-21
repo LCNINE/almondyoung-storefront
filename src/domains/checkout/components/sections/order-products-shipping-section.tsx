@@ -80,8 +80,8 @@ function ProductItem({
   const quantity = item.quantity
   const unitPrice = item.unit_price
   const originalPrice = item.compare_at_unit_price ?? item.original_total
-  const salePrice = item.total ?? unitPrice * quantity
-  const hasDiscount = !!(originalPrice && originalPrice > salePrice)
+  const price = item.total ?? unitPrice * quantity
+  const hasDiscount = !!(originalPrice && originalPrice > price)
 
   return (
     <div className={showDivider ? "border-b border-gray-100 pb-4" : ""}>
@@ -123,7 +123,7 @@ function ProductItem({
             <PriceDisplay
               hasDiscount={hasDiscount}
               originalPrice={originalPrice}
-              salePrice={salePrice}
+              price={price}
             />
           </div>
         </div>
@@ -250,11 +250,11 @@ function QuantityEditPopover({
 function PriceDisplay({
   hasDiscount,
   originalPrice,
-  salePrice,
+  price,
 }: {
   hasDiscount: boolean
   originalPrice: number | undefined
-  salePrice: number
+  price: number
 }) {
   return (
     <div className="flex items-center gap-1.5 text-right">
@@ -264,7 +264,7 @@ function PriceDisplay({
         </span>
       )}
       <span className="text-[13px] font-medium text-gray-900 md:text-base">
-        {formatPrice(salePrice)}원
+        {formatPrice(price)}원
       </span>
     </div>
   )
