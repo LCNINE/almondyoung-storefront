@@ -17,12 +17,12 @@ import { toast } from "sonner"
 
 interface OrderProductsSectionProps {
   products: StoreCart["items"]
-  shippingTotal?: number
+  shippingFee: number
 }
 
 export const OrderProductsSection = ({
   products,
-  shippingTotal = 2500,
+  shippingFee,
 }: OrderProductsSectionProps) => {
   if (!products || products.length === 0) {
     return (
@@ -60,7 +60,7 @@ export const OrderProductsSection = ({
         </div>
 
         <p className="mt-4 text-right text-[12px] text-gray-600 md:mt-6 md:text-sm">
-          배송비 {formatPrice(shippingTotal)}원
+          배송비 {formatPrice(shippingFee)}원
         </p>
       </article>
     </section>

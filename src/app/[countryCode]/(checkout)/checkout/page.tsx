@@ -17,12 +17,13 @@ export default async function CheckoutPage() {
   const shippingMethods = await listCartShippingMethods(cart.id)
   const paymentMethods = await listCartPaymentMethods(cart.region?.id ?? "")
 
-  console.log("shippingMethods::", shippingMethods)
-  console.log("paymentMethods::", paymentMethods)
-
   return (
     <ProtectedRoute>
-      <CheckoutTemplate user={currentUser} cart={cart} />
+      <CheckoutTemplate
+        user={currentUser}
+        cart={cart}
+        shippingFee={shippingMethods?.[0]?.amount ?? 0}
+      />
     </ProtectedRoute>
   )
 }

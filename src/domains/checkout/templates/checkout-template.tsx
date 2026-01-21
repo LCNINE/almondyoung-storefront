@@ -21,11 +21,13 @@ import { useCallback, useRef, useState } from "react"
 interface CheckoutTemplateProps {
   user: UserDetail
   cart: StoreCart | null
+  shippingFee: number
 }
 
 export default function CheckoutTemplate({
   user,
   cart,
+  shippingFee,
 }: CheckoutTemplateProps) {
   const router = useRouter()
   const params = useParams()
@@ -251,7 +253,7 @@ export default function CheckoutTemplate({
             />
             <OrderProductsSection
               products={cart?.items}
-              shippingTotal={cart?.shipping_total}
+              shippingFee={shippingFee}
             />
             <DiscountSection />
             <PaymentInfoSection />
