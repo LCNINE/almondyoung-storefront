@@ -1,4 +1,5 @@
-import { retrieveCart } from "@/lib/api/medusa/cart"
+import { listCartShippingMethods, retrieveCart } from "@/lib/api/medusa/cart"
+import { listCartPaymentMethods } from "@/lib/api/medusa/payment"
 import ProtectedRoute from "@components/protected-route"
 import { fetchMe } from "@lib/api/users/me"
 import { StoreCart } from "@medusajs/types"
@@ -12,6 +13,12 @@ export default async function CheckoutPage() {
   if (!cart) {
     return notFound()
   }
+
+  const shippingMethods = await listCartShippingMethods(cart.id)
+  const paymentMethods = await listCartPaymentMethods(cart.region?.id ?? "")
+
+  console.log("shippingMethods::", shippingMethods)
+  console.log("paymentMethods::", paymentMethods)
 
   return (
     <ProtectedRoute>
