@@ -26,6 +26,7 @@ export async function retrieveCart(cartId?: string, fields?: string) {
   fields ??=
     "*items, *region, *items.product, *items.variant, *items.thumbnail, *items.metadata, +items.total, *promotions, +shipping_methods.name"
 
+  console.log("id::", id)
   if (!id) {
     return null
   }
@@ -49,10 +50,7 @@ export async function retrieveCart(cartId?: string, fields?: string) {
       cache: "force-cache",
     })
     .then(({ cart }: { cart: HttpTypes.StoreCart }) => cart)
-    .catch(() => {
-      // cart를 찾지 못하면 null 반환
-      return null
-    })
+    .catch(() => null)
 }
 
 export async function getOrSetCart(countryCode: string) {
@@ -165,8 +163,6 @@ export async function addToCart({
       revalidateTag(fulfillmentCacheTag)
     })
     .catch(medusaError)
-
-  return
 }
 
 export async function updateLineItem({

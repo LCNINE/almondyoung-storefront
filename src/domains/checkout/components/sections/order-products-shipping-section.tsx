@@ -11,7 +11,6 @@ export const OrderProductsSection = ({
   products,
   shippingTotal = 2500,
 }: OrderProductsSectionProps) => {
-  console.log("products:", products)
   if (!products || products.length === 0) {
     return (
       <section aria-labelledby="order-heading" className="mb-8">
@@ -62,7 +61,7 @@ function ProductItem({
   item: StoreCartLineItem
   showDivider: boolean
 }) {
-  const thumbnail = item.thumbnail ?? "/images/product-placeholder.png"
+  const thumbnail = item.thumbnail ?? "https://placehold.co/400"
   const productTitle = item.product_title ?? item.title
   const optionLabel = item.variant_title ?? item.subtitle ?? "기본"
   const quantity = item.quantity
