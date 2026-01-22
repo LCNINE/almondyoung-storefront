@@ -1,5 +1,10 @@
 "use client"
 
+import { DiscountSection } from "@/domains/checkout/components/sections/discount"
+import { OrderProductsSection } from "@/domains/checkout/components/sections/order-products-shipping"
+import { PaymentMethodSection } from "@/domains/checkout/components/sections/payment-method"
+import { PaymentTotalSection } from "@/domains/checkout/components/sections/payment-total"
+import { ReceiptSection } from "@/domains/checkout/components/sections/receipt"
 import { ShippingSection } from "@/domains/checkout/components/sections/shipping-section"
 import type { ShippingMemo } from "@/domains/checkout/components/sections/shipping-section/types"
 import { updateCart } from "@/lib/api/medusa/cart"
@@ -10,11 +15,6 @@ import { MobileCTA, PCFixedCTA } from "domains/checkout/components/cta"
 import { MobileHeader, PCHeader } from "domains/checkout/components/header"
 import { MobileOrderSummary } from "domains/checkout/components/order-summary"
 import { PaymentDetailSidebar } from "domains/checkout/components/payment-detail-sidebar"
-import { DiscountSection } from "domains/checkout/components/sections/discount-section"
-import { OrderProductsSection } from "domains/checkout/components/sections/order-products-shipping-section"
-import { PaymentMethodSection } from "domains/checkout/components/sections/payment-method-section"
-import { PaymentInfoSection } from "domains/checkout/components/sections/paymentInfo-section"
-import { ReceiptSection } from "domains/checkout/components/sections/receipt-section"
 import { useParams, useRouter } from "next/navigation"
 import { useCallback, useRef, useState } from "react"
 
@@ -256,7 +256,7 @@ export default function CheckoutTemplate({
               shippingFee={shippingFee}
             />
             <DiscountSection />
-            <PaymentInfoSection />
+            <PaymentTotalSection cart={cart!} shippingFee={shippingFee} />
             <PaymentMethodSection
               selectedMethod={selectedMethod}
               setSelectedMethod={setSelectedMethod}

@@ -1,5 +1,5 @@
 import { Input } from "@components/common/ui/input"
-import { formatPrice } from "@lib/utils/format-price"
+import { formatPrice } from "@/lib/utils/price-utils"
 import { CheckoutMembershipTagIcon } from "@/icons/membership-tag-icon"
 import { ChevronDown } from "lucide-react"
 

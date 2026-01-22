@@ -17,7 +17,6 @@ export default async function CheckoutPage() {
 
   const shippingMethods = await listCartShippingMethods(cart.id)
   const paymentMethods = await listCartPaymentMethods(cart.region?.id ?? "")
-
   return (
     <ProtectedRoute>
       <CheckoutTemplate

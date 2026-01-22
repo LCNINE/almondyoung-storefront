@@ -19,7 +19,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { deleteLineItem, updateLineItem } from "@/lib/api/medusa/cart"
-import { formatPrice } from "@/lib/utils/format-price"
+import { calcItemPrice, formatPrice } from "@/lib/utils/price-utils"
 import { StoreCart, StoreCartLineItem } from "@medusajs/types"
 import { Minus, Plus, X } from "lucide-react"
 import Image from "next/image"
@@ -93,16 +93,11 @@ function ProductItem({
     subtitle,
     quantity,
     unit_price,
-    compare_at_unit_price,
-    original_total,
-    total,
     id,
   } = item
 
   const productTitle = product_title ?? title
-  const price = total ?? unit_price * quantity
-  const originalPrice = compare_at_unit_price ?? original_total
-  const hasDiscount = !!(originalPrice && originalPrice > price)
+  const { total, originalTotal, hasReducedPrice } = calcItemPrice(item)
 
   const handleDelete = () => {
     startTransition(async () => {
@@ -179,9 +174,9 @@ function ProductItem({
               unitPrice={unit_price}
             />
             <PriceDisplay
-              hasDiscount={hasDiscount}
-              originalPrice={originalPrice}
-              price={price}
+              hasDiscount={hasReducedPrice}
+              originalPrice={originalTotal}
+              price={total}
             />
           </div>
         </div>
@@ -293,7 +288,7 @@ function PriceDisplay({
   price,
 }: {
   hasDiscount: boolean
-  originalPrice?: number
+  originalPrice?: number | null
   price: number
 }) {
   return (
