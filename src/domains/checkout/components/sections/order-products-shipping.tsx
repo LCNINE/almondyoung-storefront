@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Popover,
   PopoverContent,
@@ -21,7 +22,7 @@ import {
 import { deleteLineItem, updateLineItem } from "@/lib/api/medusa/cart"
 import { calcItemPrice, formatPrice } from "@/lib/utils/price-utils"
 import { StoreCart, StoreCartLineItem } from "@medusajs/types"
-import { Minus, Plus, X } from "lucide-react"
+import { Minus, Plus, Trash2, X } from "lucide-react"
 import Image from "next/image"
 import { useState, useTransition } from "react"
 import { toast } from "sonner"
@@ -35,6 +36,9 @@ export const OrderProductsSection = ({
   products,
   shippingFee,
 }: OrderProductsSectionProps) => {
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [isPending, startTransition] = useTransition()
+
   if (!products?.length) {
     return (
       <section aria-labelledby="order-heading" className="mb-8">
@@ -51,6 +55,43 @@ export const OrderProductsSection = ({
     )
   }
 
+  const allSelected = selectedIds.size === products.length
+  const someSelected = selectedIds.size > 0
+
+  const toggleAll = () => {
+    if (allSelected) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(products.map((item) => item.id)))
+    }
+  }
+
+  const toggleItem = (id: string) => {
+    const newSet = new Set(selectedIds)
+    if (newSet.has(id)) {
+      newSet.delete(id)
+    } else {
+      newSet.add(id)
+    }
+    setSelectedIds(newSet)
+  }
+
+  const handleDeleteSelected = () => {
+    if (selectedIds.size === 0) return
+
+    startTransition(async () => {
+      try {
+        await Promise.all(
+          Array.from(selectedIds).map((id) => deleteLineItem(id))
+        )
+        toast.success(`${selectedIds.size}개 상품이 삭제되었습니다.`)
+        setSelectedIds(new Set())
+      } catch {
+        toast.error("상품 삭제에 실패했습니다.")
+      }
+    })
+  }
+
   return (
     <section aria-labelledby="order-heading" className="mb-8">
       <h2
@@ -59,19 +100,73 @@ export const OrderProductsSection = ({
       >
         주문 상품
       </h2>
-      <article className="rounded-md border border-gray-200 bg-white px-[14px] py-[18px] md:rounded-[10px] md:px-10 md:py-8">
-        <div className="space-y-4">
+      <article className="rounded-md border border-gray-200 bg-white md:rounded-[10px]">
+        {/* 전체 선택 & 선택 삭제 헤더 */}
+        <div className="flex items-center justify-between border-b border-gray-100 px-[14px] py-3 md:px-10">
+          <label className="flex cursor-pointer items-center gap-2">
+            <Checkbox
+              checked={allSelected}
+              onCheckedChange={toggleAll}
+              disabled={isPending}
+            />
+            <span className="text-[12px] text-gray-700 md:text-sm">
+              전체 선택 ({selectedIds.size}/{products.length})
+            </span>
+          </label>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 gap-1 px-2 text-[12px] text-gray-500 hover:text-red-500 md:text-sm"
+                disabled={!someSelected || isPending}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                선택 삭제
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>선택 상품 삭제</AlertDialogTitle>
+                <AlertDialogDescription>
+                  선택한 {selectedIds.size}개의 상품을 장바구니에서
+                  삭제하시겠습니까?
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>취소</AlertDialogCancel>
+                <AlertDialogAction
+                  className="bg-red-500 hover:bg-red-600"
+                  onClick={handleDeleteSelected}
+                  disabled={isPending}
+                >
+                  {isPending ? "삭제중..." : "삭제"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+
+        {/* 상품 목록 */}
+        <div className="space-y-4 px-[14px] py-[18px] md:px-10 md:py-8">
           {products.map((item, i) => (
             <ProductItem
               key={item.id}
               item={item}
               showDivider={i < products.length - 1}
+              isSelected={selectedIds.has(item.id)}
+              onToggle={() => toggleItem(item.id)}
+              disabled={isPending}
             />
           ))}
         </div>
-        <p className="mt-4 text-right text-[12px] text-gray-600 md:mt-6 md:text-sm">
-          배송비 {formatPrice(shippingFee)}원
-        </p>
+
+        {/* 배송비 */}
+        <div className="border-t border-gray-100 px-[14px] py-3 md:px-10">
+          <p className="text-right text-[12px] text-gray-600 md:text-sm">
+            배송비 {formatPrice(shippingFee)}원
+          </p>
+        </div>
       </article>
     </section>
   )
@@ -80,9 +175,15 @@ export const OrderProductsSection = ({
 function ProductItem({
   item,
   showDivider,
+  isSelected,
+  onToggle,
+  disabled,
 }: {
   item: StoreCartLineItem
   showDivider: boolean
+  isSelected: boolean
+  onToggle: () => void
+  disabled?: boolean
 }) {
   const [isPending, startTransition] = useTransition()
   const {
@@ -95,7 +196,6 @@ function ProductItem({
     unit_price,
     id,
   } = item
-
   const productTitle = product_title ?? title
   const { total, originalTotal, hasReducedPrice } = calcItemPrice(item)
 
@@ -113,6 +213,13 @@ function ProductItem({
   return (
     <div className={showDivider ? "border-b border-gray-100 pb-4" : ""}>
       <div className="flex items-start gap-3 md:gap-4">
+        {/* 체크박스 */}
+        <Checkbox
+          checked={isSelected}
+          onCheckedChange={onToggle}
+          disabled={disabled || isPending}
+          className="mt-1"
+        />
         <Image
           src={thumbnail ?? "https://placehold.co/400"}
           alt={productTitle}
@@ -138,7 +245,7 @@ function ProductItem({
             <AlertDialogHeader>
               <AlertDialogTitle>상품 삭제</AlertDialogTitle>
               <AlertDialogDescription>
-                {title} 이 상품을 장바구니에서 삭제하시겠습니까?
+                {productTitle} 상품을 장바구니에서 삭제하시겠습니까?
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -154,7 +261,7 @@ function ProductItem({
           </AlertDialogContent>
         </AlertDialog>
       </div>
-      <div className="mt-3">
+      <div className="mt-3 ml-7 md:ml-8">
         <div className="flex items-center justify-between rounded-[2px] bg-[#F5F5F5]/50 px-2 py-2 md:px-3 md:py-2.5">
           <div className="flex items-center gap-2">
             <Badge
