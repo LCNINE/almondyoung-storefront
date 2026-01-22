@@ -48,27 +48,20 @@ export const getPercentageDiff = (
   return decrease.toFixed()
 }
 
-/** Line Item 가격 정보 (Medusa에서 계산된 값 사용) */
+/** Line Item 가격 정보 (compare_at_unit_price 기준 정가 표시) */
 export const calcItemPrice = (item: {
   total?: number | null
-  original_total?: number | null
+  compare_at_unit_price?: number | null
+  unit_price: number
   quantity: number
 }) => {
-  const total = item.total ?? 0
-  const originalTotal = item.original_total ?? total
-  const hasReducedPrice = total < originalTotal
-  const percentageDiff = hasReducedPrice
-    ? getPercentageDiff(originalTotal, total)
-    : "0"
+  const total = item.total ?? item.unit_price * item.quantity
+  // 정가: compare_at_unit_price가 있으면 사용, 없으면 unit_price
+  const compareAtTotal = item.compare_at_unit_price ? item.compare_at_unit_price * item.quantity : null
+  const originalTotal = compareAtTotal ?? total
+  const hasReducedPrice = originalTotal > total
 
-  return {
-    total,
-    originalTotal,
-    hasReducedPrice,
-    percentageDiff,
-    unitPrice: Math.round(total / item.quantity),
-    originalUnitPrice: Math.round(originalTotal / item.quantity),
-  }
+  return { total, originalTotal, hasReducedPrice }
 }
 
 /** Cart Totals 타입 */
