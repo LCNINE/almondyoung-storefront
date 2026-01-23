@@ -30,13 +30,16 @@ import { toast } from "sonner"
 interface OrderProductsSectionProps {
   products: StoreCart["items"]
   shippingFee: number
+  selectedIds: Set<string>
+  onSelectedIdsChange: (ids: Set<string>) => void
 }
 
 export const OrderProductsSection = ({
   products,
   shippingFee,
+  selectedIds,
+  onSelectedIdsChange,
 }: OrderProductsSectionProps) => {
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [isPending, startTransition] = useTransition()
 
   if (!products?.length) {
@@ -60,9 +63,9 @@ export const OrderProductsSection = ({
 
   const toggleAll = () => {
     if (allSelected) {
-      setSelectedIds(new Set())
+      onSelectedIdsChange(new Set())
     } else {
-      setSelectedIds(new Set(products.map((item) => item.id)))
+      onSelectedIdsChange(new Set(products.map((item) => item.id)))
     }
   }
 
@@ -73,7 +76,7 @@ export const OrderProductsSection = ({
     } else {
       newSet.add(id)
     }
-    setSelectedIds(newSet)
+    onSelectedIdsChange(newSet)
   }
 
   const handleDeleteSelected = () => {
@@ -85,7 +88,7 @@ export const OrderProductsSection = ({
           Array.from(selectedIds).map((id) => deleteLineItem(id))
         )
         toast.success(`${selectedIds.size}개 상품이 삭제되었습니다.`)
-        setSelectedIds(new Set())
+        onSelectedIdsChange(new Set())
       } catch {
         toast.error("상품 삭제에 실패했습니다.")
       }

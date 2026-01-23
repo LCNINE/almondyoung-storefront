@@ -26,7 +26,7 @@ export const ShippingSection = ({
   const [editAddressState, setEditAddressState] =
     useState<EditAddressState | null>(null)
 
-  // 자동 배송지 채움
+  // 배송지 자동 채움
   const { isAutoFilling } = useAutoFillShipping({ shippingAddress })
 
   // 배송지 정보 파싱

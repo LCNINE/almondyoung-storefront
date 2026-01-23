@@ -57,7 +57,9 @@ export const calcItemPrice = (item: {
 }) => {
   const total = item.total ?? item.unit_price * item.quantity
   // 정가: compare_at_unit_price가 있으면 사용, 없으면 unit_price
-  const compareAtTotal = item.compare_at_unit_price ? item.compare_at_unit_price * item.quantity : null
+  const compareAtTotal = item.compare_at_unit_price
+    ? item.compare_at_unit_price * item.quantity
+    : null
   const originalTotal = compareAtTotal ?? total
   const hasReducedPrice = originalTotal > total
 

@@ -13,8 +13,8 @@ import medusaError from "@lib/utils/medusa-error"
 import { HttpTypes } from "@medusajs/types"
 import { revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
-import { getRegion } from "./regions"
 import { HttpApiError } from "../api-error"
+import { getRegion } from "./regions"
 
 /**
  * Retrieves a cart by its ID. If no ID is provided, it will use the cart ID from the cookies.
@@ -24,7 +24,7 @@ import { HttpApiError } from "../api-error"
 export async function retrieveCart(cartId?: string, fields?: string) {
   const id = cartId || (await getCartId())
   fields ??=
-    "*items, *region, *items.product, *items.variant, *items.thumbnail, *items.metadata, +items.total, *promotions, +shipping_methods"
+    "*items, *region, *items.product, *items.variant, *items.thumbnail, *items.metadata, +items.total, *promotions, +shipping_methods, *customer.groups"
 
   if (!id) {
     return null
@@ -39,7 +39,7 @@ export async function retrieveCart(cartId?: string, fields?: string) {
   }
 
   return await sdk.client
-    .fetch<HttpTypes.StoreCartResponse>(`/store/carts/${id}`, {
+    .fetch<{ cart: HttpTypes.StoreCart }>(`/store/carts/${id}`, {
       method: "GET",
       query: {
         fields,
@@ -74,6 +74,24 @@ export async function getOrSetCart(countryCode: string) {
     cart = cartResp.cart
 
     await setCartId(cart.id)
+
+    // let cart: Awaited<ReturnType<typeof retrieveCart>> = await retrieveCart(undefined, "id,region_id")
+
+    // const headers = {
+    //   ...(await getAuthHeaders()),
+    // }
+
+    // if (!cart) {
+    //   const cartResp = await sdk.store.cart.create(
+    //     { region_id: region.id },
+    //     {},
+    //     headers
+    //   )
+    //   cart = cartResp.cart as Awaited<ReturnType<typeof retrieveCart>>
+
+    //   if (!cart) {
+    //     throw new Error("Failed to create cart")
+    //   }
 
     const cartCacheTag = await getCacheTag("carts")
     revalidateTag(cartCacheTag)

@@ -8,19 +8,19 @@ import { ReceiptSection } from "@/domains/checkout/components/sections/receipt"
 import { ShippingSection } from "@/domains/checkout/components/sections/shipping-section"
 import type { ShippingMemo } from "@/domains/checkout/components/sections/shipping-section/types"
 import { updateCart } from "@/lib/api/medusa/cart"
+import { CartResponseDto } from "@/lib/types/dto/medusa"
 import type { UserDetail } from "@lib/types/ui/user"
-import { StoreCart } from "@medusajs/types"
 import { loadTossPayments } from "@tosspayments/tosspayments-sdk"
 import { MobileCTA, PCFixedCTA } from "domains/checkout/components/cta"
 import { MobileHeader, PCHeader } from "domains/checkout/components/header"
 import { MobileOrderSummary } from "domains/checkout/components/order-summary"
 import { PaymentDetailSidebar } from "domains/checkout/components/payment-detail-sidebar"
 import { useParams, useRouter } from "next/navigation"
-import { useCallback, useRef, useState } from "react"
+import { useCallback, useMemo, useRef, useState } from "react"
 
 interface CheckoutTemplateProps {
   user: UserDetail
-  cart: StoreCart | null
+  cart: CartResponseDto["cart"]
   shippingFee: number
 }
 
@@ -32,6 +32,17 @@ export default function CheckoutTemplate({
   const router = useRouter()
   const params = useParams()
   const countryCode = params.countryCode as string
+
+  // 선택된 상품 ID (기본값: 전체 선택)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(
+    () => new Set(cart.items?.map((item) => item.id) ?? [])
+  )
+
+  // 선택된 상품만 필터링
+  const selectedItems = useMemo(
+    () => cart.items?.filter((item) => selectedIds.has(item.id)) ?? [],
+    [cart.items, selectedIds]
+  )
 
   const [selectedMethod, setSelectedMethod] = useState("payLater")
   const [cashReceiptOption, setCashReceiptOption] = useState("noapply")
@@ -254,8 +265,15 @@ export default function CheckoutTemplate({
             <OrderProductsSection
               products={cart?.items}
               shippingFee={shippingFee}
+              selectedIds={selectedIds}
+              onSelectedIdsChange={setSelectedIds}
             />
-            <DiscountSection />
+            <DiscountSection
+              isMembership={cart?.customer?.groups.some(
+                (group) => group.name.toLowerCase() === "membership"
+              )}
+              totals={selectedItems}
+            />
             <PaymentTotalSection cart={cart!} shippingFee={shippingFee} />
             <PaymentMethodSection
               selectedMethod={selectedMethod}
