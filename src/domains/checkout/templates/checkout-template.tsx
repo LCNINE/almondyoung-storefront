@@ -9,6 +9,7 @@ import { ShippingSection } from "@/domains/checkout/components/sections/shipping
 import type { ShippingMemo } from "@/domains/checkout/components/sections/shipping-section/types"
 import { updateCart } from "@/lib/api/medusa/cart"
 import { CartResponseDto } from "@/lib/types/dto/medusa"
+import type { Promotion } from "@/lib/types/ui/promotion"
 import type { UserDetail } from "@lib/types/ui/user"
 import { loadTossPayments } from "@tosspayments/tosspayments-sdk"
 import { MobileCTA, PCFixedCTA } from "domains/checkout/components/cta"
@@ -22,12 +23,14 @@ interface CheckoutTemplateProps {
   user: UserDetail
   cart: CartResponseDto["cart"]
   shippingFee: number
+  promotions: Promotion[]
 }
 
 export default function CheckoutTemplate({
   user,
   cart,
   shippingFee,
+  promotions,
 }: CheckoutTemplateProps) {
   const router = useRouter()
   const params = useParams()
@@ -273,6 +276,7 @@ export default function CheckoutTemplate({
                 (group) => group.name.toLowerCase() === "membership"
               )}
               totals={selectedItems}
+              promotions={promotions}
             />
             <PaymentTotalSection cart={cart!} shippingFee={shippingFee} />
             <PaymentMethodSection

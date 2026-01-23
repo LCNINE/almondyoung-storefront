@@ -17,9 +17,9 @@ import { HttpApiError } from "../api-error"
 import { getRegion } from "./regions"
 
 /**
- * Retrieves a cart by its ID. If no ID is provided, it will use the cart ID from the cookies.
- * @param cartId - optional - The ID of the cart to retrieve.
- * @returns The cart object if found, or null if not found.
+ * 카트 ID를 통해 카트 정보를 조회합니다. 만약 ID가 제공되지 않으면, 쿠키에 저장된 카트 ID를 사용합니다.
+ * @param cartId (선택 사항) - 조회할 카트의 고유 ID입니다.
+ * @returns 카트를 찾으면 카트 객체를, 찾지 못하면 null을 반환합니다.
  */
 export async function retrieveCart(cartId?: string, fields?: string) {
   const id = cartId || (await getCartId())
@@ -74,24 +74,6 @@ export async function getOrSetCart(countryCode: string) {
     cart = cartResp.cart
 
     await setCartId(cart.id)
-
-    // let cart: Awaited<ReturnType<typeof retrieveCart>> = await retrieveCart(undefined, "id,region_id")
-
-    // const headers = {
-    //   ...(await getAuthHeaders()),
-    // }
-
-    // if (!cart) {
-    //   const cartResp = await sdk.store.cart.create(
-    //     { region_id: region.id },
-    //     {},
-    //     headers
-    //   )
-    //   cart = cartResp.cart as Awaited<ReturnType<typeof retrieveCart>>
-
-    //   if (!cart) {
-    //     throw new Error("Failed to create cart")
-    //   }
 
     const cartCacheTag = await getCacheTag("carts")
     revalidateTag(cartCacheTag)
@@ -392,10 +374,10 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
 }
 
 /**
- * Places an order for a cart. If no cart ID is provided, it will use the cart ID from the cookies.
- * @param cartId - optional - The ID of the cart to place an order for.
- * @returns The cart object if the order was successful, or null if not.
- */
+ * 장바구니(Cart)를 주문(Order) 상태로 전환합니다. 만약 장바구니 ID가 제공되지 않으면, 쿠키에 저장된 ID를 사용합니다.
+ * @param cartId (선택 사항) - 주문 처리할 장바구니의 ID입니다.
+ * @returns 주문이 성공적으로 완료되면 카트 객체를 반환하고, 실패하면 null을 반환합니다.
+ * */
 export async function placeOrder(cartId?: string) {
   const id = cartId || (await getCartId())
 

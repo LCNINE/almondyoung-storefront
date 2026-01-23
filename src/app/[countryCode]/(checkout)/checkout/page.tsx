@@ -1,5 +1,6 @@
 import { listCartShippingMethods, retrieveCart } from "@/lib/api/medusa/cart"
 import { listCartPaymentMethods } from "@/lib/api/medusa/payment"
+import { getMyPromotions } from "@/lib/api/medusa/promotion"
 import { CartResponseDto } from "@/lib/types/dto/medusa"
 import ProtectedRoute from "@components/protected-route"
 import { fetchMe } from "@lib/api/users/me"
@@ -10,21 +11,31 @@ export default async function CheckoutPage() {
   const currentUser = await fetchMe()
   const cart = (await retrieveCart()) as CartResponseDto["cart"]
 
-  // todo:OrderProductsSection 컴포넌트에 cart.items를 전달하고잇는데 cart의 prices들을 전달해줘도될것같음
   if (!cart) {
     return notFound()
   }
 
-  const shippingMethods = await listCartShippingMethods(cart.id)
-  const paymentMethods = await listCartPaymentMethods(cart.region?.id ?? "")
+  const [shippingMethods, paymentMethods, promotionsResponse] =
+    await Promise.all([
+      listCartShippingMethods(cart.id),
+      listCartPaymentMethods(cart.region?.id ?? ""),
+      getMyPromotions({ limit: 100 }).catch(() => ({
+        promotions: [],
+        count: 0,
+        offset: 0,
+        limit: 100,
+      })),
+    ])
 
-  console.log("cart:", cart)
+  console.log("promotionsResponse:", promotionsResponse)
+
   return (
     <ProtectedRoute>
       <CheckoutTemplate
         user={currentUser}
         cart={cart}
         shippingFee={shippingMethods?.[0]?.amount ?? 0}
+        promotions={promotionsResponse.promotions}
       />
     </ProtectedRoute>
   )

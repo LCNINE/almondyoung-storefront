@@ -1,15 +1,23 @@
 "use client"
 
 import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { CheckoutMembershipTagIcon } from "@/icons/membership-tag-icon"
+import type { Promotion } from "@/lib/types/ui/promotion"
 import { formatPrice } from "@/lib/utils/price-utils"
 import type { HttpTypes } from "@medusajs/types"
-import { ChevronDown } from "lucide-react"
 import { useMemo } from "react"
 
 interface DiscountSectionProps {
   isMembership: boolean
   totals: HttpTypes.StoreCartLineItem[] | undefined
+  promotions: Promotion[]
   couponDiscount?: number
   pointsUsed?: number
   availablePoints?: number
@@ -29,6 +37,7 @@ const calculateMembershipDiscount = (
 export const DiscountSection = ({
   isMembership = false,
   totals,
+  promotions,
   couponDiscount = 0,
   pointsUsed = 0,
   availablePoints = 0,
@@ -70,15 +79,31 @@ export const DiscountSection = ({
             <span className="text-xs font-medium text-gray-900 md:text-sm">
               쿠폰
             </span>
-            <span className="text-xs text-gray-500 md:text-sm">사용가능</span>
+            <span className="text-xs text-gray-500 md:text-sm">
+              사용가능 {promotions.length > 0 && `(${promotions.length})`}
+            </span>
           </div>
-          <div className="relative">
-            <select className="w-full appearance-none rounded-[5px] border border-gray-200 bg-white px-3 py-2.5 pr-8 text-xs text-gray-500 focus:border-gray-400 focus:outline-none md:text-sm">
-              <option value="">쿠폰을 선택해주세요 (1)</option>
-              <option value="coupon1">5% 할인 쿠폰</option>
-            </select>
-            <ChevronDown className="pointer-events-none absolute top-1/2 right-3 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
-          </div>
+          <Select disabled={promotions.length === 0}>
+            <SelectTrigger className="h-10 w-full rounded-[5px] border-gray-200 bg-white text-xs text-gray-500 focus:border-gray-400 focus:ring-0 md:text-sm">
+              <SelectValue
+                placeholder={
+                  promotions.length === 0
+                    ? "사용 가능한 쿠폰이 없습니다"
+                    : `쿠폰을 선택해주세요 (${promotions.length})`
+                }
+              />
+            </SelectTrigger>
+            <SelectContent>
+              {promotions.map((promo) => (
+                <SelectItem key={promo.id} value={promo.code}>
+                  {promo.application_method.type === "percentage"
+                    ? `${promo.application_method.value}% 할인`
+                    : `${formatPrice(promo.application_method.value)}원 할인`}
+                  {promo.code && ` (${promo.code})`}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <hr className="border-t border-gray-100" />
