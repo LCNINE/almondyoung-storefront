@@ -1,27 +1,33 @@
 "use client"
 
 import { MembershipTagIcon } from "@/icons/membership-tag-icon"
-import { convertToLocale, getCartTotals } from "@/lib/utils/price-utils"
-import { StoreCart } from "@medusajs/types"
+import { convertToLocale } from "@/lib/utils/price-utils"
+
+export interface CartTotals {
+  currency_code: string
+  item_subtotal: number
+  shippingFee: number
+  discount_subtotal: number
+  membershipDiscount: number
+  totalDiscount: number
+  finalTotal: number
+}
 
 interface PaymentTotalSectionProps {
-  cart: StoreCart
-  shippingFee: number
-  membershipDiscount?: number
+  totals: CartTotals
 }
 
 export const PaymentTotalSection = ({
-  cart,
-  shippingFee,
-  membershipDiscount = 0,
+  totals,
 }: PaymentTotalSectionProps) => {
-  const { currency_code, item_subtotal, discount_subtotal } =
-    getCartTotals(cart)
-
-  // Medusa가 계산한 할인 + 멤버십 할인
-  const totalDiscount = discount_subtotal + membershipDiscount
-  // 최종 결제 금액
-  const finalTotal = item_subtotal + shippingFee - totalDiscount
+  const {
+    currency_code,
+    item_subtotal,
+    shippingFee,
+    membershipDiscount,
+    totalDiscount,
+    finalTotal,
+  } = totals
 
   const formatAmount = (amount: number) =>
     convertToLocale({ amount, currency_code, maximumFractionDigits: 0 })

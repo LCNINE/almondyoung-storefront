@@ -1,15 +1,22 @@
 "use client"
 
-import { DiscountSection } from "@/domains/checkout/components/sections/discount"
+import {
+  calculateMembershipDiscount,
+  DiscountSection,
+} from "@/domains/checkout/components/sections/discount"
 import { OrderProductsSection } from "@/domains/checkout/components/sections/order-products-shipping"
 import { PaymentMethodSection } from "@/domains/checkout/components/sections/payment-method"
-import { PaymentTotalSection } from "@/domains/checkout/components/sections/payment-total"
+import {
+  PaymentTotalSection,
+  type CartTotals,
+} from "@/domains/checkout/components/sections/payment-total"
 import { ReceiptSection } from "@/domains/checkout/components/sections/receipt"
 import { ShippingSection } from "@/domains/checkout/components/sections/shipping-section"
 import type { ShippingMemo } from "@/domains/checkout/components/sections/shipping-section/types"
 import { updateCart } from "@/lib/api/medusa/cart"
 import { CartResponseDto } from "@/lib/types/dto/medusa"
 import type { Promotion } from "@/lib/types/ui/promotion"
+import { getCartTotals } from "@/lib/utils/price-utils"
 import type { UserDetail } from "@lib/types/ui/user"
 import { loadTossPayments } from "@tosspayments/tosspayments-sdk"
 import { MobileCTA, PCFixedCTA } from "domains/checkout/components/cta"
@@ -46,6 +53,34 @@ export default function CheckoutTemplate({
     () => cart.items?.filter((item) => selectedIds.has(item.id)) ?? [],
     [cart.items, selectedIds]
   )
+
+  // 멤버십 여부
+  const isMembership =
+    cart?.customer?.groups?.some(
+      (group) => group.name.toLowerCase() === "membership"
+    ) ?? false
+
+  // 가격 계산
+  const cartTotals: CartTotals = useMemo(() => {
+    const { currency_code, item_subtotal, discount_subtotal } =
+      getCartTotals(cart)
+    const membershipDiscount =
+      isMembership && selectedItems.length > 0
+        ? calculateMembershipDiscount(selectedItems)
+        : 0
+    const totalDiscount = discount_subtotal + membershipDiscount
+    const finalTotal = item_subtotal + shippingFee - totalDiscount
+
+    return {
+      currency_code,
+      item_subtotal,
+      shippingFee,
+      discount_subtotal,
+      membershipDiscount,
+      totalDiscount,
+      finalTotal,
+    }
+  }, [cart, shippingFee, isMembership, selectedItems])
 
   const [selectedMethod, setSelectedMethod] = useState("payLater")
   const [cashReceiptOption, setCashReceiptOption] = useState("noapply")
@@ -272,13 +307,11 @@ export default function CheckoutTemplate({
               onSelectedIdsChange={setSelectedIds}
             />
             <DiscountSection
-              isMembership={cart?.customer?.groups.some(
-                (group) => group.name.toLowerCase() === "membership"
-              )}
-              totals={selectedItems}
+              isMembership={isMembership}
+              membershipDiscount={cartTotals.membershipDiscount}
               promotions={promotions}
             />
-            <PaymentTotalSection cart={cart!} shippingFee={shippingFee} />
+            <PaymentTotalSection totals={cartTotals} />
             <PaymentMethodSection
               selectedMethod={selectedMethod}
               setSelectedMethod={setSelectedMethod}
@@ -297,6 +330,7 @@ export default function CheckoutTemplate({
             <PaymentDetailSidebar
               isOpen={isPaymentDetailsOpen}
               setIsOpen={setIsPaymentDetailsOpen}
+              totals={cartTotals}
             />
           </div>
         </div>

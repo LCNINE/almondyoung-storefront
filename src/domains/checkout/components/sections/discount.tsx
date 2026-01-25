@@ -12,11 +12,10 @@ import { CheckoutMembershipTagIcon } from "@/icons/membership-tag-icon"
 import type { Promotion } from "@/lib/types/ui/promotion"
 import { formatPrice } from "@/lib/utils/price-utils"
 import type { HttpTypes } from "@medusajs/types"
-import { useMemo } from "react"
 
 interface DiscountSectionProps {
   isMembership: boolean
-  totals: HttpTypes.StoreCartLineItem[] | undefined
+  membershipDiscount: number
   promotions: Promotion[]
   couponDiscount?: number
   pointsUsed?: number
@@ -24,7 +23,7 @@ interface DiscountSectionProps {
 }
 
 /** 멤버십 할인 금액 계산 (compare_at_unit_price - unit_price) * quantity */
-const calculateMembershipDiscount = (
+export const calculateMembershipDiscount = (
   items: HttpTypes.StoreCartLineItem[]
 ): number => {
   return items.reduce((acc, item) => {
@@ -36,22 +35,14 @@ const calculateMembershipDiscount = (
 
 export const DiscountSection = ({
   isMembership = false,
-  totals,
+  membershipDiscount,
   promotions,
   couponDiscount = 0,
   pointsUsed = 0,
   availablePoints = 0,
 }: DiscountSectionProps) => {
-  // 멤버십 할인 금액
-  const membershipDiscount = useMemo(
-    () => (isMembership && totals ? calculateMembershipDiscount(totals) : 0),
-    [isMembership, totals]
-  )
-
   // 총 할인 금액 = 멤버십 할인 + 쿠폰 할인 + 적립금 사용
   const totalDiscount = membershipDiscount + couponDiscount + pointsUsed
-
-  if (!totals) return null
 
   return (
     <section aria-labelledby="discount-heading" className="mb-8">

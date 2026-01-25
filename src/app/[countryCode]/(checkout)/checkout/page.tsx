@@ -27,8 +27,7 @@ export default async function CheckoutPage() {
       })),
     ])
 
-  console.log("promotionsResponse:", promotionsResponse)
-
+  console.log("cart:", cart)
   return (
     <ProtectedRoute>
       <CheckoutTemplate
