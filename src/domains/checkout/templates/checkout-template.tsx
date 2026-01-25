@@ -314,11 +314,14 @@ export default function CheckoutTemplate({
               onSelectedIdsChange={setSelectedIds}
             />
             <DiscountSection
+              cartId={cart.id}
               isMembership={isMembership}
               membershipDiscount={cartTotals.membershipDiscount}
               promotions={promotions}
+              appliedPromotionCode={cart.promotions?.[0]?.code}
               availablePoints={pointBalance.withdrawable}
               onPointsChange={setPointsUsed}
+              onCouponApplied={() => router.refresh()}
             />
             <PaymentTotalSection totals={cartTotals} />
             <PaymentMethodSection
