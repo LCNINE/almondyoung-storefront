@@ -1,6 +1,7 @@
 import { listCartShippingMethods, retrieveCart } from "@/lib/api/medusa/cart"
 import { listCartPaymentMethods } from "@/lib/api/medusa/payment"
 import { getMyPromotions } from "@/lib/api/medusa/promotion"
+import { getPointBalance } from "@/lib/api/wallet"
 import { CartResponseDto } from "@/lib/types/dto/medusa"
 import ProtectedRoute from "@components/protected-route"
 import { fetchMe } from "@lib/api/users/me"
@@ -27,7 +28,8 @@ export default async function CheckoutPage() {
       })),
     ])
 
-  console.log("cart:", cart)
+  const pointBalance = await getPointBalance()
+
   return (
     <ProtectedRoute>
       <CheckoutTemplate
@@ -35,6 +37,7 @@ export default async function CheckoutPage() {
         cart={cart}
         shippingFee={shippingMethods?.[0]?.amount ?? 0}
         promotions={promotionsResponse.promotions}
+        pointBalance={pointBalance}
       />
     </ProtectedRoute>
   )

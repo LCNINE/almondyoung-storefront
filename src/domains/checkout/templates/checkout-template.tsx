@@ -15,6 +15,7 @@ import { ShippingSection } from "@/domains/checkout/components/sections/shipping
 import type { ShippingMemo } from "@/domains/checkout/components/sections/shipping-section/types"
 import { updateCart } from "@/lib/api/medusa/cart"
 import { CartResponseDto } from "@/lib/types/dto/medusa"
+import type { PointBalanceDto } from "@/lib/types/dto/wallet"
 import type { Promotion } from "@/lib/types/ui/promotion"
 import { getCartTotals } from "@/lib/utils/price-utils"
 import type { UserDetail } from "@lib/types/ui/user"
@@ -31,6 +32,7 @@ interface CheckoutTemplateProps {
   cart: CartResponseDto["cart"]
   shippingFee: number
   promotions: Promotion[]
+  pointBalance: PointBalanceDto
 }
 
 export default function CheckoutTemplate({
@@ -38,6 +40,7 @@ export default function CheckoutTemplate({
   cart,
   shippingFee,
   promotions,
+  pointBalance,
 }: CheckoutTemplateProps) {
   const router = useRouter()
   const params = useParams()
@@ -60,7 +63,10 @@ export default function CheckoutTemplate({
       (group) => group.name.toLowerCase() === "membership"
     ) ?? false
 
-  // 가격 계산
+  // 적립금 사용 상태
+  const [pointsUsed, setPointsUsed] = useState(0)
+
+  // 가격 계산 (한 번에 계산하여 여러 컴포넌트에 전달)
   const cartTotals: CartTotals = useMemo(() => {
     const { currency_code, item_subtotal, discount_subtotal } =
       getCartTotals(cart)
@@ -68,8 +74,8 @@ export default function CheckoutTemplate({
       isMembership && selectedItems.length > 0
         ? calculateMembershipDiscount(selectedItems)
         : 0
-    const totalDiscount = discount_subtotal + membershipDiscount
-    const finalTotal = item_subtotal + shippingFee - totalDiscount
+    const totalDiscount = discount_subtotal + membershipDiscount + pointsUsed
+    const finalTotal = Math.max(0, item_subtotal + shippingFee - totalDiscount)
 
     return {
       currency_code,
@@ -77,10 +83,11 @@ export default function CheckoutTemplate({
       shippingFee,
       discount_subtotal,
       membershipDiscount,
+      pointsUsed,
       totalDiscount,
       finalTotal,
     }
-  }, [cart, shippingFee, isMembership, selectedItems])
+  }, [cart, shippingFee, isMembership, selectedItems, pointsUsed])
 
   const [selectedMethod, setSelectedMethod] = useState("payLater")
   const [cashReceiptOption, setCashReceiptOption] = useState("noapply")
@@ -310,6 +317,8 @@ export default function CheckoutTemplate({
               isMembership={isMembership}
               membershipDiscount={cartTotals.membershipDiscount}
               promotions={promotions}
+              availablePoints={pointBalance.withdrawable}
+              onPointsChange={setPointsUsed}
             />
             <PaymentTotalSection totals={cartTotals} />
             <PaymentMethodSection

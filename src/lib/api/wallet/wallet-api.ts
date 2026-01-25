@@ -1,11 +1,5 @@
 "use server"
 
-/**
- * Wallet API 클라이언트
- * 라우트 핸들러를 통해 백엔드 API를 호출합니다.
- * 클라이언트 측에서는 credentials: "include"로 쿠키가 자동 전달됩니다.
- */
-
 import type {
   BnplHistoryDto,
   BnplProfileDto,

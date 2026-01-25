@@ -9,6 +9,7 @@ export interface CartTotals {
   shippingFee: number
   discount_subtotal: number
   membershipDiscount: number
+  pointsUsed: number
   totalDiscount: number
   finalTotal: number
 }

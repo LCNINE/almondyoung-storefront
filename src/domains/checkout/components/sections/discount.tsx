@@ -12,14 +12,15 @@ import { CheckoutMembershipTagIcon } from "@/icons/membership-tag-icon"
 import type { Promotion } from "@/lib/types/ui/promotion"
 import { formatPrice } from "@/lib/utils/price-utils"
 import type { HttpTypes } from "@medusajs/types"
+import { useCallback, useState } from "react"
 
 interface DiscountSectionProps {
   isMembership: boolean
   membershipDiscount: number
   promotions: Promotion[]
   couponDiscount?: number
-  pointsUsed?: number
   availablePoints?: number
+  onPointsChange?: (points: number) => void
 }
 
 /** 멤버십 할인 금액 계산 (compare_at_unit_price - unit_price) * quantity */
@@ -38,9 +39,43 @@ export const DiscountSection = ({
   membershipDiscount,
   promotions,
   couponDiscount = 0,
-  pointsUsed = 0,
   availablePoints = 0,
+  onPointsChange,
 }: DiscountSectionProps) => {
+  // 적립금 입력값
+  const [pointsInput, setPointsInput] = useState("0")
+  // 실제 사용할 적립금
+  const [pointsUsed, setPointsUsed] = useState(0)
+
+  // 숫자만 추출하는 함수
+  const parseNumber = (value: string): number => {
+    const num = parseInt(value.replace(/[^0-9]/g, ""), 10)
+    return isNaN(num) ? 0 : num
+  }
+
+  // 적립금 입력 핸들러
+  const handlePointsInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const rawValue = e.target.value
+      const numericValue = parseNumber(rawValue)
+
+      // 사용 가능 금액 초과 방지
+      const clampedValue = Math.min(numericValue, availablePoints)
+
+      setPointsInput(clampedValue === 0 ? "0" : formatPrice(clampedValue))
+      setPointsUsed(clampedValue)
+      onPointsChange?.(clampedValue)
+    },
+    [availablePoints, onPointsChange]
+  )
+
+  // 전액사용 핸들러
+  const handleUseAll = useCallback(() => {
+    setPointsInput(availablePoints === 0 ? "0" : formatPrice(availablePoints))
+    setPointsUsed(availablePoints)
+    onPointsChange?.(availablePoints)
+  }, [availablePoints, onPointsChange])
+
   // 총 할인 금액 = 멤버십 할인 + 쿠폰 할인 + 적립금 사용
   const totalDiscount = membershipDiscount + couponDiscount + pointsUsed
 
@@ -106,7 +141,7 @@ export const DiscountSection = ({
               적립금
             </span>
             <span className="text-xs text-gray-500 md:text-sm">
-              보유:
+              보유:{" "}
               <span className="font-semibold text-gray-900">
                 {formatPrice(availablePoints)}원
               </span>
@@ -119,14 +154,22 @@ export const DiscountSection = ({
               </span>
               <Input
                 type="text"
-                placeholder="0원"
-                className="h-9 w-full rounded-[5px] border border-gray-200 pr-3 pl-10 text-right text-sm font-semibold text-[#F29219] placeholder-gray-300 focus:border-[#F29219] focus:outline-none md:h-10"
-                defaultValue="0원"
+                inputMode="numeric"
+                placeholder="0"
+                value={pointsInput}
+                onChange={handlePointsInputChange}
+                disabled={availablePoints === 0}
+                className="h-9 w-full rounded-[5px] border border-gray-200 pr-8 pl-10 text-right text-sm font-semibold text-[#F29219] placeholder-gray-300 focus:border-[#F29219] focus:outline-none disabled:bg-gray-50 disabled:text-gray-400 md:h-10"
               />
+              <span className="absolute top-1/2 right-3 -translate-y-1/2 text-sm font-semibold text-[#F29219]">
+                원
+              </span>
             </div>
             <button
               type="button"
-              className="shrink-0 rounded-[5px] bg-[#FFF7E5] px-4 py-2 text-xs font-bold text-gray-900 transition-colors hover:bg-[#FFE8B3] md:text-sm"
+              onClick={handleUseAll}
+              disabled={availablePoints === 0}
+              className="shrink-0 rounded-[5px] bg-[#FFF7E5] px-4 py-2 text-xs font-bold text-gray-900 transition-colors hover:bg-[#FFE8B3] disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400 md:text-sm"
             >
               전액사용
             </button>
