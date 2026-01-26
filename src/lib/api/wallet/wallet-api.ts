@@ -7,6 +7,7 @@ import type {
   CreateHmsCardProfileRequest,
   OnboardHmsBnplResponse,
   PointBalanceDto,
+  TaxInvoiceDto,
 } from "@lib/types/dto/wallet"
 import { api } from "../api"
 import { ApiNetworkError, HttpApiError } from "../api-error"
@@ -405,4 +406,19 @@ export async function getPointBalance(): Promise<PointBalanceDto> {
   )
 
   return result
+}
+
+/*───────────────────────────
+ * tax(세금 관련)
+ *──────────────────────────*/
+
+/**
+ * (내 기본 세금 설정 조회)
+ * @returns
+ */
+export async function getTaxInvoice(): Promise<TaxInvoiceDto> {
+  return await api<TaxInvoiceDto>("wallet", "/tax-invoices/preferences", {
+    method: "GET",
+    withAuth: true,
+  })
 }

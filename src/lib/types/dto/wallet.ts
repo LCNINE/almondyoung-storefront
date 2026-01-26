@@ -85,3 +85,15 @@ export type BnplHistoryDto = {
   totalAmount: number
   year: number
 }
+
+/*───────────────────────────
+ * 세금 계산서
+ *──────────────────────────*/
+
+export type TaxInvoiceDto = {
+  userId: string
+  createdAt: Date
+  updatedAt: Date
+  defaultEnabled: number
+  defaultBusinessInfo: unknown
+}

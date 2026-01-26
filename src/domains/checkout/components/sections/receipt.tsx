@@ -1,6 +1,7 @@
 "use client"
 
 import CustomRadio from "@/components/shared/custom-radio"
+import { TaxInvoiceType } from "@/lib/types/ui/wallet"
 
 // 현금영수증/세금계산서 섹션
 export const ReceiptSection = ({
@@ -8,11 +9,13 @@ export const ReceiptSection = ({
   setCashReceiptOption,
   taxInvoiceOption,
   setTaxInvoiceOption,
+  taxInvoice,
 }: {
   cashReceiptOption: string
   setCashReceiptOption: (value: string) => void
   taxInvoiceOption: string
   setTaxInvoiceOption: (value: string) => void
+  taxInvoice: TaxInvoiceType
 }) => (
   <section className="mb-8">
     <h2 className="mb-3 text-xl font-bold text-gray-900">

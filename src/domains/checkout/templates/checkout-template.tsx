@@ -24,6 +24,7 @@ import { MobileOrderSummary } from "domains/checkout/components/order-summary"
 import { PaymentDetailSidebar } from "domains/checkout/components/payment-detail-sidebar"
 import { useParams, useRouter } from "next/navigation"
 import { useCallback, useMemo, useRef, useState } from "react"
+import { TaxInvoiceType } from "@/lib/types/ui/wallet"
 
 interface CheckoutTemplateProps {
   user: UserDetail
@@ -31,6 +32,7 @@ interface CheckoutTemplateProps {
   shippingFee: number
   promotions: Promotion[]
   pointBalance: PointBalanceDto
+  taxInvoice: TaxInvoiceType
 }
 
 export default function CheckoutTemplate({
@@ -39,6 +41,7 @@ export default function CheckoutTemplate({
   shippingFee,
   promotions,
   pointBalance,
+  taxInvoice,
 }: CheckoutTemplateProps) {
   const router = useRouter()
   const params = useParams()
@@ -291,7 +294,7 @@ export default function CheckoutTemplate({
     <main className="bg-muted min-h-screen w-full">
       <PCHeader />
 
-      <div className="lg:px-[40px] lg:py-8 container mx-auto max-w-[1360px] px-4">
+      <div className="container mx-auto max-w-[1360px] px-4 lg:px-[40px] lg:py-8">
         <MobileHeader onClose={() => router.back()} />
 
         <div className="lg:flex lg:w-full lg:justify-between lg:gap-9">
@@ -333,6 +336,7 @@ export default function CheckoutTemplate({
               setCashReceiptOption={setCashReceiptOption}
               taxInvoiceOption={taxInvoiceOption}
               setTaxInvoiceOption={setTaxInvoiceOption}
+              taxInvoice={taxInvoice}
             />
           </div>
 
