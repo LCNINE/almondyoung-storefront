@@ -1,7 +1,10 @@
 "use client"
 
 import CustomRadio from "@/components/shared/custom-radio"
-import { TaxInvoiceType } from "@/lib/types/ui/wallet"
+import { Button } from "@/components/ui/button"
+import type { TaxInvoiceType } from "@/lib/types/ui/wallet"
+import { useState } from "react"
+import { TaxInvoiceModal } from "./tax-invoice-modal"
 
 // 현금영수증/세금계산서 섹션
 export const ReceiptSection = ({
@@ -15,8 +18,12 @@ export const ReceiptSection = ({
   setCashReceiptOption: (value: string) => void
   taxInvoiceOption: string
   setTaxInvoiceOption: (value: string) => void
-  taxInvoice: TaxInvoiceType
+  taxInvoice?: TaxInvoiceType
 }) => {
+  const [taxInvoiceModalOpen, setTaxInvoiceModalOpen] = useState(false)
+
+  const taxInvoiceData = taxInvoice?.defaultBusinessInfo
+
   return (
     <section className="mb-8">
       <h2 className="mb-3 text-xl font-bold text-gray-900">
@@ -82,23 +89,66 @@ export const ReceiptSection = ({
               />
             </div>
           </div>
-          {taxInvoiceOption === "apply" && (
-            <div className="mt-3 rounded-lg bg-[#fff] p-4">
+
+          {/* 신청함 선택 시 - 데이터 없음 */}
+          {taxInvoiceOption === "apply" && !taxInvoiceData && (
+            <div className="mt-3 rounded-lg bg-white p-4">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-gray-800">사업자</p>
-                  <p className="mt-1 text-sm text-gray-500">
-                    바나뷰티 010-101010-1020
+                <p className="text-sm text-gray-500">
+                  등록된 세금계산서 정보가 없습니다.
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setTaxInvoiceModalOpen(true)}
+                  className="w-fit shrink-0"
+                >
+                  추가
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* 신청함 선택 시 - 데이터 있음 */}
+          {taxInvoiceOption === "apply" && taxInvoiceData && (
+            <div className="mt-3 rounded-lg bg-white p-4">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                <div className="flex-1 space-y-1">
+                  <p className="text-sm font-semibold text-gray-800">
+                    {taxInvoiceData.name}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    사업자등록번호: {taxInvoiceData.businessNumber}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    대표자: {taxInvoiceData.ownerName}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {taxInvoiceData.address}
                   </p>
                 </div>
-                <button className="w-fit rounded border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-600">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setTaxInvoiceModalOpen(true)}
+                  className="w-fit shrink-0"
+                >
                   변경
-                </button>
+                </Button>
               </div>
             </div>
           )}
         </div>
       </div>
+
+      {/* 세금계산서 모달 */}
+      <TaxInvoiceModal
+        open={taxInvoiceModalOpen}
+        onOpenChange={setTaxInvoiceModalOpen}
+        initialData={taxInvoiceData}
+      />
     </section>
   )
 }

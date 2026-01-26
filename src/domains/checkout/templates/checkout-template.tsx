@@ -92,7 +92,9 @@ export default function CheckoutTemplate({
 
   const [selectedMethod, setSelectedMethod] = useState("payLater")
   const [cashReceiptOption, setCashReceiptOption] = useState("noapply")
-  const [taxInvoiceOption, setTaxInvoiceOption] = useState("noapply")
+  const [taxInvoiceOption, setTaxInvoiceOption] = useState(
+    taxInvoice?.defaultEnabled ? "apply" : "noapply"
+  )
   const [isPaymentDetailsOpen, setIsPaymentDetailsOpen] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)

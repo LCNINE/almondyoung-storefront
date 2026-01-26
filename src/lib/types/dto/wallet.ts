@@ -95,5 +95,13 @@ export type TaxInvoiceDto = {
   createdAt: Date
   updatedAt: Date
   defaultEnabled: number
-  defaultBusinessInfo: unknown
+  defaultBusinessInfo: TaxInvoiceData
+}
+
+/** 세금계산서 사업자 정보 */
+export interface TaxInvoiceData {
+  name: string // 사업자명
+  businessNumber: string
+  address: string // 사업장 주소
+  ownerName: string // 대표자명
 }
