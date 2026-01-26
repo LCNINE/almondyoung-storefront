@@ -2,25 +2,13 @@
 
 import { MembershipTagIcon } from "@/icons/membership-tag-icon"
 import { convertToLocale } from "@/lib/utils/price-utils"
-
-export interface CartTotals {
-  currency_code: string
-  item_subtotal: number
-  shippingFee: number
-  discount_subtotal: number
-  membershipDiscount: number
-  pointsUsed: number
-  totalDiscount: number
-  finalTotal: number
-}
+import type { CartTotals } from "@/lib/types/ui/cart"
 
 interface PaymentTotalSectionProps {
   totals: CartTotals
 }
 
-export const PaymentTotalSection = ({
-  totals,
-}: PaymentTotalSectionProps) => {
+export const PaymentTotalSection = ({ totals }: PaymentTotalSectionProps) => {
   const {
     currency_code,
     item_subtotal,
@@ -35,12 +23,12 @@ export const PaymentTotalSection = ({
 
   return (
     <section className="mb-8">
-      <h2 className="mb-3 text-base font-bold text-gray-900 md:text-xl">
+      <h2 className="mb-3 text-base font-bold text-gray-900 lg:text-xl">
         결제 정보
       </h2>
 
-      <div className="overflow-hidden rounded-md border border-gray-200 bg-white md:rounded-[10px]">
-        <div className="space-y-3 p-4 md:p-6">
+      <div className="overflow-hidden rounded-md border border-gray-200 bg-white lg:rounded-[10px]">
+        <div className="space-y-3 p-4 lg:p-6">
           <InfoRow
             label="주문 상품"
             value={formatAmount(item_subtotal)}
@@ -68,12 +56,12 @@ export const PaymentTotalSection = ({
             />
           )}
         </div>
-        <div className="flex items-center justify-between bg-[#FFF7E5]/50 px-4 py-4 md:px-6">
-          <span className="text-sm font-semibold text-gray-900 md:text-base">
+        <div className="flex items-center justify-between bg-[#FFF7E5]/50 px-4 py-4 lg:px-6">
+          <span className="text-sm font-semibold text-gray-900 lg:text-base">
             총 주문 금액
           </span>
           <span
-            className="text-base font-bold text-[#F29219] md:text-lg"
+            className="text-base font-bold text-[#F29219] lg:text-lg"
             data-testid="cart-total"
             data-value={finalTotal}
           >
@@ -99,9 +87,9 @@ const InfoRow = ({
   isDiscount?: boolean
 }) => (
   <div className="flex items-center justify-between">
-    <span className="text-[12px] text-gray-900 md:text-sm">{label}</span>
+    <span className="text-[12px] text-gray-900 lg:text-sm">{label}</span>
     <span
-      className={`text-[13px] md:text-sm ${isDiscount ? "text-[#F29219]" : "text-gray-900"}`}
+      className={`text-[13px] lg:text-sm ${isDiscount ? "text-[#F29219]" : "text-gray-900"}`}
       data-testid={dataTestId}
       data-value={dataValue ?? 0}
     >

@@ -55,8 +55,10 @@ export const calcItemPrice = (item: {
   unit_price: number
   quantity: number
 }) => {
-  const total = item.total ?? item.unit_price * item.quantity
-  // 정가: compare_at_unit_price가 있으면 사용, 없으면 unit_price
+  // 주문상품 섹션에서는 멤버십 할인(상품 자체 할인)만 표시
+  // item.total은 쿠폰 등 프로모션 할인까지 포함하므로, unit_price * quantity 사용
+  const total = item.unit_price * item.quantity
+  // 정가: compare_at_unit_price가 있으면 사용, 없으면 unit_price (할인 없음)
   const compareAtTotal = item.compare_at_unit_price
     ? item.compare_at_unit_price * item.quantity
     : null

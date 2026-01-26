@@ -130,12 +130,12 @@ export const DiscountSection = ({
     <section aria-labelledby="discount-heading" className="mb-8">
       <h2
         id="discount-heading"
-        className="mb-3 text-base font-bold text-gray-900 md:text-xl"
+        className="mb-3 text-base font-bold text-gray-900 lg:text-xl"
       >
         할인 / 부가결제
       </h2>
 
-      <div className="flex w-full flex-col gap-5 rounded-md border border-gray-200 bg-white p-4 md:gap-6 md:rounded-[10px] md:p-6">
+      <div className="flex w-full flex-col gap-5 rounded-md border border-gray-200 bg-white p-4 lg:gap-6 lg:rounded-[10px] lg:p-6">
         {/* 자동할인 - 총 할인 금액 표시 */}
         <DiscountRow
           label="자동할인"
@@ -149,10 +149,10 @@ export const DiscountSection = ({
         {/* 쿠폰 */}
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-gray-900 md:text-sm">
+            <span className="text-xs font-medium text-gray-900 lg:text-sm">
               쿠폰
             </span>
-            <span className="text-xs text-gray-500 md:text-sm">
+            <span className="text-xs text-gray-500 lg:text-sm">
               사용가능 {promotions.length > 0 && `(${promotions.length})`}
             </span>
           </div>
@@ -161,7 +161,7 @@ export const DiscountSection = ({
           {selectedCoupon ? (
             <div className="flex items-center justify-between rounded-[5px] border border-[#F29219] bg-[#FFF7E5] px-3 py-2.5">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-medium text-[#F29219] md:text-sm">
+                <span className="text-xs font-medium text-[#F29219] lg:text-sm">
                   {(() => {
                     const promo = promotions.find(
                       (p) => p.code === selectedCoupon
@@ -172,7 +172,7 @@ export const DiscountSection = ({
                       : `${formatPrice(promo.application_method.value)}원 할인`
                   })()}
                 </span>
-                <span className="text-[10px] text-gray-500 md:text-xs">
+                <span className="text-[10px] text-gray-500 lg:text-xs">
                   ({selectedCoupon})
                 </span>
               </div>
@@ -200,7 +200,7 @@ export const DiscountSection = ({
               onValueChange={handleCouponChange}
               disabled={promotions.length === 0 || isPending}
             >
-              <SelectTrigger className="h-10 w-full rounded-[5px] border-gray-200 bg-white text-xs text-gray-500 focus:border-gray-400 focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm">
+              <SelectTrigger className="h-10 w-full rounded-[5px] border-gray-200 bg-white text-xs text-gray-500 focus:border-gray-400 focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50 lg:text-sm">
                 <SelectValue
                   placeholder={
                     isPending
@@ -230,10 +230,10 @@ export const DiscountSection = ({
         {/* 적립금 */}
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-gray-900 md:text-sm">
+            <span className="text-xs font-medium text-gray-900 lg:text-sm">
               적립금
             </span>
-            <span className="text-xs text-gray-500 md:text-sm">
+            <span className="text-xs text-gray-500 lg:text-sm">
               보유:{" "}
               <span className="font-semibold text-gray-900">
                 {formatPrice(availablePoints)}원
@@ -252,7 +252,7 @@ export const DiscountSection = ({
                 value={pointsInput}
                 onChange={handlePointsInputChange}
                 disabled={availablePoints === 0}
-                className="h-9 w-full rounded-[5px] border border-gray-200 pr-8 pl-10 text-right text-sm font-semibold text-[#F29219] placeholder-gray-300 focus:border-[#F29219] focus:outline-none disabled:bg-gray-50 disabled:text-gray-400 md:h-10"
+                className="h-9 w-full rounded-[5px] border border-gray-200 pr-8 pl-10 text-right text-sm font-semibold text-[#F29219] placeholder-gray-300 focus:border-[#F29219] focus:outline-none disabled:bg-gray-50 disabled:text-gray-400 lg:h-10"
               />
               <span className="absolute top-1/2 right-3 -translate-y-1/2 text-sm font-semibold text-[#F29219]">
                 원
@@ -262,7 +262,7 @@ export const DiscountSection = ({
               type="button"
               onClick={handleUseAll}
               disabled={availablePoints === 0}
-              className="shrink-0 rounded-[5px] bg-[#FFF7E5] px-4 py-2 text-xs font-bold text-gray-900 transition-colors hover:bg-[#FFE8B3] disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400 md:text-sm"
+              className="shrink-0 rounded-[5px] bg-[#FFF7E5] px-4 py-2 text-xs font-bold text-gray-900 transition-colors hover:bg-[#FFE8B3] disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400 lg:text-sm"
             >
               전액사용
             </button>
@@ -292,7 +292,7 @@ const DiscountRow = ({
   return (
     <div className="flex items-start justify-between">
       <div className="flex flex-col gap-1.5">
-        <span className="text-xs font-medium text-gray-900 md:text-sm">
+        <span className="text-xs font-medium text-gray-900 lg:text-sm">
           {label}
         </span>
 
@@ -300,7 +300,7 @@ const DiscountRow = ({
         {hasMembershipDiscount && (
           <div className="flex items-center gap-1">
             <CheckoutMembershipTagIcon />
-            <span className="text-[10px] font-medium text-[#E08F00] md:text-xs">
+            <span className="text-[10px] font-medium text-[#E08F00] lg:text-xs">
               멤버십 할인 -{formatPrice(membershipDiscount)}원
             </span>
           </div>
@@ -308,7 +308,7 @@ const DiscountRow = ({
       </div>
       <div className="flex flex-col items-end gap-0.5">
         {/* 총 할인 금액 표시 */}
-        <span className="text-sm font-semibold text-gray-900 md:text-base">
+        <span className="text-sm font-semibold text-gray-900 lg:text-base">
           {hasDiscount ? `-${formatPrice(totalDiscount)}원` : "0원"}
         </span>
       </div>

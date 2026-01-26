@@ -1,5 +1,5 @@
+import type { CartTotals } from "@/lib/types/ui/cart"
 import { convertToLocale } from "@/lib/utils/price-utils"
-import type { CartTotals } from "./sections/payment-total"
 
 // PC 결제 상세 사이드바
 export const PaymentDetailSidebar = ({
@@ -19,7 +19,7 @@ export const PaymentDetailSidebar = ({
     })
 
   return (
-    <section className="hidden md:block md:min-w-[320px] md:flex-1 lg:w-[412px]">
+    <section className="hidden lg:block lg:min-w-[320px] lg:flex-1 lg:w-[412px]">
       <div className="flex items-center justify-between">
         <h2 className="mb-3 text-xl font-bold text-gray-900">결제 상세</h2>
         <div className="flex items-center gap-2">

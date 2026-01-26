@@ -6,10 +6,8 @@ import {
 } from "@/domains/checkout/components/sections/discount"
 import { OrderProductsSection } from "@/domains/checkout/components/sections/order-products-shipping"
 import { PaymentMethodSection } from "@/domains/checkout/components/sections/payment-method"
-import {
-  PaymentTotalSection,
-  type CartTotals,
-} from "@/domains/checkout/components/sections/payment-total"
+import { PaymentTotalSection } from "@/domains/checkout/components/sections/payment-total"
+import type { CartTotals } from "@/lib/types/ui/cart"
 import { ReceiptSection } from "@/domains/checkout/components/sections/receipt"
 import { ShippingSection } from "@/domains/checkout/components/sections/shipping-section"
 import type { ShippingMemo } from "@/domains/checkout/components/sections/shipping-section/types"
@@ -293,12 +291,12 @@ export default function CheckoutTemplate({
     <main className="bg-muted min-h-screen w-full">
       <PCHeader />
 
-      <div className="container mx-auto max-w-[1360px] px-4 md:px-[40px] md:py-8">
+      <div className="lg:px-[40px] lg:py-8 container mx-auto max-w-[1360px] px-4">
         <MobileHeader onClose={() => router.back()} />
 
-        <div className="md:flex md:w-full md:justify-between md:gap-9">
+        <div className="lg:flex lg:w-full lg:justify-between lg:gap-9">
           {/* 왼쪽 섹션 */}
-          <div className="md:max-w-[820px] md:min-w-[420px] md:flex-1">
+          <div className="lg:max-w-[820px] lg:min-w-[420px] lg:flex-1">
             <ShippingSection
               shippingAddress={cart?.shipping_address || null}
               addressName={
@@ -324,10 +322,12 @@ export default function CheckoutTemplate({
               onCouponApplied={() => router.refresh()}
             />
             <PaymentTotalSection totals={cartTotals} />
+
             <PaymentMethodSection
               selectedMethod={selectedMethod}
               setSelectedMethod={setSelectedMethod}
             />
+
             <ReceiptSection
               cashReceiptOption={cashReceiptOption}
               setCashReceiptOption={setCashReceiptOption}
@@ -337,8 +337,11 @@ export default function CheckoutTemplate({
           </div>
 
           {/* 오른쪽 섹션 */}
-          <div className="md:shrink-0">
-            <MobileOrderSummary />
+          <div className="lg:shrink-0">
+            <MobileOrderSummary
+              totals={cartTotals}
+              isMembership={isMembership}
+            />
             <PaymentDetailSidebar
               isOpen={isPaymentDetailsOpen}
               setIsOpen={setIsPaymentDetailsOpen}

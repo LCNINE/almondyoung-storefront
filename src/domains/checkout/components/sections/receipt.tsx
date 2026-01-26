@@ -18,10 +18,10 @@ export const ReceiptSection = ({
     <h2 className="mb-3 text-xl font-bold text-gray-900">
       현금영수증 / 세금계산서
     </h2>
-    <div className="w-full space-y-4 rounded-lg bg-transparent py-4 md:space-y-6">
+    <div className="w-full space-y-4 rounded-lg bg-transparent py-4 lg:space-y-6">
       {/* 현금영수증 */}
       <div>
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-0">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-0">
           <h3 className="text-base font-bold">현금영수증</h3>
           <div className="flex items-center space-x-4">
             <CustomRadio
@@ -42,7 +42,7 @@ export const ReceiptSection = ({
         </div>
         {cashReceiptOption === "apply" && (
           <div className="mt-3 rounded-lg bg-[#fff] p-4">
-            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <p className="text-sm font-semibold text-gray-800">사업자</p>
                 <p className="mt-1 text-sm text-gray-500">
@@ -59,7 +59,7 @@ export const ReceiptSection = ({
 
       {/* 세금계산서 */}
       <div>
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-0">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-0">
           <h3 className="text-base font-bold">세금계산서</h3>
           <div className="flex items-center space-x-4">
             <CustomRadio
@@ -80,7 +80,7 @@ export const ReceiptSection = ({
         </div>
         {taxInvoiceOption === "apply" && (
           <div className="mt-3 rounded-lg bg-[#fff] p-4">
-            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <p className="text-sm font-semibold text-gray-800">사업자</p>
                 <p className="mt-1 text-sm text-gray-500">
