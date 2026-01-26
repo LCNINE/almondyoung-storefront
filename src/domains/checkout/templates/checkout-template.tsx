@@ -25,6 +25,11 @@ import { PaymentDetailSidebar } from "domains/checkout/components/payment-detail
 import { useParams, useRouter } from "next/navigation"
 import { useCallback, useMemo, useRef, useState } from "react"
 import { ReceiptSection } from "../components/sections/receipt/"
+import {
+  authorizePayment,
+  createIntent,
+  getBnplProfiles,
+} from "@/lib/api/wallet"
 
 interface CheckoutTemplateProps {
   user: UserDetail
@@ -117,28 +122,14 @@ export default function CheckoutTemplate({
         throw new Error("로그인이 필요합니다.")
       }
 
-      // Intent 생성 (라우트 핸들러 사용)
-      const intentResponse = await fetch("/api/wallet/payments/intents", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
+      const intent = await createIntent({
+        data: {
           customerId: user.id,
-          originalAmount: 100, // TODO: 실제 금액으로 교체
+          originalAmount: cartTotals.finalTotal,
           discountAmount: 0,
           type: "ORDER",
-        }),
-        cache: "no-store",
+        },
       })
-
-      if (!intentResponse.ok) {
-        const errorData = await intentResponse.json().catch(() => ({}))
-        throw new Error(errorData.message || "Intent 생성 실패")
-      }
-
-      const intent = await intentResponse.json()
 
       // 3. 토스 결제 SDK 초기화
       const clientKey =
@@ -184,15 +175,16 @@ export default function CheckoutTemplate({
           method: "CARD",
           amount: {
             currency: "KRW",
-            value: 100, // TODO: 실제 금액으로 교체
+            value: cartTotals.finalTotal,
           },
           orderId: intentId,
-          orderName: "주문 상품", // TODO: 실제 주문명으로 교체
+          orderName: cart.items?.map((item) => item.title).join(", "),
           successUrl: `${baseUrl}/${countryCode}/checkout/callback`,
           failUrl: `${baseUrl}/${countryCode}/checkout/callback`,
-          customerEmail: "customer@example.com", // TODO: 실제 이메일로 교체
-          customerName: "고객명", // TODO: 실제 이름으로 교체
-          customerMobilePhone: "01012341234", // TODO: 실제 전화번호로 교체
+          customerEmail: user.email,
+          customerName: user.username,
+          customerMobilePhone:
+            cart.shipping_address?.phone ?? user.profile?.phoneNumber,
         })
       } else if (selectedMethod === "payLater") {
         // 나중 결제: 라우트 핸들러로 직접 요청
@@ -200,47 +192,24 @@ export default function CheckoutTemplate({
           throw new Error("로그인이 필요합니다.")
         }
 
-        // Intent 생성 (라우트 핸들러 사용)
-        const intentResponse = await fetch("/api/wallet/payments/intents", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            credentials: "include",
-          },
-
-          body: JSON.stringify({
+        const intent = await createIntent({
+          data: {
             customerId: user.id,
-            originalAmount: 100, // TODO: 실제 금액으로 교체
+            originalAmount: cartTotals.finalTotal,
             discountAmount: 0,
             type: "ORDER",
-          }),
-          cache: "no-store",
-        })
-
-        if (!intentResponse.ok) {
-          const errorData = await intentResponse.json().catch(() => ({}))
-          throw new Error(errorData.message || "Intent 생성 실패")
-        }
-
-        const intent = await intentResponse.json()
-
-        // 3. BNPL 프로필 조회 (나중 결제는 프로필이 필요)
-        const profilesResponse = await fetch("/api/wallet/payments/profiles", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
           },
         })
 
-        let profileId: string | undefined
-        if (profilesResponse.ok) {
-          const profiles = await profilesResponse.json()
-          // HMS_BNPL 프로필 찾기
-          const bnplProfile = profiles.find(
-            (p: any) => p.provider === "HMS_BNPL" && p.status === "ACTIVE"
-          )
-          profileId = bnplProfile?.id
-        }
+        //  BNPL 프로필 조회 (나중 결제는 프로필이 필요)
+        const profiles = await getBnplProfiles()
+
+        // HMS_BNPL 프로필 찾기
+        const bnplProfile = profiles?.find(
+          (p: any) => p.provider === "HMS_BNPL" && p.status === "ACTIVE"
+        )
+
+        const profileId = bnplProfile?.id
 
         if (!profileId) {
           throw new Error(
@@ -248,39 +217,19 @@ export default function CheckoutTemplate({
           )
         }
 
-        // 4. 결제 승인 (라우트 핸들러 사용)
+        // 결제 승인 (라우트 핸들러 사용)
         // 나중 결제는 HMS_BNPL로 처리
-        const authorizeResponse = await fetch(
-          `/api/wallet/payments/intents/${intent.id}/authorize`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include",
-            body: JSON.stringify({
-              provider: "HMS_BNPL", // 나중 결제는 BNPL로 처리
-              profileId: profileId, // BNPL 프로필 ID 필수
-            }),
-            cache: "no-store",
-          }
-        )
+        const authorize = await authorizePayment(intent.id, {
+          provider: "HMS_BNPL",
+          profileId: profileId,
+        })
 
-        if (!authorizeResponse.ok) {
-          const errorData = await authorizeResponse.json().catch(() => ({}))
-          throw new Error(errorData.message || "결제 승인 실패")
-        }
-
-        const responseData = await authorizeResponse.json()
-
-        const result = responseData.data || responseData
-
-        if (result.success && result.intentId) {
-          router.push(`/${countryCode}/checkout/success/${result.intentId}`)
+        if (authorize.success) {
+          router.push(`/${countryCode}/checkout/success/${intent.id}`)
         } else {
           throw new Error(
-            result.message ||
-              `결제 승인 실패: success=${result?.success}, intentId=${result?.intentId}`
+            authorize.message ||
+              `결제 승인 실패: success=${authorize?.success}, intentId=${intent.id}`
           )
         }
       }

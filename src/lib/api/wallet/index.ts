@@ -1,10 +1,15 @@
 "use server"
 
 import type {
+  AuthorizePaymentDto,
+  AuthorizePaymentErrorResponse,
+  AuthorizePaymentSuccessResponse,
   BnplHistoryDto,
   BnplProfileDto,
   BnplSummaryDto,
   CreateHmsCardProfileRequest,
+  CreateIntentRequestDto,
+  CreateIntentResponseDto,
   OnboardHmsBnplResponse,
   PointBalanceDto,
   TaxInvoiceData,
@@ -12,8 +17,6 @@ import type {
 } from "@lib/types/dto/wallet"
 import { api } from "../api"
 import { ApiNetworkError, HttpApiError } from "../api-error"
-
-const API_BASE = "/api/wallet"
 
 // ==========================================
 // PIN 상태 관련 타입
@@ -110,23 +113,13 @@ export async function getBnplSummary(): Promise<BnplSummaryDto> {
  * @param data HMS 카드 등록 정보
  */
 export async function createHmsCardProfile(data: CreateHmsCardProfileRequest) {
-  const res = await fetch(`${API_BASE}/payments/profiles/hms-card`, {
+  const res = await api("wallet", "/payments/profiles/hms-card", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-    body: JSON.stringify(data),
+    body: data,
+    withAuth: true,
   })
 
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({ message: "Unknown error" }))
-    throw new Error(
-      error.message || `Failed to create HMS card profile: ${res.statusText}`
-    )
-  }
-
-  return res.json()
+  return res
 }
 
 /**
@@ -237,14 +230,31 @@ export async function onboardHmsBnpl(_: any, formData: FormData) {
  * @param intentId Intent ID
  * @param data 인증 데이터
  */
-export async function authorizePayment(intentId: string, data: any) {
-  const result = await api<{ success: boolean }>(
+export async function authorizePayment(
+  intentId: string,
+  data: AuthorizePaymentDto
+): Promise<AuthorizePaymentSuccessResponse | AuthorizePaymentErrorResponse> {
+  const result = await api<
+    AuthorizePaymentSuccessResponse | AuthorizePaymentErrorResponse
+  >("wallet", `/payments/intents/${intentId}/authorize`, {
+    method: "POST",
+    body: data,
+    withAuth: true,
+    cache: "no-store",
+  })
+
+  return result
+}
+
+export async function createIntent({ data }: { data: CreateIntentRequestDto }) {
+  const result = await api<CreateIntentResponseDto>(
     "wallet",
-    `/payments/intents/${intentId}/authorize`,
+    "/payments/intents",
     {
       method: "POST",
       body: data,
       withAuth: true,
+      cache: "no-store",
     }
   )
 

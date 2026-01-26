@@ -1,4 +1,63 @@
 /*───────────────────────────
+ * Intent 생성
+ *──────────────────────────*/
+export type CreateIntentRequestDto = {
+  customerId: string
+  originalAmount: number
+  discountAmount: number
+  type: string
+}
+
+export type CreateIntentResponseDto = {
+  id: string
+  customerId: string
+  amount: number
+  type: string
+  status: string
+  createdAt: string
+  updatedAt: string
+  metadata: any | null
+  capturedAt: string | null
+}
+
+/*───────────────────────────
+ * 결제
+ *──────────────────────────*/
+
+export type AuthorizePaymentDto = {
+  authParams?: Record<string, string> | null
+  profileId?: string | null
+  provider: "TOSS" | "HMS_CARD" | "HMS_BNPL"
+  usePoints?: number | null
+}
+
+/** authorize 결제 성공 응답 */
+export type AuthorizePaymentSuccessResponse = {
+  success: true
+  intentId: string
+  attemptId?: string
+  status: string
+  provider: string
+  amount: number
+  paymentKey: string
+  message: string
+  pointEventId?: number
+  breakdown?: {
+    totalAmount: number
+    pointsUsed: number
+    finalAmount: number
+  }
+}
+
+/** authorize 결제 실패 응답 */
+export type AuthorizePaymentErrorResponse = {
+  success: false
+  message: string
+  statusCode: number
+  timestamp?: string
+}
+
+/*───────────────────────────
  * BNPL Profile
  *──────────────────────────*/
 export type BnplProfileDto = {
