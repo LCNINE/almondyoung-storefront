@@ -162,6 +162,11 @@ export default function CheckoutTemplate({
         },
       })
 
+      console.log("🔍 결제 처리 시작:", {
+        selectedMethod,
+        cartTotals,
+      })
+
       if (selectedMethod === "toss") {
         // 토스 결제: 결제창 열기
         if (!tossPaymentRef.current) {

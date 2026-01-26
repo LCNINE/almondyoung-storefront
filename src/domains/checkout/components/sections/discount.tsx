@@ -17,6 +17,7 @@ import type { Promotion } from "@/lib/types/ui/promotion"
 import { formatPrice } from "@/lib/utils/price-utils"
 import type { HttpTypes } from "@medusajs/types"
 import { useCallback, useState, useTransition } from "react"
+import { toast } from "sonner"
 
 interface DiscountSectionProps {
   cartId: string
@@ -81,6 +82,7 @@ export const DiscountSection = ({
           onCouponApplied?.()
         } catch (error) {
           console.error("쿠폰 적용 실패:", error)
+          toast.error("쿠폰 적용에 실패했습니다. 잠시 후 다시 시도해주세요.")
         }
       })
     },
