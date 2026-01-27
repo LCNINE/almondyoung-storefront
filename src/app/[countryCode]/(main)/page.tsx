@@ -1,13 +1,12 @@
 import { ThemeManager } from "@/components/shared/theme-manager"
 import { HomeLoggedInTemplate } from "@/domains/home/template/home-loggedin-template"
-import { getProductList } from "@/lib/api/medusa/products"
 import { getRegion } from "@/lib/api/medusa/regions"
 import { siteConfig } from "@/lib/config/site"
 import { getSEOTags } from "@/lib/seo"
 import ProtectedRoute from "@components/protected-route"
-import { getCategoryTree } from "@lib/api/pim"
+import { getCategoryTree } from "@/lib/api/medusa/categories"
 import { fetchMe } from "@lib/api/users/me"
-import type { CategoryTreeNodeDto } from "@lib/types/dto/pim"
+import type { StoreProductCategoryTree } from "@/lib/types/medusa-category"
 import { HomeLogoutTemplate } from "domains/home/template/home-logout-template"
 
 export const metadata = getSEOTags({
@@ -25,18 +24,9 @@ export default async function Home({
   const region = await getRegion(countryCode)
 
   // 카테고리 트리 조회
-  let categories: CategoryTreeNodeDto[] = []
+  let categories: StoreProductCategoryTree[] = []
 
-  const result = await getCategoryTree().catch(() => null)
-  categories = result?.categories || []
-
-  const productList = await getProductList({
-    region_id: region?.id,
-    // categoryId: categories[0]?.id,
-  }).catch((err) => {
-    console.error("getProductList failed:", err)
-    return null
-  })
+  categories = await getCategoryTree().catch(() => [])
 
   // const user = await fetchMe().catch(() => null)
 
@@ -47,7 +37,10 @@ export default async function Home({
       ) : (
         <HomeLogoutTemplate initialCategories={categories} />
       )} */}
-      <HomeLogoutTemplate initialCategories={categories} />
+      <HomeLogoutTemplate
+        initialCategories={categories}
+        regionId={region?.id}
+      />
 
       {/* 테마 매니저 (개발 모드에서만 표시) */}
       {process.env.NODE_ENV === "development" && <ThemeManager />}

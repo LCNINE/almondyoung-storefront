@@ -22,7 +22,7 @@ import { getRegion } from "./regions"
  * @returns 카트를 찾으면 카트 객체를, 찾지 못하면 null을 반환합니다.
  */
 export async function retrieveCart(cartId?: string, fields?: string) {
-  const id = cartId || (await getCartId())
+  let id = cartId || (await getCartId())
   fields ??=
     "*items, *region, *items.product, *items.variant, *items.thumbnail, *items.metadata, +items.total, *promotions, +shipping_methods, *customer.groups"
 
@@ -36,6 +36,35 @@ export async function retrieveCart(cartId?: string, fields?: string) {
 
   const next = {
     ...(await getCacheOptions("carts")),
+  }
+
+  // 쿠키에 cart_id가 없으면 customer의 카트를 조회 시도
+  if (!id && headers.authorization) {
+    try {
+      const response = await sdk.client.fetch<{
+        carts: HttpTypes.StoreCart[]
+      }>(`/store/carts`, {
+        method: "GET",
+        query: {
+          fields: "id",
+          limit: 1,
+        },
+        headers,
+        cache: "no-store",
+      })
+
+      if (response.carts && response.carts.length > 0) {
+        id = response.carts[0].id
+        // 찾은 카트 ID를 쿠키에 저장
+        await setCartId(id)
+      }
+    } catch (error) {
+      console.error("Customer cart lookup failed:", error)
+    }
+  }
+
+  if (!id) {
+    return null
   }
 
   return await sdk.client
@@ -59,7 +88,8 @@ export async function getOrSetCart(countryCode: string) {
     throw new Error(`Region not found for country code: ${countryCode}`)
   }
 
-  let cart = await retrieveCart(undefined, "id,region_id")
+  // customer_id도 함께 조회해서 연결 여부 확인
+  let cart = await retrieveCart(undefined, "id,region_id,customer_id")
 
   const headers = {
     ...(await getAuthHeaders()),
@@ -75,8 +105,26 @@ export async function getOrSetCart(countryCode: string) {
 
     await setCartId(cart.id)
 
+    // 로그인된 사용자라면 카트를 고객에게 연결
+    if (headers.authorization) {
+      try {
+        await transferCart()
+      } catch (error) {
+        console.error("Cart transfer failed:", error)
+      }
+    }
+
     const cartCacheTag = await getCacheTag("carts")
     revalidateTag(cartCacheTag)
+  } else if (headers.authorization && !cart.customer_id) {
+    // 기존 카트가 있지만 고객에게 연결되지 않은 경우 연결
+    try {
+      await transferCart()
+      const cartCacheTag = await getCacheTag("carts")
+      revalidateTag(cartCacheTag)
+    } catch (error) {
+      console.error("Cart transfer failed:", error)
+    }
   }
 
   if (cart && cart?.region_id !== region.id) {
@@ -440,7 +488,10 @@ export async function updateRegion(countryCode: string, currentPath: string) {
   redirect(`/${countryCode}${currentPath}`)
 }
 
-export const listCartShippingMethods = async (cartId: string) => {
+export const listCartShippingMethods = async (
+  cartId: string,
+  cache: RequestCache = "force-cache"
+) => {
   const headers = {
     ...(await getAuthHeaders()),
   }
@@ -459,11 +510,33 @@ export const listCartShippingMethods = async (cartId: string) => {
         },
         headers,
         next,
-        cache: "force-cache",
+        cache,
       }
     )
     .then(({ shipping_options }) => shipping_options)
     .catch(() => {
       return null
     })
+}
+
+export const addCartShippingMethod = async (
+  cartId: string,
+  optionId: string
+) => {
+  const headers = {
+    ...(await getAuthHeaders()),
+  }
+
+  return sdk.store.cart
+    .addShippingMethod(cartId, { option_id: optionId }, {}, headers)
+    .then(async ({ cart }: { cart: HttpTypes.StoreCart }) => {
+      const cartCacheTag = await getCacheTag("carts")
+      revalidateTag(cartCacheTag)
+
+      const fulfillmentCacheTag = await getCacheTag("fulfillment")
+      revalidateTag(fulfillmentCacheTag)
+
+      return cart
+    })
+    .catch(medusaError)
 }

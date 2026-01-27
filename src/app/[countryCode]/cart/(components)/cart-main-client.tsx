@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useMemo, useEffect, useCallback } from "react"
+import { useParams } from "next/navigation"
 import type { CartItem } from "@lib/types/ui/cart"
 import { CartHeader } from "./cart-header"
 import { CartTabsMobile } from "./cart-tabs-mobile"
@@ -10,9 +11,12 @@ import { CartFooter } from "./cart-footer"
 import { RecommendedProducts } from "./recommended-products"
 import {
   retrieveCart,
+  getOrSetCart,
+  listCartShippingMethods,
   updateLineItem,
   deleteLineItem,
 } from "@lib/api/medusa/cart"
+import { transferCart } from "@lib/api/medusa/customer"
 import type { HttpTypes } from "@medusajs/types"
 import { toast } from "sonner"
 
@@ -34,7 +38,8 @@ function mapMedusaItemToCartItem(item: HttpTypes.StoreCartLineItem): CartItem {
 
   // 가격 정보
   const basePrice = item.unit_price || 0
-  const membershipPrice = (variant?.metadata as any)?.membershipPrice || basePrice
+  const membershipPrice = (variant?.metadata as any)?.membershipPrice || null
+  const isMembershipOnly = (product?.metadata as any)?.isMembershipOnly || false
 
   return {
     id: item.id,
@@ -43,9 +48,9 @@ function mapMedusaItemToCartItem(item: HttpTypes.StoreCartLineItem): CartItem {
       name: item.title || product?.title || "상품명 없음",
       thumbnail: item.thumbnail || product?.thumbnail || "",
       basePrice,
-      membershipPrice,
+      membershipPrice: membershipPrice || basePrice,
       brand: product?.subtitle || (product?.metadata as any)?.brand || "",
-      isMembershipOnly: false,
+      isMembershipOnly,
     },
     selectedOptions,
     quantity: item.quantity,
@@ -54,34 +59,85 @@ function mapMedusaItemToCartItem(item: HttpTypes.StoreCartLineItem): CartItem {
 }
 
 export function CartMainClient() {
+  const params = useParams() as { countryCode?: string }
+  const countryCode = params?.countryCode || "kr"
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [checkedItems, setCheckedItems] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [isUpdating, setIsUpdating] = useState(false)
   const [recommendedProducts, setRecommendedProducts] = useState<any[]>([])
+  const [shippingTotal, setShippingTotal] = useState<number>(0)
+  const [cartId, setCartId] = useState<string | null>(null)
+
+  const getEstimatedShippingTotal = useCallback(async (id: string) => {
+    const options = await listCartShippingMethods(id, "no-store")
+    const standard =
+      options?.find((option) => option.type?.code === "standard") ??
+      options?.[0]
+    return standard?.amount ?? 0
+  }, [listCartShippingMethods])
 
   // 장바구니 데이터 로드
   const loadCart = useCallback(async () => {
+    console.log("[장바구니] 로드 시작...")
     setIsLoading(true)
     try {
-      const cart = await retrieveCart()
-      if (cart?.items && cart.items.length > 0) {
-        const items = cart.items.map(mapMedusaItemToCartItem)
+      // customer_id도 함께 조회
+      let cart = await retrieveCart()
+
+      if (!cart) {
+        const ensuredCart = await getOrSetCart(countryCode)
+        if (ensuredCart?.id) {
+          cart = await retrieveCart(ensuredCart.id)
+        }
+      }
+
+      console.log("[장바구니] API 응답:", cart)
+
+      // 카트가 있지만 고객에게 연결되지 않은 경우 연결 시도
+      if (cart && !cart.customer_id) {
+        try {
+          await transferCart()
+          console.log("[장바구니] 카트를 고객에게 연결 완료")
+        } catch (error) {
+          // 로그인 안 된 상태면 실패할 수 있음 - 무시
+          console.log("[장바구니] 카트 연결 스킵 (로그인 필요)")
+        }
+      }
+
+      const updatedCart = cart
+
+      if (updatedCart?.items && updatedCart.items.length > 0) {
+        const items = updatedCart.items.map(mapMedusaItemToCartItem)
+        console.log("[장바구니] 매핑된 아이템:", items)
         setCartItems(items)
         // 기본으로 모든 아이템 선택
         setCheckedItems(items.map((item) => item.id))
+        if (updatedCart.id) {
+          const estimatedShipping = await getEstimatedShippingTotal(
+            updatedCart.id
+          )
+          setShippingTotal(estimatedShipping)
+        } else {
+          setShippingTotal(updatedCart.shipping_total ?? 0)
+        }
+        setCartId(updatedCart.id)
       } else {
+        console.log("[장바구니] 아이템 없음")
         setCartItems([])
         setCheckedItems([])
+        setShippingTotal(updatedCart?.shipping_total ?? 0)
+        setCartId(updatedCart?.id ?? null)
       }
     } catch (error) {
-      console.error("장바구니 로드 실패:", error)
+      console.error("[장바구니] 로드 실패:", error)
       setCartItems([])
       setCheckedItems([])
+      setShippingTotal(0)
+      setCartId(null)
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [countryCode, getEstimatedShippingTotal])
 
   useEffect(() => {
     loadCart()
@@ -113,23 +169,23 @@ export function CartMainClient() {
   }
 
   const handleDeleteItem = async (id: string) => {
-    setIsUpdating(true)
     try {
       await deleteLineItem(id)
       setCartItems((prev) => prev.filter((item) => item.id !== id))
       setCheckedItems((prev) => prev.filter((itemId) => itemId !== id))
+      if (cartId) {
+        const estimatedShipping = await getEstimatedShippingTotal(cartId)
+        setShippingTotal(estimatedShipping)
+      }
       toast.success("상품이 삭제되었습니다.")
     } catch (error) {
       console.error("상품 삭제 실패:", error)
       toast.error("상품 삭제에 실패했습니다.")
-    } finally {
-      setIsUpdating(false)
     }
   }
 
   const handleDeleteSelected = async () => {
     if (checkedItems.length === 0) return
-    setIsUpdating(true)
     try {
       // 선택된 아이템들 순차 삭제
       await Promise.all(checkedItems.map((id) => deleteLineItem(id)))
@@ -137,14 +193,16 @@ export function CartMainClient() {
         prev.filter((item) => !checkedItems.includes(item.id))
       )
       setCheckedItems([])
+      if (cartId) {
+        const estimatedShipping = await getEstimatedShippingTotal(cartId)
+        setShippingTotal(estimatedShipping)
+      }
       toast.success("선택한 상품이 삭제되었습니다.")
     } catch (error) {
       console.error("선택 상품 삭제 실패:", error)
       toast.error("상품 삭제에 실패했습니다.")
       // 실패 시 다시 로드
       await loadCart()
-    } finally {
-      setIsUpdating(false)
     }
   }
 
@@ -158,6 +216,10 @@ export function CartMainClient() {
 
     try {
       await updateLineItem({ lineId: id, quantity })
+      if (cartId) {
+        const estimatedShipping = await getEstimatedShippingTotal(cartId)
+        setShippingTotal(estimatedShipping)
+      }
     } catch (error) {
       console.error("수량 변경 실패:", error)
       toast.error("수량 변경에 실패했습니다.")
@@ -172,7 +234,6 @@ export function CartMainClient() {
     finalPrice,
     totalDiscount,
     selectedCount,
-    shippingFee,
   } = useMemo(() => {
     const selected = cartItems.filter((item) => checkedItems.includes(item.id))
 
@@ -184,23 +245,16 @@ export function CartMainClient() {
       (sum, item) =>
         sum +
         (item.product.membershipPrice || item.product.basePrice || 0) *
-          item.quantity,
+        item.quantity,
       0
     )
-    const shippingFee = finalPrice >= 50000 ? 0 : 3000
-
     return {
       totalOriginalPrice,
       finalPrice,
       totalDiscount: totalOriginalPrice - finalPrice,
       selectedCount: selected.length,
-      shippingFee,
     }
   }, [cartItems, checkedItems])
-
-  // 무료배송까지 남은 금액 계산
-  const remainingForFreeShipping = Math.max(0, 50000 - finalPrice)
-  const freeShippingProgress = Math.min(100, (finalPrice / 50000) * 100)
 
   // 로딩 상태
   if (isLoading) {
@@ -234,8 +288,7 @@ export function CartMainClient() {
               <CartTabsMobile
                 cartItems={cartItems}
                 checkedItems={checkedItems}
-                remainingForFreeShipping={remainingForFreeShipping}
-                freeShippingProgress={freeShippingProgress}
+                shippingTotal={shippingTotal}
                 onCheckAll={handleCheckAll}
                 onDeleteSelected={handleDeleteSelected}
                 onCheckItem={handleCheckItem}
@@ -247,8 +300,7 @@ export function CartMainClient() {
               <CartDesktopContent
                 cartItems={cartItems}
                 checkedItems={checkedItems}
-                remainingForFreeShipping={remainingForFreeShipping}
-                freeShippingProgress={freeShippingProgress}
+                shippingTotal={shippingTotal}
                 onCheckAll={handleCheckAll}
                 onDeleteSelected={handleDeleteSelected}
                 onCheckItem={handleCheckItem}
@@ -261,7 +313,7 @@ export function CartMainClient() {
             <CartSummary
               totalOriginalPrice={totalOriginalPrice}
               totalDiscount={totalDiscount}
-              shippingFee={shippingFee}
+              shippingFee={shippingTotal}
               finalPrice={finalPrice}
               selectedCount={selectedCount}
             />
@@ -276,6 +328,7 @@ export function CartMainClient() {
             totalDiscount={totalDiscount}
             finalPrice={finalPrice}
             selectedCount={selectedCount}
+            shippingFee={shippingTotal}
           />
         </div>
       </main>

@@ -4,11 +4,13 @@ import { ProductCard } from "@/components/products/prodcut-card"
 import { Tabs, TabsContent } from "@/components/ui/tabs"
 import { useDraggableScroll } from "@/hooks/ui/use-draggable-scroll"
 import { ProductCardProps } from "@/lib/types/ui/product"
-import type { CategoryTreeNodeDto } from "@lib/types/dto/pim"
+import type { StoreProductCategoryTree } from "@/lib/types/medusa-category"
 import { AnimatePresence, motion } from "framer-motion"
 import { Package } from "lucide-react"
 import { chunk } from "lodash"
 import { useEffect, useMemo, useState, useTransition } from "react"
+import Link from "next/link"
+import { useParams } from "next/navigation"
 import { ProductGrid } from "../../../../../components/products/product-grid"
 import { useCategoryTabs } from "../../../hooks/use-category-tabs"
 import { getCategoryBestProducts } from "../../actions/get-category-products"
@@ -17,14 +19,18 @@ import { ProductCarousel } from "../../shared/product-carousel"
 import { CategoryTabs } from "./category-tabs"
 
 interface CategoryBestSectionProps {
-  initialCategories: CategoryTreeNodeDto[]
+  initialCategories: StoreProductCategoryTree[]
   initialProducts: ProductCardProps[] | undefined
+  regionId?: string
 }
 
 export function CategoryBestSection({
   initialCategories,
   initialProducts,
+  regionId,
 }: CategoryBestSectionProps) {
+  const params = useParams() as { countryCode?: string }
+  const countryCode = params?.countryCode || "kr"
   const [isPending, startTransition] = useTransition()
 
   const bestCategories = initialCategories.slice(0, 7)
@@ -39,10 +45,10 @@ export function CategoryBestSection({
 
   useEffect(() => {
     startTransition(async () => {
-      const products = await getCategoryBestProducts(activeTab)
+      const products = await getCategoryBestProducts(activeTab, regionId)
       setProducts(products)
     })
-  }, [activeTab])
+  }, [activeTab, regionId])
 
   const { props: dragHandlers } = useDraggableScroll()
   const isVisitedTab = visitedTabs.has(activeTab)
@@ -57,7 +63,9 @@ export function CategoryBestSection({
           카테고리 <span className="text-yellow-30">베스트</span>
         </SectionHeader.Title>
         <SectionHeader.More
-          href={`/category/${activeCategory?.slug || activeTab}`}
+          href={`/${countryCode}/category/${
+            activeCategory?.handle || activeTab
+          }`}
         />
       </SectionHeader>
 
@@ -137,15 +145,23 @@ export function CategoryBestSection({
                                 {group.map((product, itemIndex) => {
                                   const rank = groupIndex * 6 + itemIndex + 1
                                   return (
-                                    <ProductCard key={product.id}>
-                                      <ProductCard.Thumbnail
-                                        src={product.imageSrc}
-                                        alt={product.title}
-                                        rank={<ProductCard.Rank rank={rank} />}
-                                        className="rounded-tl-sm rounded-tr-xl rounded-br-xl rounded-bl-md"
-                                      />
-                                      <ProductCard.Info {...product} />
-                                    </ProductCard>
+                                    <Link
+                                      key={product.id}
+                                      href={`/${countryCode}/products/${product.id}`}
+                                      className="block"
+                                    >
+                                      <ProductCard>
+                                        <ProductCard.Thumbnail
+                                          src={product.imageSrc}
+                                          alt={product.title}
+                                          rank={
+                                            <ProductCard.Rank rank={rank} />
+                                          }
+                                          className="rounded-tl-sm rounded-tr-xl rounded-br-xl rounded-bl-md"
+                                        />
+                                        <ProductCard.Info {...product} />
+                                      </ProductCard>
+                                    </Link>
                                   )
                                 })}
                               </div>
@@ -162,6 +178,7 @@ export function CategoryBestSection({
                         products={products.slice(0, 10)}
                         showRank={true}
                         roundedClassName="rounded-sm md:rounded-md"
+                        countryCode={countryCode}
                       />
                     </div>
                   </TabsContent>
