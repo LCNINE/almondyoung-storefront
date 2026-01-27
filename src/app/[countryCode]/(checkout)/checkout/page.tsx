@@ -1,4 +1,12 @@
-import { listCartShippingMethods, retrieveCart } from "@/lib/api/medusa/cart"
+import {
+  listCartOptions,
+  retrieveCart,
+  setShippingMethod,
+} from "@/lib/api/medusa/cart"
+import {
+  calculatePriceForShippingOption,
+  listCartShippingMethods,
+} from "@/lib/api/medusa/fulfillment"
 import { listCartPaymentMethods } from "@/lib/api/medusa/payment"
 import { getMyPromotions } from "@/lib/api/medusa/promotion"
 import {
@@ -7,6 +15,7 @@ import {
   getTaxInvoice,
 } from "@/lib/api/wallet"
 import { CartResponseDto } from "@/lib/types/dto/medusa"
+import type { ShippingInfo } from "@/lib/types/ui/cart"
 import ProtectedRoute from "@components/protected-route"
 import { fetchMe } from "@lib/api/users/me"
 import CheckoutTemplate from "domains/checkout/templates/checkout-template"
@@ -39,14 +48,30 @@ export default async function CheckoutPage() {
 
   const profiles = await getBnplProfiles()
 
-  console.log("cart::", cart)
+  // 배송료 정보
+  const shippingMethod = shippingMethods?.[0]
+  const shipping: ShippingInfo = {
+    amount: shippingMethod?.amount ?? 0,
+    name: shippingMethod?.name ?? "배송",
+    description: shippingMethod?.type?.description ?? "",
+  }
 
+  console.log("shippingMethod::", shippingMethod)
+  console.log("cart:", cart)
+
+  const shippingOptions = await listCartOptions()
+  console.log("shippingOptions::", shippingOptions)
+
+  await setShippingMethod({
+    cartId: cart.id,
+    shippingMethodId: shippingMethod?.id ?? "",
+  })
   return (
     <ProtectedRoute>
       <CheckoutTemplate
         user={currentUser}
         cart={cart}
-        shippingFee={shippingMethods?.[0]?.amount ?? 0}
+        shipping={shipping}
         promotions={promotionsResponse.promotions}
         pointBalance={pointBalance}
         taxInvoice={taxInvoice}

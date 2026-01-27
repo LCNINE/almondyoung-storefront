@@ -13,6 +13,7 @@ import {
   addPromotionToCart,
   removePromotionFromCart,
 } from "@/lib/api/medusa/store"
+import type { ShippingInfo } from "@/lib/types/ui/cart"
 import type { Promotion } from "@/lib/types/ui/promotion"
 import { formatPrice } from "@/lib/utils/price-utils"
 import { useCallback, useState, useTransition } from "react"
@@ -22,6 +23,7 @@ interface DiscountSectionProps {
   cartId: string
   isMembership: boolean
   membershipDiscount: number
+  shipping: ShippingInfo
   promotions: Promotion[]
   appliedPromotionCode?: string | null
   availablePoints: number
@@ -33,6 +35,7 @@ export const DiscountSection = ({
   cartId,
   isMembership = false,
   membershipDiscount,
+  shipping,
   promotions,
   appliedPromotionCode,
   availablePoints,
@@ -133,6 +136,8 @@ export const DiscountSection = ({
           totalDiscount={totalDiscount}
           pointsUsed={pointsUsed}
           membershipDiscount={membershipDiscount}
+          shipping={shipping}
+          promotions={promotions}
         />
 
         <hr className="border-t border-gray-100" />
@@ -271,6 +276,8 @@ interface DiscountRowProps {
   totalDiscount: number
   pointsUsed: number
   membershipDiscount: number
+  shipping: ShippingInfo
+  promotions: Promotion[]
 }
 
 const DiscountRow = ({
@@ -279,10 +286,13 @@ const DiscountRow = ({
   totalDiscount,
   pointsUsed,
   membershipDiscount,
+  shipping,
+  promotions,
 }: DiscountRowProps) => {
   const hasMembershipDiscount = isMembership && membershipDiscount > 0
   const hasDiscount = totalDiscount > 0
   const hasPointsUsed = pointsUsed > 0
+  const isFreeShipping = shipping.amount === 0
 
   return (
     <div className="flex items-start justify-between">
@@ -290,6 +300,14 @@ const DiscountRow = ({
         <span className="text-xs font-medium text-gray-900 lg:text-sm">
           {label}
         </span>
+
+        {isFreeShipping && shipping.description && (
+          <div className="flex items-center gap-1">
+            <span className="text-[10px] font-medium text-[#F29219] lg:text-xs">
+              {shipping.description && `${shipping.description}`}
+            </span>
+          </div>
+        )}
 
         {hasMembershipDiscount && (
           <div className="flex items-center gap-1">
@@ -307,6 +325,8 @@ const DiscountRow = ({
             </span>
           </div>
         )}
+
+        <CartPromotions promotions={promotions} />
       </div>
       <div className="flex flex-col items-end gap-0.5">
         {/* 총 할인 금액 표시 */}
@@ -315,5 +335,31 @@ const DiscountRow = ({
         </span>
       </div>
     </div>
+  )
+}
+
+// todo: 수정필요
+function CartPromotions({ promotions }: { promotions: Promotion[] }) {
+  return (
+    <>
+      {promotions.map((promo) => {
+        const method = promo.application_method
+        let label = promo.code
+
+        if (method?.type === "percentage") {
+          label += ` (-${method.value}%)`
+        } else if (method?.type === "fixed") {
+          label += ` (-${formatPrice(method.value)})`
+        }
+
+        return (
+          <div key={promo.id} className="flex items-center gap-1">
+            <span className="text-[10px] font-medium text-[#F29219] lg:text-xs">
+              {label}
+            </span>
+          </div>
+        )
+      })}
+    </>
   )
 }
