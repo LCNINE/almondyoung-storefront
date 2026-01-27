@@ -138,6 +138,7 @@ export const DiscountSection = ({
           membershipDiscount={membershipDiscount}
           shipping={shipping}
           promotions={promotions}
+          appliedCouponCode={selectedCoupon}
         />
 
         <hr className="border-t border-gray-100" />
@@ -278,6 +279,7 @@ interface DiscountRowProps {
   membershipDiscount: number
   shipping: ShippingInfo
   promotions: Promotion[]
+  appliedCouponCode?: string
 }
 
 const DiscountRow = ({
@@ -288,11 +290,17 @@ const DiscountRow = ({
   membershipDiscount,
   shipping,
   promotions,
+  appliedCouponCode,
 }: DiscountRowProps) => {
   const hasMembershipDiscount = isMembership && membershipDiscount > 0
   const hasDiscount = totalDiscount > 0
   const hasPointsUsed = pointsUsed > 0
   const isFreeShipping = shipping.amount === 0
+
+  // 적용된 쿠폰 찾기
+  const appliedPromotion = appliedCouponCode
+    ? promotions.find((p) => p.code === appliedCouponCode)
+    : null
 
   return (
     <div className="flex items-start justify-between">
@@ -304,7 +312,7 @@ const DiscountRow = ({
         {isFreeShipping && shipping.description && (
           <div className="flex items-center gap-1">
             <span className="text-[10px] font-medium text-[#F29219] lg:text-xs">
-              {shipping.description && `${shipping.description}`}
+              {shipping.description}
             </span>
           </div>
         )}
@@ -318,6 +326,10 @@ const DiscountRow = ({
           </div>
         )}
 
+        {appliedPromotion && (
+          <AppliedCoupon promotion={appliedPromotion} />
+        )}
+
         {hasPointsUsed && (
           <div className="flex items-center gap-1">
             <span className="text-[10px] font-medium text-[#F29219] lg:text-xs">
@@ -325,8 +337,6 @@ const DiscountRow = ({
             </span>
           </div>
         )}
-
-        <CartPromotions promotions={promotions} />
       </div>
       <div className="flex flex-col items-end gap-0.5">
         {/* 총 할인 금액 표시 */}
@@ -338,28 +348,21 @@ const DiscountRow = ({
   )
 }
 
-// todo: 수정필요
-function CartPromotions({ promotions }: { promotions: Promotion[] }) {
+function AppliedCoupon({ promotion }: { promotion: Promotion }) {
+  const method = promotion.application_method
+  let discountText = ""
+
+  if (method?.type === "percentage") {
+    discountText = `${method.value}% 할인`
+  } else if (method?.type === "fixed") {
+    discountText = `${formatPrice(method.value)}원 할인`
+  }
+
   return (
-    <>
-      {promotions.map((promo) => {
-        const method = promo.application_method
-        let label = promo.code
-
-        if (method?.type === "percentage") {
-          label += ` (-${method.value}%)`
-        } else if (method?.type === "fixed") {
-          label += ` (-${formatPrice(method.value)})`
-        }
-
-        return (
-          <div key={promo.id} className="flex items-center gap-1">
-            <span className="text-[10px] font-medium text-[#F29219] lg:text-xs">
-              {label}
-            </span>
-          </div>
-        )
-      })}
-    </>
+    <div className="flex items-center gap-1">
+      <span className="text-[10px] font-medium text-[#F29219] lg:text-xs">
+        쿠폰 적용 - {discountText}
+      </span>
+    </div>
   )
 }
