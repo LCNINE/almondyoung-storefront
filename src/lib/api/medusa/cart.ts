@@ -521,6 +521,37 @@ export const addCartShippingMethod = async (
     .catch(medusaError)
 }
 
+export const listCartShippingMethods = async (
+  cartId: string,
+  cache: RequestCache = "force-cache"
+) => {
+  const headers = {
+    ...(await getAuthHeaders()),
+  }
+
+  const next = {
+    ...(await getCacheOptions("fulfillment")),
+  }
+
+  return sdk.client
+    .fetch<HttpTypes.StoreShippingOptionListResponse>(
+      `/store/shipping-options`,
+      {
+        method: "GET",
+        query: {
+          cart_id: cartId,
+        },
+        headers,
+        next,
+        cache,
+      }
+    )
+    .then(({ shipping_options }) => shipping_options)
+    .catch(() => {
+      return null
+    })
+}
+
 export async function setShippingMethod({
   cartId,
   shippingMethodId,

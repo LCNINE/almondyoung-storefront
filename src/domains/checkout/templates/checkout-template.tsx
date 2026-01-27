@@ -272,6 +272,7 @@ export default function CheckoutTemplate({
               cartId={cart.id}
               isMembership={isMembership}
               membershipDiscount={cartTotals.membershipDiscount}
+              itemSubtotal={cartTotals.item_subtotal}
               shipping={shipping}
               promotions={promotions}
               appliedPromotionCode={cart.promotions?.[0]?.code}

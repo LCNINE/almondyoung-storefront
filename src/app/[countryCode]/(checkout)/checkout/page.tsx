@@ -1,5 +1,4 @@
-import { retrieveCart } from "@/lib/api/medusa/cart"
-import { listCartShippingMethods } from "@/lib/api/medusa/fulfillment"
+import { listCartShippingMethods, retrieveCart } from "@/lib/api/medusa/cart"
 import { listCartPaymentMethods } from "@/lib/api/medusa/payment"
 import { getMyPromotions } from "@/lib/api/medusa/promotion"
 import { getPointBalance, getTaxInvoice } from "@/lib/api/wallet"
@@ -9,13 +8,27 @@ import ProtectedRoute from "@components/protected-route"
 import { fetchMe } from "@lib/api/users/me"
 import CheckoutTemplate from "domains/checkout/templates/checkout-template"
 import { notFound } from "next/navigation"
+import { EmptyCartView } from "@/components/cart/empty-cart-view"
 
-export default async function CheckoutPage() {
+export default async function CheckoutPage({
+  params,
+}: {
+  params: Promise<{ countryCode: string }>
+}) {
+  const { countryCode } = await params
   const currentUser = await fetchMe()
   const cart = (await retrieveCart()) as CartResponseDto["cart"]
 
   if (!cart) {
     return notFound()
+  }
+
+  if (!cart.items?.length) {
+    return (
+      <ProtectedRoute>
+        <EmptyCartView countryCode={countryCode} />
+      </ProtectedRoute>
+    )
   }
 
   const [shippingMethods, paymentMethods, promotionsResponse] =
@@ -42,9 +55,6 @@ export default async function CheckoutPage() {
     name: shippingMethod?.name ?? "배송",
     description: shippingMethod?.type?.description ?? "",
   }
-
-  console.log("shippingMethod::", shippingMethod)
-  console.log("cart:", cart)
 
   return (
     <ProtectedRoute>
