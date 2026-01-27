@@ -40,6 +40,7 @@ export default async function CheckoutPage() {
   const profiles = await getBnplProfiles()
 
   console.log("cart::", cart)
+
   return (
     <ProtectedRoute>
       <CheckoutTemplate

@@ -4,6 +4,8 @@
  * - Medusa 백엔드에서 계산된 값을 그대로 사용
  */
 
+import { HttpTypes } from "@medusajs/types"
+
 const isEmpty = (value: unknown): boolean =>
   value === null || value === undefined || value === ""
 
@@ -31,6 +33,17 @@ export const convertToLocale = ({
         maximumFractionDigits,
       }).format(amount)
     : amount.toString()
+}
+
+/** 멤버십 할인 금액 계산 (compare_at_unit_price - unit_price) * quantity */
+export const calculateMembershipDiscount = (
+  items: HttpTypes.StoreCartLineItem[]
+): number => {
+  return items.reduce((acc, item) => {
+    const compareAtPrice = item.compare_at_unit_price ?? item.unit_price
+    const discount = (compareAtPrice - item.unit_price) * item.quantity
+    return acc + Math.max(0, discount)
+  }, 0)
 }
 
 /** 숫자를 천단위 콤마 문자열로 변환 (9000 → "9,000") - 단순 포맷용 */

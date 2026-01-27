@@ -15,7 +15,6 @@ import {
 } from "@/lib/api/medusa/store"
 import type { Promotion } from "@/lib/types/ui/promotion"
 import { formatPrice } from "@/lib/utils/price-utils"
-import type { HttpTypes } from "@medusajs/types"
 import { useCallback, useState, useTransition } from "react"
 import { toast } from "sonner"
 
@@ -25,20 +24,9 @@ interface DiscountSectionProps {
   membershipDiscount: number
   promotions: Promotion[]
   appliedPromotionCode?: string | null
-  availablePoints?: number
+  availablePoints: number
   onPointsChange?: (points: number) => void
   onCouponApplied?: () => void
-}
-
-/** 멤버십 할인 금액 계산 (compare_at_unit_price - unit_price) * quantity */
-export const calculateMembershipDiscount = (
-  items: HttpTypes.StoreCartLineItem[]
-): number => {
-  return items.reduce((acc, item) => {
-    const compareAtPrice = item.compare_at_unit_price ?? item.unit_price
-    const discount = (compareAtPrice - item.unit_price) * item.quantity
-    return acc + Math.max(0, discount)
-  }, 0)
 }
 
 export const DiscountSection = ({
@@ -47,7 +35,7 @@ export const DiscountSection = ({
   membershipDiscount,
   promotions,
   appliedPromotionCode,
-  availablePoints = 0,
+  availablePoints,
   onPointsChange,
   onCouponApplied,
 }: DiscountSectionProps) => {
@@ -125,7 +113,7 @@ export const DiscountSection = ({
     onPointsChange?.(availablePoints)
   }, [availablePoints, onPointsChange])
 
-  // 총 할인 금액 = 멤버십 할인 + 적립금 사용 (쿠폰은 cart에서 계산됨)
+  // 총 할인 금액 = 멤버십 할인 + 적립금 사용
   const totalDiscount = membershipDiscount + pointsUsed
 
   return (
@@ -143,6 +131,7 @@ export const DiscountSection = ({
           label="자동할인"
           isMembership={isMembership}
           totalDiscount={totalDiscount}
+          pointsUsed={pointsUsed}
           membershipDiscount={membershipDiscount}
         />
 
@@ -161,7 +150,7 @@ export const DiscountSection = ({
 
           {/* 적용된 쿠폰이 있을 때 */}
           {selectedCoupon ? (
-            <div className="flex items-center justify-between rounded-[5px] border border-[#F29219] bg-[#FFF7E5] px-3 py-2.5">
+            <div className="bg-gray-0 flex items-center justify-between rounded-[5px] border border-[#F29219] px-3 py-2.5">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-medium text-[#F29219] lg:text-sm">
                   {(() => {
@@ -236,12 +225,13 @@ export const DiscountSection = ({
               적립금
             </span>
             <span className="text-xs text-gray-500 lg:text-sm">
-              보유:{" "}
+              보유:
               <span className="font-semibold text-gray-900">
                 {formatPrice(availablePoints)}원
               </span>
             </span>
           </div>
+
           <div className="flex gap-2">
             <div className="relative flex-1">
               <span className="absolute top-1/2 left-3 -translate-y-1/2 text-xs text-gray-500">
@@ -254,7 +244,7 @@ export const DiscountSection = ({
                 value={pointsInput}
                 onChange={handlePointsInputChange}
                 disabled={availablePoints === 0}
-                className="h-9 w-full rounded-[5px] border border-gray-200 pr-8 pl-10 text-right text-sm font-semibold text-[#F29219] placeholder-gray-300 focus:border-[#F29219] focus:outline-none disabled:bg-gray-50 disabled:text-gray-400 lg:h-10"
+                className="disabled:bg-gray-20 h-9 w-full rounded-[5px] border border-gray-200 pr-8 pl-10 text-right text-sm font-semibold text-[#F29219] placeholder-gray-300 focus:border-[#F29219] focus:outline-none disabled:text-gray-400 lg:h-10"
               />
               <span className="absolute top-1/2 right-3 -translate-y-1/2 text-sm font-semibold text-[#F29219]">
                 원
@@ -279,6 +269,7 @@ interface DiscountRowProps {
   label: string
   isMembership: boolean
   totalDiscount: number
+  pointsUsed: number
   membershipDiscount: number
 }
 
@@ -286,10 +277,12 @@ const DiscountRow = ({
   label,
   isMembership,
   totalDiscount,
+  pointsUsed,
   membershipDiscount,
 }: DiscountRowProps) => {
   const hasMembershipDiscount = isMembership && membershipDiscount > 0
   const hasDiscount = totalDiscount > 0
+  const hasPointsUsed = pointsUsed > 0
 
   return (
     <div className="flex items-start justify-between">
@@ -298,12 +291,19 @@ const DiscountRow = ({
           {label}
         </span>
 
-        {/* 멤버십 할인인 경우에만 할인 유형 표시 */}
         {hasMembershipDiscount && (
           <div className="flex items-center gap-1">
             <CheckoutMembershipTagIcon />
             <span className="text-[10px] font-medium text-[#E08F00] lg:text-xs">
-              멤버십 할인 -{formatPrice(membershipDiscount)}원
+              멤버십 할인 {formatPrice(membershipDiscount)}원
+            </span>
+          </div>
+        )}
+
+        {hasPointsUsed && (
+          <div className="flex items-center gap-1">
+            <span className="text-[10px] font-medium text-[#F29219] lg:text-xs">
+              적립금 사용 {formatPrice(pointsUsed)}원
             </span>
           </div>
         )}

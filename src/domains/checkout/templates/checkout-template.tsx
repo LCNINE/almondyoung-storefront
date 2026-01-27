@@ -1,21 +1,26 @@
 "use client"
 
-import {
-  calculateMembershipDiscount,
-  DiscountSection,
-} from "@/domains/checkout/components/sections/discount"
+import { DiscountSection } from "@/domains/checkout/components/sections/discount"
 import { OrderProductsSection } from "@/domains/checkout/components/sections/order-products-shipping"
 import { PaymentMethodSection } from "@/domains/checkout/components/sections/payment-method"
 import { PaymentTotalSection } from "@/domains/checkout/components/sections/payment-total"
 import { ShippingSection } from "@/domains/checkout/components/sections/shipping"
 import type { ShippingMemo } from "@/domains/checkout/components/sections/shipping/types"
 import { updateCart } from "@/lib/api/medusa/cart"
+import {
+  authorizePayment,
+  createIntent,
+  getBnplProfiles,
+} from "@/lib/api/wallet"
 import { CartResponseDto } from "@/lib/types/dto/medusa"
 import type { PointBalanceDto } from "@/lib/types/dto/wallet"
 import type { CartTotals } from "@/lib/types/ui/cart"
 import type { Promotion } from "@/lib/types/ui/promotion"
 import { TaxInvoiceType } from "@/lib/types/ui/wallet"
-import { getCartTotals } from "@/lib/utils/price-utils"
+import {
+  calculateMembershipDiscount,
+  getCartTotals,
+} from "@/lib/utils/price-utils"
 import type { UserDetail } from "@lib/types/ui/user"
 import { loadTossPayments } from "@tosspayments/tosspayments-sdk"
 import { MobileCTA, PCFixedCTA } from "domains/checkout/components/cta"
@@ -25,11 +30,6 @@ import { PaymentDetailSidebar } from "domains/checkout/components/payment-detail
 import { useParams, useRouter } from "next/navigation"
 import { useCallback, useMemo, useRef, useState } from "react"
 import { ReceiptSection } from "../components/sections/receipt/"
-import {
-  authorizePayment,
-  createIntent,
-  getBnplProfiles,
-} from "@/lib/api/wallet"
 
 interface CheckoutTemplateProps {
   user: UserDetail
@@ -324,7 +324,11 @@ export default function CheckoutTemplate({
         </div>
       )}
 
-      <PCFixedCTA onPayment={handlePayment} loading={loading} />
+      <PCFixedCTA
+        onPayment={handlePayment}
+        loading={loading}
+        totals={cartTotals}
+      />
       <MobileCTA onPayment={handlePayment} loading={loading} />
     </main>
   )
