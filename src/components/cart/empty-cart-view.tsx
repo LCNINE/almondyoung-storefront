@@ -2,18 +2,26 @@ import Link from "next/link"
 
 interface EmptyCartViewProps {
   countryCode: string
+  showHeader?: boolean
+  bgColor?: string
 }
 
-export function EmptyCartView({ countryCode }: EmptyCartViewProps) {
+export function EmptyCartView({
+  countryCode,
+  showHeader = true,
+  bgColor = "bg-white",
+}: EmptyCartViewProps) {
   return (
-    <div className="flex min-h-screen w-full flex-col bg-white">
-      <header className="border-border bg-foreground w-full border-b">
-        <div className="container mx-auto flex h-14 items-center px-4">
-          <span className="text-background text-lg font-bold tracking-tight">
-            ALMOND YOUNG
-          </span>
-        </div>
-      </header>
+    <div className={`flex min-h-screen w-full flex-col ${bgColor}`}>
+      {showHeader && (
+        <header className="border-border bg-foreground w-full border-b">
+          <div className="container mx-auto flex h-14 items-center px-4">
+            <span className="text-background text-lg font-bold tracking-tight">
+              ALMOND YOUNG
+            </span>
+          </div>
+        </header>
+      )}
 
       <main className="flex flex-1 flex-col items-center justify-center px-4 sm:px-6">
         <div className="flex w-full max-w-md flex-col items-center">
