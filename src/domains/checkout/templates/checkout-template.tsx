@@ -167,6 +167,11 @@ export default function CheckoutTemplate({
   }
 
   const handlePayment = async () => {
+    // 배송지 확인
+    if (!cart?.shipping_address?.address_1) {
+      return toast.error("배송지를 설정해주세요.")
+    }
+
     try {
       setLoading(true)
       setError(null)
