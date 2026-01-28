@@ -34,6 +34,7 @@ import { useParams, useRouter } from "next/navigation"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { ReceiptSection } from "../components/sections/receipt/"
 import { toast } from "sonner"
+import { getCleanKoreanNumber } from "@/lib/utils/format-phone-number"
 
 interface CheckoutTemplateProps {
   user: UserDetail
@@ -236,7 +237,8 @@ export default function CheckoutTemplate({
           customerEmail: user.email,
           customerName: user.username,
           customerMobilePhone:
-            cart.shipping_address?.phone ?? user.profile?.phoneNumber,
+            cart.shipping_address?.phone ??
+            getCleanKoreanNumber(user.profile?.phoneNumber ?? ""),
         })
       } else if (selectedMethod === "payLater") {
         // 나중 결제: 라우트 핸들러로 직접 요청
