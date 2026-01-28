@@ -1,6 +1,7 @@
 "use client"
 
 import { DiscountSection } from "@/domains/checkout/components/sections/discount"
+import { PinRequiredModal } from "@/domains/checkout/components/modals/pin-required-modal"
 import { OrderProductsSection } from "@/domains/checkout/components/sections/order-products-shipping"
 import { PaymentMethodSection } from "@/domains/checkout/components/sections/payment-method"
 import { PaymentTotalSection } from "@/domains/checkout/components/sections/payment-total"
@@ -27,9 +28,11 @@ import { MobileCTA, PCFixedCTA } from "domains/checkout/components/cta"
 import { MobileHeader, PCHeader } from "domains/checkout/components/header"
 import { MobileOrderSummary } from "domains/checkout/components/order-summary"
 import { PaymentDetailSidebar } from "domains/checkout/components/payment-detail-sidebar"
+import { usePinStatus } from "@/hooks/api/use-pin-status"
 import { useParams, useRouter } from "next/navigation"
-import { useCallback, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { ReceiptSection } from "../components/sections/receipt/"
+import { toast } from "sonner"
 
 interface CheckoutTemplateProps {
   user: UserDetail
@@ -51,6 +54,14 @@ export default function CheckoutTemplate({
   const router = useRouter()
   const params = useParams()
   const countryCode = params.countryCode as string
+
+  // PIN 상태 조회
+  const { pinStatus, fetchPinStatus } = usePinStatus()
+
+  //  PIN 상태 미리 조회
+  useEffect(() => {
+    fetchPinStatus()
+  }, [fetchPinStatus])
 
   // 선택된 상품 ID (기본값: 전체 선택)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(
@@ -106,6 +117,7 @@ export default function CheckoutTemplate({
   const [isPaymentDetailsOpen, setIsPaymentDetailsOpen] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [pinRequiredModalOpen, setPinRequiredModalOpen] = useState(false)
   const tossPaymentRef = useRef<any>(null)
 
   // 배송 메모 상태
@@ -155,6 +167,23 @@ export default function CheckoutTemplate({
     try {
       setLoading(true)
       setError(null)
+
+      //  PIN 상태 확인
+      if (!pinStatus) {
+        // PIN 상태 조회 중이거나 실패한 경우
+        fetchPinStatus()
+        return toast.info(
+          "PIN 상태를 확인 중입니다. 잠시 후 다시 시도해주세요."
+        )
+      }
+
+      if (!pinStatus.hasPin || pinStatus.status === "NONE") {
+        // PIN 미등록 → 확인 모달 열기
+        setPinRequiredModalOpen(true)
+        setLoading(false)
+        return
+      }
+      // TODO: PIN 검증 모달/페이지 추가 필요
 
       // 결제 전 배송 메모 저장
       await updateCart({
@@ -239,7 +268,6 @@ export default function CheckoutTemplate({
     } catch (err) {
       console.error("결제 처리 실패:", err)
       setError(err instanceof Error ? err.message : "알 수 없는 오류")
-    } finally {
       setLoading(false)
     }
   }
@@ -335,6 +363,12 @@ export default function CheckoutTemplate({
         totals={cartTotals}
       />
       <MobileCTA onPayment={handlePayment} loading={loading} />
+
+      {/* PIN 등록 필요 모달 */}
+      <PinRequiredModal
+        open={pinRequiredModalOpen}
+        onOpenChange={setPinRequiredModalOpen}
+      />
     </main>
   )
 }
