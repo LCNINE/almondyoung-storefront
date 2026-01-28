@@ -2,6 +2,7 @@
 
 import { DiscountSection } from "@/domains/checkout/components/sections/discount"
 import { PinRequiredModal } from "@/domains/checkout/components/modals/pin-required-modal"
+import { PinVerifyModal } from "@/domains/checkout/components/modals/pin-verify-modal"
 import { OrderProductsSection } from "@/domains/checkout/components/sections/order-products-shipping"
 import { PaymentMethodSection } from "@/domains/checkout/components/sections/payment-method"
 import { PaymentTotalSection } from "@/domains/checkout/components/sections/payment-total"
@@ -118,6 +119,7 @@ export default function CheckoutTemplate({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [pinRequiredModalOpen, setPinRequiredModalOpen] = useState(false)
+  const [pinVerifyModalOpen, setPinVerifyModalOpen] = useState(false)
   const tossPaymentRef = useRef<any>(null)
 
   // 배송 메모 상태
@@ -183,7 +185,25 @@ export default function CheckoutTemplate({
         setLoading(false)
         return
       }
-      // TODO: PIN 검증 모달/페이지 추가 필요
+
+      if (pinStatus.status === "ACTIVE") {
+        // PIN 검증 필요 → 검증 모달 열기
+        setPinVerifyModalOpen(true)
+        setLoading(false)
+        return
+      }
+    } catch (err) {
+      console.error("결제 처리 실패:", err)
+      setError(err instanceof Error ? err.message : "알 수 없는 오류")
+      setLoading(false)
+    }
+  }
+
+  // PIN 검증 성공 후 실제 결제 진행
+  const processPayment = async () => {
+    try {
+      setLoading(true)
+      setError(null)
 
       // 결제 전 배송 메모 저장
       await updateCart({
@@ -368,6 +388,13 @@ export default function CheckoutTemplate({
       <PinRequiredModal
         open={pinRequiredModalOpen}
         onOpenChange={setPinRequiredModalOpen}
+      />
+
+      {/* PIN 검증 모달 */}
+      <PinVerifyModal
+        open={pinVerifyModalOpen}
+        onOpenChange={setPinVerifyModalOpen}
+        onSuccess={processPayment}
       />
     </main>
   )
