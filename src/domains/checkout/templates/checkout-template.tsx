@@ -149,7 +149,7 @@ export default function CheckoutTemplate({
         },
       })
 
-      // 3. 토스 결제 SDK 초기화
+      // 토스 결제 SDK 초기화
       const clientKey =
         process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY ||
         "test_ck_pP2YxJ4K87ZZmMga5K59rRGZwXLO"
