@@ -47,7 +47,7 @@ export function CartControls({
           <Checkbox checked={isAllChecked} onCheckedChange={onCheckAll} />
           <span className="text-base font-semibold">전체 선택</span>
         </label>
-        <CustomButton onClick={onDeleteSelected} variant="secondary" size="sm">
+        <CustomButton onClick={onDeleteSelected} variant="outline" size="sm">
           선택삭제
         </CustomButton>
       </div>
