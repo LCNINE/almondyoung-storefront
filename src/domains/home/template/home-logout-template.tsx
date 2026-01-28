@@ -14,10 +14,12 @@ import { TimeSaleSection } from "../components/sections/time-sale"
 import { WelcomeDealSection } from "../components/sections/welcome-deal"
 import { ProductListSection } from "../components/shared/product-list-section"
 import { getTimeSaleProducts } from "../components/actions/get-category-products"
+import type { UserDetail } from "@/lib/types/ui/user"
 
 interface HomeLogoutTemplateProps {
   initialCategories: StoreProductCategoryTree[]
   regionId?: string
+  user: UserDetail | null
 }
 
 /*──────────────────
@@ -26,6 +28,7 @@ interface HomeLogoutTemplateProps {
 export async function HomeLogoutTemplate({
   initialCategories,
   regionId,
+  user,
 }: HomeLogoutTemplateProps) {
   const findCategoryByHandle = (
     categories: StoreProductCategoryTree[],
@@ -90,7 +93,7 @@ export async function HomeLogoutTemplate({
       <HeroBanner />
 
       {/* 로그인 유도 배너 */}
-      <LoginPromptBanner />
+      {!user && <LoginPromptBanner />}
 
       {/* 카테고리별 제품 섹션  */}
       <ProductListSection>
