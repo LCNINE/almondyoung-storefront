@@ -85,7 +85,7 @@ export default function CheckoutTemplate({
   // 적립금 사용 상태
   const [pointsUsed, setPointsUsed] = useState(0)
 
-  // 가격 계산 (한 번에 계산하여 여러 컴포넌트에 전달)
+  // 가격 계산
   const cartTotals: CartTotals = useMemo(() => {
     const { currency_code, item_subtotal, discount_subtotal } =
       getCartTotals(cart)
@@ -110,6 +110,8 @@ export default function CheckoutTemplate({
       finalTotal,
     }
   }, [cart, shipping, isMembership, selectedItems, pointsUsed])
+
+  console.log("cartTotals:", cartTotals)
 
   const [selectedMethod, setSelectedMethod] = useState("payLater")
   const [cashReceiptOption, setCashReceiptOption] = useState("noapply")
@@ -143,13 +145,19 @@ export default function CheckoutTemplate({
       const intent = await createIntent({
         data: {
           customerId: user.id,
-          originalAmount: cartTotals.finalTotal,
-          discountAmount: 0,
+          originalAmount: cart.original_item_total,
+          discountAmount: 0, // 0을 고정값으로 넣어주기로 함 - 이유는 wallt 설계 미스
           type: "ORDER",
+          discountBreakdown: [
+            {
+              amount: cartTotals.pointsUsed, // 적립금 사용 금액
+              type: "POINT",
+            },
+          ],
         },
       })
-
-      // 토스 결제 SDK 초기화
+      console.log("intent:", intent)
+      // 토스 결제 SDK 초기화₩
       const clientKey =
         process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY ||
         "test_ck_pP2YxJ4K87ZZmMga5K59rRGZwXLO"
@@ -229,22 +237,23 @@ export default function CheckoutTemplate({
         const { payment, intentId } = tossPaymentRef.current
         const baseUrl = window.location.origin
 
-        await payment.requestPayment({
-          method: "CARD",
-          amount: {
-            currency: "KRW",
-            value: cartTotals.finalTotal,
-          },
-          orderId: intentId,
-          orderName: cart.items?.map((item) => item.title).join(", "),
-          successUrl: `${baseUrl}/${countryCode}/checkout/callback`,
-          failUrl: `${baseUrl}/${countryCode}/checkout/callback`,
-          customerEmail: user.email,
-          customerName: user.username,
-          customerMobilePhone:
-            cart.shipping_address?.phone ??
-            getCleanKoreanNumber(user.profile?.phoneNumber ?? ""),
-        })
+        // await payment.requestPayment({
+        //   method: "CARD",
+        //   amount: {
+        //     currency: "KRW",
+        //     value: cartTotals.finalTotal,
+        //   },
+        //   orderId: intentId,
+        //   orderName: cart.items?.map((item) => item.title).join(", "),
+        //   successUrl: `${baseUrl}/${countryCode}/checkout/callback?usePoints=${cartTotals.pointsUsed.toString()}`,
+        //   failUrl: `${baseUrl}/${countryCode}/checkout/callback`,
+        //   customerEmail: user.email,
+        //   customerName: user.username,
+        //   customerMobilePhone:
+        //     cart.shipping_address?.phone ??
+        //     getCleanKoreanNumber(user.profile?.phoneNumber ?? ""),
+        // })
+        return
       } else if (selectedMethod === "payLater") {
         // 나중 결제: 라우트 핸들러로 직접 요청
         if (!user?.id) {
@@ -254,8 +263,8 @@ export default function CheckoutTemplate({
         const intent = await createIntent({
           data: {
             customerId: user.id,
-            originalAmount: cartTotals.finalTotal, // todo: 할인전 가격을 넣어야함
-            discountAmount: 0, // 적립금 사용했을때의 금액을 여기에 넣어야 함
+            originalAmount: cartTotals.finalTotal,
+            discountAmount: 0,
             type: "ORDER",
           },
         })
@@ -284,7 +293,9 @@ export default function CheckoutTemplate({
         })
 
         if (authorize.success) {
-          router.push(`/${countryCode}/checkout/success/${intent.id}`)
+          router.replace(
+            `/${countryCode}/checkout/success/${intent.id}?usePoints=${cartTotals.pointsUsed.toString()}`
+          )
         } else {
           throw new Error(
             authorize.message ||

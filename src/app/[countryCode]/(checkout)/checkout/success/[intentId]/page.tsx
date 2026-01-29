@@ -4,7 +4,7 @@ import { notFound } from "next/navigation"
 import { ChevronDownIcon, ReviewPromptCard } from "../_components"
 
 interface PageProps {
-  params: Promise<{ intentId: string; countryCode: string }>
+  params: Promise<{ intentId: string; countryCode: string; usePoints: string }>
 }
 
 interface IntentData {
@@ -23,7 +23,7 @@ interface IntentData {
 }
 
 export default async function CheckoutSuccessPage({ params }: PageProps) {
-  const { intentId } = await params
+  const { intentId, usePoints } = await params
 
   const intent = await getIntent(intentId)
   console.log("============== intent 정보 ==============")
