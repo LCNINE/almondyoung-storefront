@@ -23,12 +23,13 @@ interface IntentData {
 }
 
 export default async function CheckoutSuccessPage({ params }: PageProps) {
-  const { intentId, usePoints } = await params
+  const { intentId } = await params
 
   const intent = await getIntent(intentId)
   console.log("============== intent 정보 ==============")
   console.log(intent)
   console.log("=======================================")
+
   if (!intent) {
     notFound()
   }

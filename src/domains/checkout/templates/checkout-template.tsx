@@ -1,13 +1,14 @@
 "use client"
 
-import { DiscountSection } from "@/domains/checkout/components/sections/discount"
 import { PinRequiredModal } from "@/domains/checkout/components/modals/pin-required-modal"
 import { PinVerifyModal } from "@/domains/checkout/components/modals/pin-verify-modal"
+import { DiscountSection } from "@/domains/checkout/components/sections/discount"
 import { OrderProductsSection } from "@/domains/checkout/components/sections/order-products-shipping"
 import { PaymentMethodSection } from "@/domains/checkout/components/sections/payment-method"
 import { PaymentTotalSection } from "@/domains/checkout/components/sections/payment-total"
 import { ShippingSection } from "@/domains/checkout/components/sections/shipping"
 import type { ShippingMemo } from "@/domains/checkout/components/sections/shipping/types"
+import { usePinStatus } from "@/hooks/api/use-pin-status"
 import { updateCart } from "@/lib/api/medusa/cart"
 import {
   authorizePayment,
@@ -19,6 +20,7 @@ import type { PointBalanceDto } from "@/lib/types/dto/wallet"
 import type { CartTotals, ShippingInfo } from "@/lib/types/ui/cart"
 import type { Promotion } from "@/lib/types/ui/promotion"
 import { TaxInvoiceType } from "@/lib/types/ui/wallet"
+import { getCleanKoreanNumber } from "@/lib/utils/format-phone-number"
 import {
   calculateMembershipDiscount,
   getCartTotals,
@@ -29,12 +31,10 @@ import { MobileCTA, PCFixedCTA } from "domains/checkout/components/cta"
 import { MobileHeader, PCHeader } from "domains/checkout/components/header"
 import { MobileOrderSummary } from "domains/checkout/components/order-summary"
 import { PaymentDetailSidebar } from "domains/checkout/components/payment-detail-sidebar"
-import { usePinStatus } from "@/hooks/api/use-pin-status"
 import { useParams, useRouter } from "next/navigation"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { ReceiptSection } from "../components/sections/receipt/"
 import { toast } from "sonner"
-import { getCleanKoreanNumber } from "@/lib/utils/format-phone-number"
+import { ReceiptSection } from "../components/sections/receipt/"
 
 interface CheckoutTemplateProps {
   user: UserDetail
@@ -111,8 +111,6 @@ export default function CheckoutTemplate({
     }
   }, [cart, shipping, isMembership, selectedItems, pointsUsed])
 
-  console.log("cartTotals:", cartTotals)
-
   const [selectedMethod, setSelectedMethod] = useState("payLater")
   const [cashReceiptOption, setCashReceiptOption] = useState("noapply")
   const [taxInvoiceOption, setTaxInvoiceOption] = useState(
@@ -145,19 +143,12 @@ export default function CheckoutTemplate({
       const intent = await createIntent({
         data: {
           customerId: user.id,
-          originalAmount: cart.original_item_total,
-          discountAmount: 0, // 0을 고정값으로 넣어주기로 함 - 이유는 wallt 설계 미스
+          originalAmount: cart.original_item_total + cartTotals.shipping, // 원래 상품 가격 + 배송료
+          discountAmount: 0, // 0을 고정값으로 넣어주기로 함 - 이유는 wallet 설계 미스
           type: "ORDER",
-          discountBreakdown: [
-            {
-              amount: cartTotals.pointsUsed, // 적립금 사용 금액
-              type: "POINT",
-            },
-          ],
         },
       })
-      console.log("intent:", intent)
-      // 토스 결제 SDK 초기화₩
+      // 토스 결제 SDK 초기화
       const clientKey =
         process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY ||
         "test_ck_pP2YxJ4K87ZZmMga5K59rRGZwXLO"
@@ -237,22 +228,22 @@ export default function CheckoutTemplate({
         const { payment, intentId } = tossPaymentRef.current
         const baseUrl = window.location.origin
 
-        // await payment.requestPayment({
-        //   method: "CARD",
-        //   amount: {
-        //     currency: "KRW",
-        //     value: cartTotals.finalTotal,
-        //   },
-        //   orderId: intentId,
-        //   orderName: cart.items?.map((item) => item.title).join(", "),
-        //   successUrl: `${baseUrl}/${countryCode}/checkout/callback?usePoints=${cartTotals.pointsUsed.toString()}`,
-        //   failUrl: `${baseUrl}/${countryCode}/checkout/callback`,
-        //   customerEmail: user.email,
-        //   customerName: user.username,
-        //   customerMobilePhone:
-        //     cart.shipping_address?.phone ??
-        //     getCleanKoreanNumber(user.profile?.phoneNumber ?? ""),
-        // })
+        await payment.requestPayment({
+          method: "CARD",
+          amount: {
+            currency: "KRW",
+            value: cartTotals.finalTotal,
+          },
+          orderId: intentId,
+          orderName: cart.items?.map((item) => item.title).join(", "),
+          successUrl: `${baseUrl}/${countryCode}/checkout/callback?usePoints=${cartTotals.pointsUsed}`,
+          failUrl: `${baseUrl}/${countryCode}/checkout/callback`,
+          customerEmail: user.email,
+          customerName: user.username,
+          customerMobilePhone:
+            cart.shipping_address?.phone ??
+            getCleanKoreanNumber(user.profile?.phoneNumber ?? ""),
+        })
         return
       } else if (selectedMethod === "payLater") {
         // 나중 결제: 라우트 핸들러로 직접 요청

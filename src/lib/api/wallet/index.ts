@@ -18,7 +18,6 @@ import type {
 } from "@lib/types/dto/wallet"
 import { api } from "../api"
 import { ApiNetworkError, HttpApiError } from "../api-error"
-import { getCookies } from "@lib/data/cookies"
 
 // ==========================================
 // PIN 상태 관련 타입
@@ -236,64 +235,28 @@ export async function authorizePayment(
   intentId: string,
   data: AuthorizePaymentDto
 ): Promise<AuthorizePaymentSuccessResponse | AuthorizePaymentErrorResponse> {
-  // TODO: 테스트 완료 후 원복 필요
-  // const result = await api<
-  //   AuthorizePaymentSuccessResponse | AuthorizePaymentErrorResponse
-  // >("wallet", `/payments/intents/${intentId}/authorize`, {
-  //   method: "POST",
-  //   body: data,
-  //   withAuth: true,
-  //   cache: "no-store",
-  // })
-  // return result
-
-  // 로컬 테스트용
-  const cookieString = await getCookies()
-  const response = await fetch(
-    `http://localhost:5001/payments/intents/${intentId}/authorize`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Cookie: cookieString,
-      },
-      body: JSON.stringify(data),
-      cache: "no-store",
-    }
-  )
-
-  const result = await response.json()
+  const result = await api<
+    AuthorizePaymentSuccessResponse | AuthorizePaymentErrorResponse
+  >("wallet", `/payments/intents/${intentId}/authorize`, {
+    method: "POST",
+    body: data,
+    withAuth: true,
+    cache: "no-store",
+  })
   return result
 }
 
 export async function createIntent({ data }: { data: CreateIntentRequestDto }) {
-  // const result = await api<CreateIntentResponseDto>(
-  //   "wallet",
-  //   "/payments/intents",
-  //   {
-  //     method: "POST",
-  //     body: data,
-  //     withAuth: true,
-  //     cache: "no-store",
-  //   }
-  // )
-
-  // return result
-
-  console.log("data:", data)
-  // 로컬 테스트용
-  const cookieString = await getCookies()
-  const response = await fetch(`http://localhost:5001/payments/intents`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Cookie: cookieString,
-    },
-    body: JSON.stringify(data),
-    cache: "no-store",
-  })
-
-  const result = await response.json()
+  const result = await api<CreateIntentResponseDto>(
+    "wallet",
+    "/payments/intents",
+    {
+      method: "POST",
+      body: data,
+      withAuth: true,
+      cache: "no-store",
+    }
+  )
 
   return result
 }
@@ -304,6 +267,7 @@ export async function getIntent(intentId: string): Promise<IntentDto> {
     withAuth: true,
   })
 }
+
 // ==========================================
 // 결제 비밀번호 (PIN) 관련 API
 // ==========================================

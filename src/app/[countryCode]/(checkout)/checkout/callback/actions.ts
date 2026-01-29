@@ -11,12 +11,13 @@ export async function processPaymentCallback(
   countryCode: string,
   paymentKey: string,
   orderId: string,
+  amount: string,
   usePoints: number
 ): Promise<ProcessPaymentResult> {
   try {
     const response = await authorizePayment(orderId, {
       provider: "TOSS",
-      authParams: { paymentKey },
+      authParams: { paymentKey, orderId, amount },
       usePoints,
     })
 

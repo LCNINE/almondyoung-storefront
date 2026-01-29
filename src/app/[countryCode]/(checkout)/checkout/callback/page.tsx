@@ -18,6 +18,7 @@ export default function CallbackPage() {
     const paymentKey = searchParams.get("paymentKey")
     const orderId = searchParams.get("orderId")
     const usePoints = searchParams.get("usePoints")
+    const amount = searchParams.get("amount")
 
     // 실패 케이스 처리 (토스에서 실패로 리다이렉트된 경우)
     if (status === "FAIL") {
@@ -43,6 +44,7 @@ export default function CallbackPage() {
       countryCode,
       paymentKey,
       orderId,
+      amount!,
       usePointsNumber
     ).then((result) => {
       router.replace(result.redirectUrl)
