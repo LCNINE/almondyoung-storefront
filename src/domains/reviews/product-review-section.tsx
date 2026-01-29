@@ -2,16 +2,11 @@
 
 import { useEffect, useState, useCallback } from "react"
 import { getReviewsByProductId } from "@/lib/api/ugc"
+import { getBackendBaseUrl, isRailwayBackend } from "@/lib/config/backend"
 import type { ReviewResponseDto, ReviewRatingFilter } from "@/lib/types/dto/ugc"
 import { ReviewSummary } from "./summary/review-summary"
 import { ReviewDetailCard, type ReviewDetail } from "./details/review-detail-card"
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationEllipsis,
-} from "@components/common/ui/pagination"
+import { SharedPagination } from "@/components/shared/pagination"
 import {
   Select,
   SelectContent,
@@ -19,7 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { ChevronLeft, ChevronRight } from "lucide-react"
 
 type Props = {
   productId: string
@@ -78,6 +72,9 @@ function getAuthorName(
 
 function mapToReviewDetail(dto: ReviewResponseDto): ReviewDetail {
   const legacyName = dto.legacyAuthorName ?? dto.legacy_author_name ?? null
+  const fileServiceBaseUrl =
+    process.env.NEXT_PUBLIC_FILE_SERVICE_URL ||
+    (isRailwayBackend() ? getBackendBaseUrl("fs") : "")
 
   return {
     id: dto.id,
@@ -87,7 +84,7 @@ function mapToReviewDetail(dto: ReviewResponseDto): ReviewDetail {
     tags: [],
     text: dto.content,
     thumbnails: dto.mediaFileIds.map((fileId, index) => ({
-      src: `${process.env.NEXT_PUBLIC_FILE_SERVICE_URL || ""}/files/${fileId}`,
+      src: `${fileServiceBaseUrl ?? ""}/files/${fileId}`,
       alt: `리뷰 이미지 ${index + 1}`,
     })),
     likeCount: 0,
@@ -189,31 +186,6 @@ export function ProductReviewSection({
     setCurrentPage(1)
   }
 
-  const getPageNumbers = () => {
-    const pages: (number | "ellipsis")[] = []
-    const maxVisible = 5
-    if (totalPages <= maxVisible) {
-      for (let i = 1; i <= totalPages; i++) pages.push(i)
-    } else {
-      if (currentPage <= 3) {
-        for (let i = 1; i <= 4; i++) pages.push(i)
-        pages.push("ellipsis")
-        pages.push(totalPages)
-      } else if (currentPage >= totalPages - 2) {
-        pages.push(1)
-        pages.push("ellipsis")
-        for (let i = totalPages - 3; i <= totalPages; i++) pages.push(i)
-      } else {
-        pages.push(1)
-        pages.push("ellipsis")
-        for (let i = currentPage - 1; i <= currentPage + 1; i++) pages.push(i)
-        pages.push("ellipsis")
-        pages.push(totalPages)
-      }
-    }
-    return pages
-  }
-
   return (
     <section className="space-y-6">
       <ReviewSummary
@@ -284,62 +256,11 @@ export function ProductReviewSection({
 
           {/* 페이지네이션 */}
           {totalPages > 1 && (
-            <Pagination>
-              <PaginationContent className="flex-wrap justify-center">
-                <PaginationItem>
-                  <PaginationLink
-                    aria-label="Previous page"
-                    onClick={() =>
-                      currentPage > 1 && handlePageChange(currentPage - 1)
-                    }
-                    className={
-                      currentPage === 1
-                        ? "pointer-events-none opacity-50"
-                        : "cursor-pointer"
-                    }
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                    <span className="ml-1 hidden sm:inline">이전</span>
-                  </PaginationLink>
-                </PaginationItem>
-
-                {getPageNumbers().map((page, index) =>
-                  page === "ellipsis" ? (
-                    <PaginationItem key={`ellipsis-${index}`}>
-                      <PaginationEllipsis />
-                    </PaginationItem>
-                  ) : (
-                    <PaginationItem key={page}>
-                      <PaginationLink
-                        onClick={() => handlePageChange(page as number)}
-                        isActive={currentPage === page}
-                        className="cursor-pointer"
-                      >
-                        {page}
-                      </PaginationLink>
-                    </PaginationItem>
-                  )
-                )}
-
-                <PaginationItem>
-                  <PaginationLink
-                    aria-label="Next page"
-                    onClick={() =>
-                      currentPage < totalPages &&
-                      handlePageChange(currentPage + 1)
-                    }
-                    className={
-                      currentPage === totalPages
-                        ? "pointer-events-none opacity-50"
-                        : "cursor-pointer"
-                    }
-                  >
-                    <span className="mr-1 hidden sm:inline">다음</span>
-                    <ChevronRight className="h-4 w-4" />
-                  </PaginationLink>
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
+            <SharedPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
           )}
         </div>
       )}

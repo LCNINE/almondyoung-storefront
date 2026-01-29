@@ -308,11 +308,13 @@ export function CartMainClient() {
                 cartItems={cartItems}
                 checkedItems={checkedItems}
                 shippingTotal={shippingTotal}
+                selectedTotal={finalPrice}
                 onCheckAll={handleCheckAll}
                 onDeleteSelected={handleDeleteSelected}
                 onCheckItem={handleCheckItem}
                 onDeleteItem={handleDeleteItem}
                 onQuantityChange={handleQuantityChange}
+                countryCode={countryCode}
               />
 
               {/* PC 버전 컨텐츠 */}
@@ -320,11 +322,13 @@ export function CartMainClient() {
                 cartItems={cartItems}
                 checkedItems={checkedItems}
                 shippingTotal={shippingTotal}
+                selectedTotal={finalPrice}
                 onCheckAll={handleCheckAll}
                 onDeleteSelected={handleDeleteSelected}
                 onCheckItem={handleCheckItem}
                 onDeleteItem={handleDeleteItem}
                 onQuantityChange={handleQuantityChange}
+                countryCode={countryCode}
               />
             </div>
 

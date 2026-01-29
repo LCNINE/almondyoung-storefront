@@ -15,6 +15,7 @@ import { getTimeSaleProducts } from "../../actions/get-category-products"
 import { useEffect, useState, useTransition } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
+import { useUser } from "@/contexts/user-context"
 
 interface TimeSaleSectionProps {
   initialCategories: StoreProductCategoryTree[]
@@ -30,6 +31,8 @@ export function TimeSaleSection({
   const bestCategories = initialCategories.slice(0, 7)
   const params = useParams() as { countryCode?: string }
   const countryCode = params?.countryCode || "kr"
+  const { user } = useUser()
+  const isLoggedIn = !!user
 
   const [products, setProducts] = useState<ProductCardProps[]>(
     initialProducts || []
@@ -109,6 +112,15 @@ export function TimeSaleSection({
                               <ProductCard.Thumbnail
                                 src={product.imageSrc}
                                 alt={product.title}
+                                action={
+                                  <ProductCard.QuickActions
+                                    productId={product.id}
+                                    variantId={product.optionMeta?.defaultVariantId}
+                                    isSingleOption={product.optionMeta?.isSingle ?? false}
+                                    isLoggedIn={isLoggedIn}
+                                    countryCode={countryCode}
+                                  />
+                                }
                                 className="rounded-sm md:rounded-md"
                               />
                               <ProductCard.Info {...product} />
@@ -125,8 +137,10 @@ export function TimeSaleSection({
                   <ProductGrid
                     products={products.slice(0, 5)}
                     showRank={false}
+                    showQuickActions
                     roundedClassName="rounded-sm md:rounded-md"
                     countryCode={countryCode}
+                    isLoggedIn={isLoggedIn}
                   />
                 </div>
               </TabsContent>

@@ -41,9 +41,12 @@ export function mapStoreProductToCardProps(
     0
   const rawMembershipPrice =
     membershipPreviewPrice ??
-    defaultPrice?.calculated_price_number ||
-    priceInfo?.cheapestPrice?.calculated_price_number ||
-    0
+    (
+      defaultPrice?.calculated_price_number ||
+      priceInfo?.cheapestPrice?.calculated_price_number ||
+      0
+    )
+
   const membershipPrice =
     rawMembershipPrice > 0 && basePrice > rawMembershipPrice
       ? rawMembershipPrice
@@ -65,6 +68,11 @@ export function mapStoreProductToCardProps(
   const imageUrl = product.thumbnail || ""
   const reviewData = reviewsMap?.get(product.handle || product.id)
 
+  // 옵션 메타 정보 계산 (퀵 장바구니 담기용)
+  const variants = product.variants as any[] | undefined
+  const isSingleOption = variants?.length === 1
+  const defaultVariantId = defaultVariant?.id
+
   return {
     id: product.id,
     title: product.title || "",
@@ -76,6 +84,10 @@ export function mapStoreProductToCardProps(
     imageSrc: imageUrl,
     membershipSavings,
     showMembershipHint,
+    optionMeta: {
+      isSingle: isSingleOption,
+      defaultVariantId,
+    },
   }
 }
 

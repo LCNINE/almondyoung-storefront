@@ -11,22 +11,26 @@ interface CartTabsMobileProps {
   cartItems: CartItem[]
   checkedItems: string[]
   shippingTotal: number
+  selectedTotal: number
   onCheckAll: (checked: boolean) => void
   onDeleteSelected: () => void
   onCheckItem: (id: string, checked: boolean) => void
   onDeleteItem: (id: string) => void
   onQuantityChange: (id: string, quantity: number) => void
+  countryCode?: string
 }
 
 export function CartTabsMobile({
   cartItems,
   checkedItems,
   shippingTotal,
+  selectedTotal,
   onCheckAll,
   onDeleteSelected,
   onCheckItem,
   onDeleteItem,
   onQuantityChange,
+  countryCode = "kr",
 }: CartTabsMobileProps) {
   const isAllChecked =
     cartItems.length > 0 && checkedItems.length === cartItems.length
@@ -53,6 +57,7 @@ export function CartTabsMobile({
                 {/* 무료배송 안내 - 모바일 */}
                 <ShippingNotice
                   shippingTotal={shippingTotal}
+                  selectedTotal={selectedTotal}
                   variant="mobile"
                 />
 
@@ -72,6 +77,7 @@ export function CartTabsMobile({
                   onDelete={onDeleteItem}
                   onQuantityChange={onQuantityChange}
                   variant="mobile"
+                  countryCode={countryCode}
                 />
               </div>
             </div>
