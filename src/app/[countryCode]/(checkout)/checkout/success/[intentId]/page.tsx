@@ -1,7 +1,7 @@
 import CheckoutHeader from "@/app/[countryCode]/(checkout)/checkout/checkout-header"
 import { getIntent } from "@/lib/api/wallet"
 import { notFound } from "next/navigation"
-import { ReviewPromptCard } from "../_components"
+import { ChevronDownIcon, ReviewPromptCard } from "../_components"
 
 interface PageProps {
   params: Promise<{ intentId: string; countryCode: string }>
@@ -116,27 +116,5 @@ async function OrderSummaryCard({ intent }: { intent: IntentData }) {
         </div>
       </div>
     </section>
-  )
-}
-
-function ChevronDownIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      width={24}
-      height={24}
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-      preserveAspectRatio="none"
-    >
-      <path
-        d="M6 9L12 15L18 9"
-        stroke="black"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
   )
 }
