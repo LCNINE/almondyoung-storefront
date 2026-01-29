@@ -254,8 +254,8 @@ export default function CheckoutTemplate({
         const intent = await createIntent({
           data: {
             customerId: user.id,
-            originalAmount: cartTotals.finalTotal,
-            discountAmount: 0,
+            originalAmount: cartTotals.finalTotal, // todo: 할인전 가격을 넣어야함
+            discountAmount: 0, // 적립금 사용했을때의 금액을 여기에 넣어야 함
             type: "ORDER",
           },
         })
