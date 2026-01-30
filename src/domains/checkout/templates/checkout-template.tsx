@@ -111,7 +111,7 @@ export default function CheckoutTemplate({
     }
   }, [cart, shipping, isMembership, selectedItems, pointsUsed])
 
-  const [selectedMethod, setSelectedMethod] = useState("payLater")
+  const [selectedMethod, setSelectedMethod] = useState("toss")
   const [cashReceiptOption, setCashReceiptOption] = useState("noapply")
   const [taxInvoiceOption, setTaxInvoiceOption] = useState(
     taxInvoice?.defaultEnabled ? "apply" : "noapply"
