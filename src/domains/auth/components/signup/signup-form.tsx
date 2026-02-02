@@ -15,15 +15,17 @@ import { createUser } from "@lib/api/users/auth/signup-base"
 import { formatBirthday } from "@lib/utils/format-birthday"
 import { signupSchema, SignupSchema } from "domains/auth/schemas/signup-schema"
 import { setFormError } from "domains/auth/utils/set-form-error"
-import { useSearchParams } from "next/navigation"
+import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { useActionState, useEffect, useState, useTransition } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { SignupFormFields } from "./signup-form-fields"
 
 export function SignupForm() {
+  const router = useRouter()
+  const { countryCode } = useParams() as { countryCode: string }
   const searchParams = useSearchParams()
-  const redirectTo = searchParams.get("redirect_to") || undefined
+  const redirectTo = searchParams.get("redirect_to") || "/"
 
   const [state, formAction, pending] = useActionState(createUser, null)
   const [isPending, startTransition] = useTransition()
@@ -54,12 +56,10 @@ export function SignupForm() {
   useEffect(() => {
     if (state) {
       if (state.success) {
-        toast(state.message, {
-          action: {
-            label: "확인",
-            onClick: () => {},
-          },
-        })
+        console.log("state", state)
+        router.push(
+          `/${countryCode}/callback/signup?userId=${state.userId}&redirect_to=${redirectTo}`
+        )
       } else {
         toast.error(state.message)
         setFormError(state.message, form)
@@ -78,10 +78,7 @@ export function SignupForm() {
     }
 
     startTransition(() => {
-      formAction({
-        ...formattedSubmitData,
-        redirectTo,
-      })
+      formAction(formattedSubmitData)
     })
   }
 
