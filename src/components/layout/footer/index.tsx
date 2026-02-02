@@ -47,25 +47,25 @@ export default function Footer({ className }: { className?: string }) {
               </div>
               <nav className="flex flex-wrap gap-4 text-sm">
                 <Link
-                  href="/#"
+                  href="/kr/company"
                   className="hover:text-stone-700 hover:underline"
                 >
                   회사소개
                 </Link>
                 <Link
-                  href="/#"
+                  href="/kr/terms"
                   className="hover:text-stone-700 hover:underline"
                 >
                   이용약관
                 </Link>
                 <Link
-                  href="/#"
+                  href="/kr/privacy"
                   className="font-bold text-stone-600 hover:text-stone-800 hover:underline"
                 >
                   개인정보처리방침
                 </Link>
                 <Link
-                  href="/#"
+                  href="/kr/guide"
                   className="hover:text-stone-700 hover:underline"
                 >
                   이용안내
@@ -129,19 +129,19 @@ export default function Footer({ className }: { className?: string }) {
 
             {/* 정책 링크 */}
             <nav className="mb-6 flex flex-wrap justify-start gap-x-4 gap-y-2 text-xs text-stone-500">
-              <Link href="/company" className="hover:text-stone-800">
+              <Link href="/kr/company" className="hover:text-stone-800">
                 회사소개
               </Link>
-              <Link href="/terms" className="hover:text-stone-800">
+              <Link href="/kr/terms" className="hover:text-stone-800">
                 이용약관
               </Link>
               <Link
-                href="/privacy"
+                href="/kr/privacy"
                 className="font-bold text-stone-700 hover:text-stone-900"
               >
                 개인정보처리방침
               </Link>
-              <Link href="/guide" className="hover:text-stone-800">
+              <Link href="/kr/guide" className="hover:text-stone-800">
                 이용안내
               </Link>
             </nav>
