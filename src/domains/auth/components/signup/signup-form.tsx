@@ -56,10 +56,7 @@ export function SignupForm() {
   useEffect(() => {
     if (state) {
       if (state.success) {
-        console.log("state", state)
-        router.push(
-          `/${countryCode}/callback/signup?userId=${state.userId}&redirect_to=${redirectTo}`
-        )
+        window.location.href = `/api/auth/callback/signup?userId=${state.userId}&redirect_to=${encodeURIComponent(redirectTo)}`
       } else {
         toast.error(state.message)
         setFormError(state.message, form)
