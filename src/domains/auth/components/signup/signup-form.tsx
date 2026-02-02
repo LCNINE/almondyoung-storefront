@@ -15,15 +15,13 @@ import { createUser } from "@lib/api/users/auth/signup-base"
 import { formatBirthday } from "@lib/utils/format-birthday"
 import { signupSchema, SignupSchema } from "domains/auth/schemas/signup-schema"
 import { setFormError } from "domains/auth/utils/set-form-error"
-import { useParams, useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import { useActionState, useEffect, useState, useTransition } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { SignupFormFields } from "./signup-form-fields"
 
 export function SignupForm() {
-  const router = useRouter()
-  const { countryCode } = useParams() as { countryCode: string }
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get("redirect_to") || "/"
 
@@ -32,6 +30,7 @@ export function SignupForm() {
 
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false)
   const [hasAgreed, setHasAgreed] = useState(false)
+  const [isRedirecting, setIsRedirecting] = useState(false)
 
   const form = useForm<SignupSchema>({
     resolver: zodResolver(signupSchema),
@@ -56,6 +55,7 @@ export function SignupForm() {
   useEffect(() => {
     if (state) {
       if (state.success) {
+        setIsRedirecting(true)
         window.location.href = `/api/auth/callback/signup?userId=${state.userId}&redirect_to=${encodeURIComponent(redirectTo)}`
       } else {
         toast.error(state.message)
@@ -127,8 +127,8 @@ export function SignupForm() {
           <CustomButton
             type="button"
             className="cursor-pointer"
-            disabled={pending || isPending}
-            isLoading={pending || isPending}
+            disabled={pending || isPending || isRedirecting}
+            isLoading={pending || isPending || isRedirecting}
             onClick={handleSignupClick}
           >
             가입하기
@@ -151,6 +151,7 @@ export function SignupForm() {
               type="button"
               variant="outline"
               className="cursor-pointer"
+              disabled={isRedirecting}
               onClick={() => setIsConfirmDialogOpen(false)}
             >
               취소
@@ -158,8 +159,8 @@ export function SignupForm() {
             <CustomButton
               type="button"
               className="cursor-pointer"
-              disabled={pending || isPending}
-              isLoading={pending || isPending}
+              disabled={pending || isPending || isRedirecting}
+              isLoading={pending || isPending || isRedirecting}
               onClick={handleConfirmSignup}
             >
               계속
