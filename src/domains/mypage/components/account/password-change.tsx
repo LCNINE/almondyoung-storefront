@@ -13,7 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import {
   changePasswordAction,
   type PasswordActionState,
-} from "../../actions/password"
+} from "../actions/password"
 import { useActionState, useCallback, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import {

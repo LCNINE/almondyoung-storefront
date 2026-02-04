@@ -1,14 +1,18 @@
 import { WithHeaderLayout } from "@components/layout"
 import MypageLayout from "@/app/[countryCode]/(mypage)/_components/mypage-layout"
 import { PageTitle } from "@/components/shared/page-title"
+import { ProfileEdit } from "@/domains/mypage/components/account/profile-edit"
 import { Metadata } from "next"
+import { fetchMe } from "@/lib/api/users/me"
 
 export const metadata: Metadata = {
   title: "회원정보 수정",
   description: "회원정보를 수정하세요",
 }
 
-export default function AccountProfilePage() {
+export default async function AccountProfilePage() {
+  const userData = await fetchMe()
+
   return (
     <WithHeaderLayout
       config={{
@@ -21,9 +25,7 @@ export default function AccountProfilePage() {
       <MypageLayout>
         <div className="bg-white px-3 py-4 md:min-h-screen md:px-6">
           <PageTitle>회원정보 수정</PageTitle>
-          <div className="flex h-56 items-center justify-center text-center">
-            <p className="text-gray-500">준비 중입니다</p>
-          </div>
+          <ProfileEdit userData={userData} />
         </div>
       </MypageLayout>
     </WithHeaderLayout>
