@@ -1,6 +1,7 @@
 import { WithHeaderLayout } from "@components/layout"
 import MypageLayout from "@/app/[countryCode]/(mypage)/_components/mypage-layout"
 import { PageTitle } from "@/components/shared/page-title"
+import { PasswordChange } from "@/domains/mypage/components/account/password-change"
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -21,9 +22,7 @@ export default function AccountPasswordPage() {
       <MypageLayout>
         <div className="bg-white px-3 py-4 md:min-h-screen md:px-6">
           <PageTitle>비밀번호 변경</PageTitle>
-          <div className="flex h-56 items-center justify-center text-center">
-            <p className="text-gray-500">준비 중입니다</p>
-          </div>
+          <PasswordChange />
         </div>
       </MypageLayout>
     </WithHeaderLayout>
