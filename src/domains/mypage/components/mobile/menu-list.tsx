@@ -1,6 +1,5 @@
 "use client"
 
-import { Spinner } from "@/components/shared/spinner"
 import { useUser } from "@/contexts/user-context"
 import { signout } from "@lib/api/users/signout"
 import { ChevronRight } from "lucide-react"
@@ -11,10 +10,6 @@ import { MenuItem } from "../../types/mypage-types"
 
 interface MenuListProps {
   items: MenuItem[]
-}
-
-function ListIcon({ children }: { children: React.ReactNode }) {
-  return <div className="h-6 w-6 text-2xl text-gray-500">{children}</div>
 }
 
 export function MenuList({ items }: MenuListProps) {
