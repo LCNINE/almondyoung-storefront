@@ -1,5 +1,5 @@
 import type { UserDetail } from "@lib/types/ui/user"
-import { MENU_ITEMS } from "../constants/mypage-constants"
+import { MENU_SECTIONS } from "../constants/mypage-constants"
 import { MenuList } from "./menu-list"
 import { MobileHeader } from "./mobile-header"
 import { PointsBanner } from "./points-banner"
@@ -47,7 +47,7 @@ export function MyPageMobileContent({
         <ShippingStatusCard />
       </div>
       {isPayLaterBannerEnabled && <PayLaterBanner />}
-      <MenuList items={MENU_ITEMS} />
+      <MenuList sections={MENU_SECTIONS} />
     </div>
   )
 }
