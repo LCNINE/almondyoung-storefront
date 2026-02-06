@@ -1,7 +1,6 @@
 "use client"
 
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
 import BenefitListItem from "./benefit-list-item"
 import { CURRENT_BENEFITS } from "./benefits-data"
 
@@ -33,17 +32,13 @@ export default function BenefitOverviewSection({
         <span className="text-lg text-white/40">▽</span>
       </div>
 
-      <div className="space-y-1">
-        {CURRENT_BENEFITS.map((benefit, index) => (
-          <div key={benefit.id}>
-            <BenefitListItem
-              benefit={benefit}
-              onClick={() => onBenefitClick?.(benefit.id)}
-            />
-            {index < CURRENT_BENEFITS.length - 1 && (
-              <Separator className="bg-white/10" />
-            )}
-          </div>
+      <div className="space-y-2">
+        {CURRENT_BENEFITS.map((benefit) => (
+          <BenefitListItem
+            key={benefit.id}
+            benefit={benefit}
+            onClick={() => onBenefitClick?.(benefit.id)}
+          />
         ))}
       </div>
     </section>

@@ -39,7 +39,7 @@ export function MenuList({ items }: MenuListProps) {
 
   return (
     <nav aria-label="마이페이지 메뉴">
-      <ul className="rounded-lg bg-white shadow-sm">
+      <ul className="rounded-lg bg-white/15">
         {items.map((item, index) => (
           <li key={item.label}>
             {item.action === "logout" ? (
@@ -49,9 +49,6 @@ export function MenuList({ items }: MenuListProps) {
                 disabled={isPending}
                 className={itemClassName(index)}
               >
-                <ListIcon>
-                  {isPending ? <Spinner size="sm" color="gray" /> : item.icon}
-                </ListIcon>
                 <span className="grow text-left text-base text-gray-800">
                   {item.label}
                 </span>
@@ -59,7 +56,6 @@ export function MenuList({ items }: MenuListProps) {
               </button>
             ) : (
               <Link href={item.path ?? "#"} className={itemClassName(index)}>
-                <ListIcon>{item.icon}</ListIcon>
                 <span className="grow text-base text-gray-800">
                   {item.label}
                 </span>
