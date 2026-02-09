@@ -4,10 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Form } from "@/components/ui/form"
 
 import { useShopSurvey } from "@/domains/shop-survey/hooks/use-shop-survey"
-import {
-  ShopSurveySchema,
-  shopSurveySchema,
-} from "@/domains/shop-survey/schemas/suvery-schema"
+import { shopFormSchema, type ShopFormSchema } from "@/components/shop-form/schema"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
@@ -26,8 +23,8 @@ export default function ShopSurveyForm({
 
   const router = useRouter()
 
-  const form = useForm<ShopSurveySchema>({
-    resolver: zodResolver(shopSurveySchema),
+  const form = useForm<ShopFormSchema>({
+    resolver: zodResolver(shopFormSchema),
     mode: "onChange",
     defaultValues: {
       isOperating: undefined,
@@ -43,11 +40,7 @@ export default function ShopSurveyForm({
     setCurrentStep((prev) => prev + 1)
   }
 
-  const handlePrev = () => {
-    setCurrentStep((prev) => prev - 1)
-  }
-
-  const onSubmit = async (data: ShopSurveySchema) => {
+  const onSubmit = async (data: ShopFormSchema) => {
     try {
       await modifyShopSurveyAction(data)
       toast.success("정보가 저장되었습니다.")
@@ -60,7 +53,15 @@ export default function ShopSurveyForm({
   useEffect(() => {
     const getShopSurveyData = async () => {
       const res = await getShopSurveyAction()
-      form.reset(res) // todo: 해결해야함 ..
+
+      form.reset({
+        isOperating: res?.isOperating ?? undefined,
+        yearsOperating: res?.yearsOperating ?? 0,
+        shopType: res?.shopType ?? "",
+        categories: res?.categories ?? [],
+        targetCustomers: (res?.targetCustomers as string[]) ?? [],
+        openDays: (res?.openDays as string[]) ?? [],
+      })
     }
     getShopSurveyData()
   }, [])
@@ -78,7 +79,6 @@ export default function ShopSurveyForm({
         <StepsManager
           currentStep={currentStep}
           onNextStep={handleNext}
-          onPrevStep={handlePrev}
         />
       </form>
     </Form>

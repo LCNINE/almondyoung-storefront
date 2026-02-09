@@ -1,6 +1,6 @@
 import { WithHeaderLayout } from "@components/layout"
 import MypageLayout from "@/app/[countryCode]/(mypage)/_components/mypage-layout"
-import { SettingClient } from "domains/settings/setting-client"
+import { ShopSettingTemplate } from "@/domains/shop-setting"
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -17,7 +17,7 @@ export default function SettingPage() {
       }}
     >
       <MypageLayout>
-        <SettingClient />
+        <ShopSettingTemplate />
       </MypageLayout>
     </WithHeaderLayout>
   )
