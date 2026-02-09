@@ -48,6 +48,7 @@ export const MENU_SECTIONS: MenuSection[] = [
       { label: "회원정보 수정", icon: "👤", path: "/mypage/account/profile" },
       { label: "비밀번호 변경", icon: "🔒", path: "/mypage/account/password" },
       { label: "기존 계정 연결", icon: "🔗", path: "/mypage/account/cafe24" },
+      { label: "맞춤설정", icon: "👀", path: "/mypage/shop-setting" },
       { label: "사업자 정보", icon: "💼", path: "/mypage/business" },
       { label: "로그아웃", icon: "🚪", action: "logout" },
     ],
@@ -96,10 +97,10 @@ export const SIDEBAR_MENU_ITEMS = [
     path: "/mypage/recent",
   },
   {
-    id: "settings",
+    id: "shopSettings",
     label: "맞춤설정",
     hasSubMenu: false,
-    path: "/mypage/setting",
+    path: "/mypage/shop-setting",
   },
   {
     id: "account",

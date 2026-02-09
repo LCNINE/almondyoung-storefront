@@ -1,73 +1,60 @@
 "use client"
 
-import SurveyHeader from "@/domains/shop-survey/components/surbey-header"
 import {
   CATEGORIES,
-  TARGET_CUSTOMERS,
   DAYS_OF_WEEK,
   SHOP_TYPES,
+  TARGET_CUSTOMERS,
 } from "@/components/shop-form/constants"
-import { shopFormSchema, type ShopFormSchema } from "@/components/shop-form/schema"
+import {
+  shopFormSchema,
+  type ShopFormSchema,
+} from "@/components/shop-form/schema"
+import SurveyHeader from "@/domains/shop-survey/components/surbey-header"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { getShopInfo, updateShopInfo } from "@lib/api/users/shop"
+import { ShopInfoDto } from "@lib/types/dto/users"
 import { Building2, Check, Scissors, Users } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { Controller, useForm } from "react-hook-form"
+import { toast } from "sonner"
+import { useShopSurvey } from "../../components/shop-form/hooks/use-shop-survey"
 
-export function ShopSettingTemplate() {
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
+export function ShopSettingTemplate({
+  shopInfo,
+}: {
+  shopInfo: ShopInfoDto | null
+}) {
   const { control, handleSubmit, watch, reset } = useForm<ShopFormSchema>({
     resolver: zodResolver(shopFormSchema),
     defaultValues: {
-      isOperating: true,
+      isOperating: undefined,
       yearsOperating: 0,
-      shopType: "solo",
+      shopType: "",
       categories: [],
       targetCustomers: [],
       openDays: [],
     },
   })
 
+  const { modifyShopSurveyAction, isSubmitting } = useShopSurvey()
+
   const isOperating = watch("isOperating")
 
   useEffect(() => {
-    const loadShopInfo = async () => {
-      try {
-        setIsLoading(true)
-        const shopInfo = await getShopInfo()
-
-        if (!shopInfo) {
-          return
-        }
-
-        reset({
-          isOperating: shopInfo.isOperating,
-          yearsOperating: shopInfo.yearsOperating ?? 0,
-          shopType: shopInfo.shopType ?? "solo",
-          categories: Array.isArray(shopInfo.categories)
-            ? shopInfo.categories
-            : [],
-          targetCustomers: Array.isArray(shopInfo.targetCustomers)
-            ? shopInfo.targetCustomers
-            : [],
-          openDays: Array.isArray(shopInfo.openDays) ? shopInfo.openDays : [],
-        })
-      } catch (err) {
-        console.error("상점 정보 로드 실패:", err)
-      } finally {
-        setIsLoading(false)
-      }
+    if (shopInfo) {
+      reset({
+        isOperating: shopInfo.isOperating,
+        yearsOperating: shopInfo.yearsOperating ?? 0,
+        shopType: shopInfo.shopType ?? "solo",
+        categories: shopInfo.categories ?? [],
+        targetCustomers: (shopInfo.targetCustomers as string[]) ?? [],
+        openDays: (shopInfo.openDays as string[]) ?? [],
+      })
     }
-
-    loadShopInfo()
-  }, [reset])
+  }, [shopInfo, reset])
 
   const onSubmit = async (data: ShopFormSchema) => {
     try {
-      setIsSubmitting(true)
-
       const updateDto = {
         isOperating: data.isOperating,
         yearsOperating: data.yearsOperating,
@@ -77,21 +64,12 @@ export function ShopSettingTemplate() {
         openDays: data.openDays,
       }
 
-      await updateShopInfo(updateDto)
-      alert("상점 정보가 성공적으로 저장되었습니다.")
-    } catch (err) {
-      console.error("상점 정보 저장 실패:", err)
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
+      await modifyShopSurveyAction(updateDto)
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <p className="text-sm text-gray-600">로딩 중...</p>
-      </div>
-    )
+      toast.success("상점 정보가 성공적으로 저장되었습니다.")
+    } catch (err) {
+      toast.error("상점 정보 저장에 실패했습니다. 잠시 후 다시 시도해주세요.")
+    }
   }
 
   return (
@@ -121,23 +99,24 @@ export function ShopSettingTemplate() {
                     type="button"
                     onClick={() => onChange(true)}
                     className={`flex items-center gap-2.5 rounded-[10px] px-4 py-3.5 text-xs shadow-[0_4px_4px_rgba(0,0,0,0.1)] transition-colors ${
-                      value
+                      value === true
                         ? "bg-amber-500 font-bold text-white"
                         : "bg-white font-normal text-gray-600 outline-[0.5px] outline-zinc-300"
                     }`}
                   >
-                    {value && <Check className="h-3.5 w-3.5" />}샵 운영 중
+                    {value === true && <Check className="h-3.5 w-3.5" />}샵 운영
+                    중
                   </button>
                   <button
                     type="button"
                     onClick={() => onChange(false)}
                     className={`flex items-center gap-2.5 rounded-[10px] px-4 py-3.5 text-xs shadow-[0_4px_4px_rgba(0,0,0,0.1)] transition-colors ${
-                      !value
+                      value === false
                         ? "bg-amber-500 font-bold text-white"
                         : "bg-white font-normal text-gray-600 outline-[0.5px] outline-zinc-300"
                     }`}
                   >
-                    {!value && <Check className="h-3.5 w-3.5" />}
+                    {value === false && <Check className="h-3.5 w-3.5" />}
                     예비 원장
                   </button>
                 </fieldset>
@@ -190,7 +169,7 @@ export function ShopSettingTemplate() {
           </section>
 
           {/* 샵 기본 정보 (규모) */}
-          <section className="flex w-full flex-col gap-5 md:w-[770px]">
+          <section className="flex w-full flex-col gap-5 md:max-w-[770px]">
             <header>
               <h2 className="flex items-center gap-1 text-base font-bold text-black">
                 <Building2 className="h-4 w-4 text-amber-500" />샵 기본 정보
@@ -225,7 +204,7 @@ export function ShopSettingTemplate() {
           </section>
 
           {/* 시술 종류 (다중 선택) */}
-          <section className="flex w-full flex-col gap-5 md:w-[770px]">
+          <section className="flex w-full flex-col gap-5 md:max-w-[770px]">
             <header>
               <h2 className="flex items-center gap-1 text-base font-bold text-black">
                 <Scissors className="h-4 w-4 text-amber-500" />샵 유형 및 시술

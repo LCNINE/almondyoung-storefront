@@ -9,7 +9,7 @@ import {
   SHOP_TYPES,
 } from "@/components/shop-form/constants"
 import { useFormContext } from "react-hook-form"
-import { useShopSurvey } from "@/domains/shop-survey/hooks/use-shop-survey"
+import { useShopSurvey } from "@/components/shop-form/hooks/use-shop-survey"
 
 function YearsOperatingSection({
   value,
@@ -247,9 +247,13 @@ export function StepTwo() {
   const categories = form.watch("categories")
 
   const errors = {
-    yearsOperating: form.formState.errors.yearsOperating?.message as string | undefined,
+    yearsOperating: form.formState.errors.yearsOperating?.message as
+      | string
+      | undefined,
     shopType: form.formState.errors.shopType?.message as string | undefined,
-    targetCustomers: form.formState.errors.targetCustomers?.message as string | undefined,
+    targetCustomers: form.formState.errors.targetCustomers?.message as
+      | string
+      | undefined,
     openDays: form.formState.errors.openDays?.message as string | undefined,
   }
 

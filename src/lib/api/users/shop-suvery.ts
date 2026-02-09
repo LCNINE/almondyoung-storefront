@@ -14,7 +14,7 @@ export const modifyShopSurvey = async (data: ShopFormSchema) => {
   return response
 }
 
-export const getShopSurvey = async () => {
+export const getShopSurvey = async (): Promise<ShopInfoDto | null> => {
   return await api<ShopInfoDto>("users", `/shop/info`, {
     method: "GET",
     withAuth: true,

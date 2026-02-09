@@ -3,8 +3,11 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form } from "@/components/ui/form"
 
-import { useShopSurvey } from "@/domains/shop-survey/hooks/use-shop-survey"
-import { shopFormSchema, type ShopFormSchema } from "@/components/shop-form/schema"
+import { useShopSurvey } from "@/components/shop-form/hooks/use-shop-survey"
+import {
+  shopFormSchema,
+  type ShopFormSchema,
+} from "@/components/shop-form/schema"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
@@ -76,10 +79,7 @@ export default function ShopSurveyForm({
         onSubmit={form.handleSubmit(onSubmit)}
         className="max-[600px] relative flex flex-col gap-10 p-2"
       >
-        <StepsManager
-          currentStep={currentStep}
-          onNextStep={handleNext}
-        />
+        <StepsManager currentStep={currentStep} onNextStep={handleNext} />
       </form>
     </Form>
   )

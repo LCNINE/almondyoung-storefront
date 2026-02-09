@@ -31,13 +31,3 @@ export const shopFormSchema = z
   })
 
 export type ShopFormSchema = z.infer<typeof shopFormSchema>
-
-// 기본값
-export const shopFormDefaultValues: ShopFormSchema = {
-  isOperating: true,
-  yearsOperating: 0,
-  shopType: "",
-  categories: [],
-  targetCustomers: [],
-  openDays: [],
-}
