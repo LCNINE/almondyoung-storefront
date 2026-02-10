@@ -9,7 +9,7 @@ import {
   SHOP_TYPES,
 } from "@/components/shop-form/constants"
 import { useFormContext } from "react-hook-form"
-import { useShopSurvey } from "@/components/shop-form/hooks/use-shop-survey"
+import { useRouter } from "next/navigation"
 
 function YearsOperatingSection({
   value,
@@ -96,8 +96,9 @@ function ShopTypeSection({
             </div>
           ))}
         </div>
+
         {error && (
-          <p className="ml-2 text-sm font-medium text-red-500">{error}</p>
+          <p className="mt-2 ml-2 text-sm font-medium text-red-500">{error}</p>
         )}
       </div>
     </section>
@@ -236,32 +237,29 @@ function OpenDaysSection({
 }
 
 export function StepTwo() {
-  const form = useFormContext()
-  const { isSubmitting } = useShopSurvey()
+  const router = useRouter()
+  const { watch, setValue: setFormValue, formState } = useFormContext()
+  const { isSubmitting, errors: formErrors } = formState
 
-  const isOperating = form.watch("isOperating")
-  const yearsOperating = form.watch("yearsOperating")
-  const shopType = form.watch("shopType")
-  const targetCustomers = form.watch("targetCustomers")
-  const openDays = form.watch("openDays")
-  const categories = form.watch("categories")
+  const isOperating = watch("isOperating")
+  const yearsOperating = watch("yearsOperating")
+  const shopType = watch("shopType")
+  const targetCustomers = watch("targetCustomers")
+  const openDays = watch("openDays")
+  const categories = watch("categories")
 
   const errors = {
-    yearsOperating: form.formState.errors.yearsOperating?.message as
-      | string
-      | undefined,
-    shopType: form.formState.errors.shopType?.message as string | undefined,
-    targetCustomers: form.formState.errors.targetCustomers?.message as
-      | string
-      | undefined,
-    openDays: form.formState.errors.openDays?.message as string | undefined,
+    yearsOperating: formErrors.yearsOperating?.message as string | undefined,
+    shopType: formErrors.shopType?.message as string | undefined,
+    targetCustomers: formErrors.targetCustomers?.message as string | undefined,
+    openDays: formErrors.openDays?.message as string | undefined,
   }
 
   const isSubmitDisabled =
     isOperating === undefined || categories?.length === 0 || isSubmitting
 
   const setValue = (field: string, value: unknown) => {
-    form.setValue(field, value, {
+    setFormValue(field, value, {
       shouldValidate: true,
       shouldDirty: true,
     })
@@ -298,8 +296,25 @@ export function StepTwo() {
       )}
 
       <footer className="mt-8 flex w-full gap-2">
-        <CustomButton variant="outline" size="lg" disabled={isSubmitDisabled}>
+        <CustomButton
+          variant="outline"
+          size="lg"
+          disabled={isSubmitDisabled}
+          type="button"
+          // todo: api
+          onClick={() => router.push("/")}
+        >
           건너뛰기
+        </CustomButton>
+
+        <CustomButton
+          variant="fill"
+          size="lg"
+          disabled={isSubmitDisabled}
+          type="submit"
+          isLoading={isSubmitting}
+        >
+          제출하기
         </CustomButton>
       </footer>
     </>
