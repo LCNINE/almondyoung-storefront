@@ -6,20 +6,32 @@ import { Check, ChevronDown, ShoppingCart } from "lucide-react"
 import { ProductOptionSelector } from "./product-option-selector"
 import { getThumbnailUrl } from "@lib/utils/get-thumbnail-url"
 
+type OptionValue = {
+  id: string
+  name: string
+  isSoldOut?: boolean
+}
+
+type ProductOption = {
+  label: string
+  type?: string
+  values: OptionValue[]
+}
+
+type SelectedCartOption = {
+  id: string
+  variantId?: string
+  name: string
+  quantity: number
+  price: number
+  image: string
+  stock?: number
+}
+
 type Product = {
   name: string
   thumbnails?: string[]
-  options?: any[]
-}
-
-type OptionWithSoldOut = {
-  label: string
-  type: string
-  values: Array<{
-    id: string
-    name: string
-    isSoldOut?: boolean
-  }>
+  options?: ProductOption[]
 }
 
 type Props = {
@@ -38,11 +50,11 @@ type Props = {
   onGoToCart: () => void
   // 옵션 관련
   selectedOptions: Record<string, string>
-  selectedCartOptions: any[]
+  selectedCartOptions: SelectedCartOption[]
   onOptionChange: (label: string, value: string) => void
   onQuantityUpdate: (id: string, newQuantity: number) => void
   onOptionRemove: (id: string) => void
-  optionsWithSoldOut?: OptionWithSoldOut[]
+  optionsWithSoldOut?: ProductOption[]
   isSoldOut?: boolean
 }
 
