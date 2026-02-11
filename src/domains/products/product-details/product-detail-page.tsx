@@ -15,6 +15,7 @@ import { useAddToCart } from "@hooks/api/use-add-to-cart"
 import { useRecentViews } from "@hooks/api/use-recent-views"
 import { toggleWishlist } from "@lib/api/users/wishlist"
 import type { ProductDetail } from "@lib/types/ui/product"
+import { isProductSoldOut } from "@lib/utils"
 import type { UserDetail, WishlistItem } from "@lib/types/ui/user"
 import { ProductReviewSection } from "domains/reviews/product-review-section"
 import { use, useEffect, useRef, useState, useTransition } from "react"
@@ -106,7 +107,6 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
   const qnaRef = useRef<HTMLDivElement>(null)
   const infoRef = useRef<HTMLDivElement>(null)
 
-  console.log("product:::::", product)
   // ===== Hooks =====
   const { addToCart, isLoading: isAddToCartLoading } = useAddToCart()
 
@@ -183,7 +183,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
 
   const isSingleOption = !product.options || product.options.length === 0
   const isOutOfStock = product.status !== "active"
-  const isSoldOut = product.manageInventory && product.available <= 0
+  const isSoldOut = isProductSoldOut(product)
   const getVariantPrice = (variantId?: string) => {
     const resolvePrice = (base?: number, actual?: number) => {
       const basePrice = base ?? 0

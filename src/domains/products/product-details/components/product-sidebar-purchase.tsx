@@ -22,6 +22,7 @@ import { ProductRatingDisplay } from "./product-rating-display"
 import { ProductShippingInfo } from "./product-shipping-info"
 import { usePathname, useRouter } from "next/navigation"
 import { useMembership } from "@/contexts/membership-context"
+import { isProductSoldOut } from "@/lib/utils"
 
 type SelectedCartOption = {
   id: string
@@ -137,6 +138,8 @@ export function ProductSidebarPurchase({
       `/${countryCode}/login?redirect_to=${encodeURIComponent(pathname)}`
     )
   }
+  console.log("product:::::", product)
+  console.log("isProductSoldOut(product):::::", isProductSoldOut(product))
   return (
     <>
       <aside className="hidden w-full min-w-[383px] overflow-y-auto md:sticky md:top-0 md:block md:max-h-screen md:max-w-[383px] lg:max-w-[480px]">
@@ -160,8 +163,9 @@ export function ProductSidebarPurchase({
                 aria-label="찜하기"
               >
                 <Heart
-                  className={`h-7 w-7 ${isWishlisted ? "text-red-500" : "text-gray-300"
-                    }`}
+                  className={`h-7 w-7 ${
+                    isWishlisted ? "text-red-500" : "text-gray-300"
+                  }`}
                 />
                 찜
               </CustomButton>
@@ -197,7 +201,9 @@ export function ProductSidebarPurchase({
                 !isMember &&
                 hasMembershipPrice &&
                 typeof product.actualPrice === "number" &&
-                Math.abs(product.actualPrice - (product.membershipPrice ?? 0)) >= 1
+                Math.abs(
+                  product.actualPrice - (product.membershipPrice ?? 0)
+                ) >= 1
               }
               membershipSavings={
                 hasMembershipPrice
@@ -225,7 +231,7 @@ export function ProductSidebarPurchase({
                 quantity={quantity}
                 onQuantityChange={onQuantityChange}
                 price={getPrice()}
-                stock={0}
+                stock={product.manageInventory ? product.available : null}
                 showTitle={true}
               />
             ) : (
