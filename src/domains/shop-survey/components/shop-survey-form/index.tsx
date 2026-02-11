@@ -45,7 +45,6 @@ export default function ShopSurveyForm({
   }
 
   const onSubmit = async (data: ShopFormSchema) => {
-    console.log("data:", data)
     const transformedData = {
       ...data,
       shopType: data.shopType ?? undefined,

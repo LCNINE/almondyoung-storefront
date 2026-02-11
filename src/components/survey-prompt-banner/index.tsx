@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, Sparkles } from "lucide-react"
+import { X } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { updateSurveyRemind } from "@/lib/api/users/shop-suvery"
+import { CustomButton } from "../shared/custom-buttons"
 
 const STORAGE_KEY = "survey-banner-dismissed"
 
@@ -76,14 +78,14 @@ export function SurveyPromptBanner({
           )}
         >
           <div className="flex items-center gap-3">
-            <div
-              className={cn(
-                "h-9 w-9 shrink-0 rounded-full",
-                "bg-linear-to-br from-amber-400 to-orange-500",
-                "flex items-center justify-center"
-              )}
-            >
-              <Sparkles className="h-4 w-4 text-white" />
+            <div className="h-9 w-9 shrink-0">
+              <Image
+                src="/images/logo.webp"
+                alt="아몬드영 로고"
+                width={36}
+                height={36}
+                className="h-full w-full object-contain"
+              />
             </div>
 
             <div className="min-w-0 flex-1">
@@ -98,17 +100,17 @@ export function SurveyPromptBanner({
                 size="sm"
                 onClick={handleDismiss}
                 disabled={isLoading}
-                className="h-auto px-3 py-1.5 text-[12px] text-gray-500"
+                className="h-auto rounded-full bg-gray-100 px-3 py-1.5 text-[12px] text-gray-600 hover:bg-gray-200"
               >
                 닫기
               </Button>
-              <Button
+              <CustomButton
                 asChild
                 size="sm"
                 className="h-auto rounded-full px-3.5 py-1.5 text-[12px]"
               >
                 <Link href={`/${countryCode}/shop-survey`}>설정하기</Link>
-              </Button>
+              </CustomButton>
             </div>
           </div>
         </div>
@@ -134,15 +136,14 @@ export function SurveyPromptBanner({
           </Button>
 
           <div className="flex items-start gap-4">
-            <div
-              className={cn(
-                "h-10 w-10 shrink-0 rounded-full",
-                "bg-linear-to-br from-amber-400 to-orange-500",
-                "flex items-center justify-center",
-                "shadow-lg shadow-orange-500/25"
-              )}
-            >
-              <Sparkles className="h-5 w-5 text-white" />
+            <div className="h-10 w-10 shrink-0">
+              <Image
+                src="/images/logo.webp"
+                alt="아몬드영 로고"
+                width={40}
+                height={40}
+                className="h-full w-full object-contain"
+              />
             </div>
 
             <div className="min-w-0 flex-1 pr-4">
@@ -154,16 +155,18 @@ export function SurveyPromptBanner({
               </p>
 
               <div className="mt-3 flex items-center gap-2">
-                <Button asChild size="sm" className="rounded-full">
-                  <Link href={`/${countryCode}/shop-survey`}>맞춤 설정하기</Link>
-                </Button>
+                <CustomButton asChild size="sm" className="rounded-full">
+                  <Link href={`/${countryCode}/shop-survey`}>
+                    맞춤 설정하기
+                  </Link>
+                </CustomButton>
 
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleRemindLater}
                   disabled={isLoading}
-                  className="rounded-full text-gray-500"
+                  className="rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200"
                 >
                   {isLoading ? "처리 중..." : "나중에 할게요"}
                 </Button>

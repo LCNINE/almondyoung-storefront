@@ -1,4 +1,15 @@
+import { useState } from "react"
 import { cn } from "@lib/utils"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { NumberStepper } from "@/components/shared/number-stepper"
 import { Checkbox } from "@components/common/ui/checkbox"
 import { Label } from "@components/common/ui/label"
@@ -10,6 +21,7 @@ import {
 } from "@/components/shop-form/constants"
 import { useFormContext } from "react-hook-form"
 import { useRouter } from "next/navigation"
+import { updateSurveyRemind } from "@/lib/api/users/shop-suvery"
 
 function YearsOperatingSection({
   value,
@@ -237,9 +249,17 @@ function OpenDaysSection({
 }
 
 export function StepTwo() {
+  const [showSkipDialog, setShowSkipDialog] = useState(false)
+  const [isSkipping, setIsSkipping] = useState(false)
   const router = useRouter()
   const { watch, setValue: setFormValue, formState } = useFormContext()
   const { isSubmitting, errors: formErrors } = formState
+
+  const handleSkip = async () => {
+    setIsSkipping(true)
+    await updateSurveyRemind()
+    router.push("/")
+  }
 
   const isOperating = watch("isOperating")
   const yearsOperating = watch("yearsOperating")
@@ -299,10 +319,9 @@ export function StepTwo() {
         <CustomButton
           variant="outline"
           size="lg"
-          disabled={isSubmitDisabled}
+          disabled={isSubmitting || isSkipping}
           type="button"
-          // todo: api
-          onClick={() => router.push("/")}
+          onClick={() => setShowSkipDialog(true)}
         >
           건너뛰기
         </CustomButton>
@@ -310,13 +329,34 @@ export function StepTwo() {
         <CustomButton
           variant="fill"
           size="lg"
-          disabled={isSubmitDisabled}
+          disabled={isSubmitDisabled || isSkipping}
           type="submit"
           isLoading={isSubmitting}
         >
           제출하기
         </CustomButton>
       </footer>
+
+      <AlertDialog open={showSkipDialog} onOpenChange={setShowSkipDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>설문을 건너뛰시겠어요?</AlertDialogTitle>
+            <AlertDialogDescription>
+              지금까지 입력하신 내용은 저장되지 않아요.
+              <br />
+              나중에 다시 맞춤 설정을 진행하실 수 있습니다.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isSkipping}>
+              계속 작성하기
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleSkip} disabled={isSkipping}>
+              {isSkipping ? "처리 중..." : "건너뛰기"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }
