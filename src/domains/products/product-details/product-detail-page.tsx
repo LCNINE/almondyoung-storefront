@@ -184,6 +184,101 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
   const isSingleOption = !product.options || product.options.length === 0
   const isOutOfStock = product.status !== "active"
   const isSoldOut = isProductSoldOut(product)
+
+  // 단일 옵션 상품 수량 변경 (재고 초과 시 자동 조정)
+  const handleSingleOptionQuantityChange = (newQuantity: number) => {
+    if (newQuantity < 1) {
+      setQuantity(1)
+      return
+    }
+    const maxStock = product.available
+    const adjustedQuantity =
+      product.manageInventory && maxStock !== Infinity && newQuantity > maxStock
+        ? maxStock
+        : newQuantity
+    setQuantity(adjustedQuantity)
+  }
+
+  // 선택된 옵션을 기반으로 각 옵션 값의 품절 여부 계산
+  const getOptionsWithSoldOut = () => {
+    const options = product.options ?? []
+    const optionOrder = options.map((o) => o.label)
+
+    return options.map((option, optionIndex) => ({
+      ...option,
+      values: option.values.map((value) => {
+        // 이전 옵션들이 모두 선택되었는지 확인
+        const prevOptionsSelected = optionOrder
+          .slice(0, optionIndex)
+          .every((label) => !!selectedOptions[label])
+
+        if (!prevOptionsSelected) {
+          // 이전 옵션이 선택되지 않으면 품절 여부 알 수 없음
+          return { ...value, isSoldOut: false }
+        }
+
+        // 이전 옵션들 + 현재 값으로 조합 테스트
+        const testSelection = {
+          ...Object.fromEntries(
+            optionOrder
+              .slice(0, optionIndex)
+              .map((label) => [label, selectedOptions[label]])
+          ),
+          [option.label]: value.name,
+        }
+
+        // 남은 옵션들의 모든 조합 확인
+        const remainingOptions = options.slice(optionIndex + 1)
+
+        if (remainingOptions.length === 0) {
+          // 마지막 옵션이면 바로 재고 확인
+          const selectionKey = optionOrder
+            .map((label) => `${label}=${testSelection[label]}`)
+            .join("|")
+          const variantId = product.skuIndex?.[selectionKey]
+          const stock = variantId ? product.skuStock?.[variantId] : undefined
+          const isSoldOut =
+            stock !== undefined && stock !== Infinity && stock <= 0
+          return { ...value, isSoldOut }
+        }
+
+        // 남은 옵션들의 모든 조합을 확인해서 하나라도 재고 있으면 품절 아님
+        const checkAllCombinations = (
+          currentSelection: Record<string, string>,
+          remainingOpts: typeof remainingOptions
+        ): boolean => {
+          if (remainingOpts.length === 0) {
+            const selectionKey = optionOrder
+              .map((label) => `${label}=${currentSelection[label]}`)
+              .join("|")
+            const variantId = product.skuIndex?.[selectionKey]
+            const stock = variantId ? product.skuStock?.[variantId] : undefined
+            // 재고 있으면 true (품절 아님)
+            return stock === undefined || stock === Infinity || stock > 0
+          }
+
+          const [nextOption, ...rest] = remainingOpts
+          for (const nextValue of nextOption.values) {
+            const hasStock = checkAllCombinations(
+              { ...currentSelection, [nextOption.label]: nextValue.name },
+              rest
+            )
+            if (hasStock) return true // 하나라도 재고 있으면 품절 아님
+          }
+          return false // 모든 조합 품절
+        }
+
+        const hasAnyStock = checkAllCombinations(
+          testSelection,
+          remainingOptions
+        )
+        return { ...value, isSoldOut: !hasAnyStock }
+      }),
+    }))
+  }
+
+  const optionsWithSoldOut = getOptionsWithSoldOut()
+
   const getVariantPrice = (variantId?: string) => {
     const resolvePrice = (base?: number, actual?: number) => {
       const basePrice = base ?? 0
@@ -232,6 +327,19 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
       return
     }
 
+    // 품절 체크
+    const variantStock = product.skuStock?.[variantId]
+    const isSoldOut =
+      variantStock !== undefined &&
+      variantStock !== Infinity &&
+      variantStock <= 0
+
+    if (isSoldOut) {
+      toast.error("선택한 옵션은 품절입니다.")
+      setSelectedOptions({})
+      return
+    }
+
     const optionPrice = getVariantPrice(variantId)
 
     setSelectedCartOptions((prevCart) => {
@@ -241,6 +349,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
           p.name === optionName ? { ...p, quantity: p.quantity + 1 } : p
         )
       }
+
       return [
         ...prevCart,
         {
@@ -254,7 +363,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
             product.thumbnails?.[0] ||
             product.thumbnail ||
             "https://placehold.co/80x80?text=No+Image",
-          stock: (variantId && product.skuStock?.[variantId]) || undefined,
+          stock: variantId ? product.skuStock?.[variantId] : undefined,
         },
       ]
     })
@@ -268,9 +377,16 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
       setSelectedCartOptions((prev) => prev.filter((opt) => opt.id !== id))
     } else {
       setSelectedCartOptions((prev) =>
-        prev.map((opt) =>
-          opt.id === id ? { ...opt, quantity: newQuantity } : opt
-        )
+        prev.map((opt) => {
+          if (opt.id !== id) return opt
+          // 재고 초과 시 최대 수량으로 자동 조정
+          const maxStock = opt.stock
+          const adjustedQuantity =
+            maxStock !== undefined && maxStock !== Infinity && newQuantity > maxStock
+              ? maxStock
+              : newQuantity
+          return { ...opt, quantity: adjustedQuantity }
+        })
       )
     }
   }
@@ -290,6 +406,12 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
   }
 
   const handleAddToCart = async (showModal = false) => {
+    // 단일 옵션 상품 품절 체크
+    if (isSingleOption && isSoldOut) {
+      toast.error("품절된 상품입니다.")
+      return false
+    }
+
     if (isSingleOption) {
       const variantId = product.defaultVariantId || product.id
       const result = await addToCart({ variantId, quantity })
@@ -453,7 +575,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
             countryCode={countryCode}
             // isUser={!!user}
             quantity={quantity}
-            onQuantityChange={setQuantity}
+            onQuantityChange={handleSingleOptionQuantityChange}
             selectedOptions={selectedOptions}
             selectedCartOptions={selectedCartOptions}
             onOptionChange={handleOptionChange}
@@ -464,6 +586,8 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
             isAddToCartLoading={isAddToCartLoading}
             rating={averageRating}
             reviewCount={reviewCount}
+            optionsWithSoldOut={optionsWithSoldOut}
+            isSoldOut={isSoldOut}
           />
         </div>
       </div>
@@ -484,7 +608,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
               isOpen={isBottomSheetOpen}
               product={product}
               quantity={quantity}
-              onQuantityChange={setQuantity}
+              onQuantityChange={handleSingleOptionQuantityChange}
               getProductPrice={getProductPrice}
               getTotalPrice={getTotalPrice}
               isSingleOptionProduct={isSingleOption}
@@ -499,6 +623,8 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
               onOptionChange={handleOptionChange}
               onQuantityUpdate={handleQuantityUpdate}
               onOptionRemove={handleOptionRemove}
+              optionsWithSoldOut={optionsWithSoldOut}
+              isSoldOut={isSoldOut}
             />
           </>,
           document.body
