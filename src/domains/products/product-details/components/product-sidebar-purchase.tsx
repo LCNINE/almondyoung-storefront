@@ -179,7 +179,6 @@ export function ProductSidebarPurchase({
                     isWishlisted ? "text-red-500" : "text-gray-300"
                   }`}
                 />
-                찜
               </CustomButton>
               <CustomButton
                 variant="outline"
@@ -188,7 +187,6 @@ export function ProductSidebarPurchase({
                 aria-label="챗봇"
               >
                 <MessageCircle className="h-7 w-7" />
-                챗봇
               </CustomButton>
             </div>
           </header>
