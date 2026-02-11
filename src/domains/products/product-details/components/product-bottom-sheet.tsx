@@ -181,10 +181,10 @@ export function ProductBottomSheet({
               <CustomButton
                 variant="outline"
                 size="lg"
-                className="flex-1"
+                className="flex-1 cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400"
                 disabled
               >
-                품절 상품
+                현재 품절된 상품이에요
               </CustomButton>
             </>
           ) : (
