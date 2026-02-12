@@ -1,8 +1,10 @@
 "use server"
 
+import { sdk } from "@/lib/config/medusa"
 import {
   getAuthHeaders,
   getCacheTag,
+  setCartId,
   setMedusaAuthToken,
 } from "@lib/data/cookies"
 import { revalidateTag } from "next/cache"
@@ -30,10 +32,18 @@ export async function medusaSignin(): Promise<{
     const customerCacheTag = await getCacheTag("customers")
     revalidateTag(customerCacheTag)
 
+    //  기존 게스트 카트 → 로그인 고객으로 이전
     try {
       await transferCart()
     } catch (error: any) {
       console.log("Transfer cart error:", error)
+    }
+
+    //  고객의 활성 카트 조회 → cart_id 동기화
+    try {
+      await recoverCustomerCart()
+    } catch (error: any) {
+      console.log("Recover cart error:", error)
     }
 
     return {
@@ -48,6 +58,29 @@ export async function medusaSignin(): Promise<{
       message: "Failed to connect to Medusa API",
     }
   }
+}
+
+/** 로그인한 고객의 미완료 카트를 조회하고 cart_id 쿠키를 동기화*/
+export async function recoverCustomerCart() {
+  const headers = {
+    ...(await getAuthHeaders()),
+  }
+
+  if (!headers.authorization) return
+
+  const res = await sdk.client.fetch<{ cart: { id: string } | null }>(
+    "/store/customers/me/cart",
+    {
+      method: "GET",
+      headers,
+    }
+  )
+  if (res.cart?.id) {
+    await setCartId(res.cart.id)
+  }
+
+  const cartCacheTag = await getCacheTag("carts")
+  revalidateTag(cartCacheTag)
 }
 
 // 임시

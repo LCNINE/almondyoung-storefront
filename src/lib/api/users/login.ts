@@ -15,7 +15,7 @@ type LoginResult =
   | { success: false; error: string; code?: string }
 
 export async function login(
-  prevState: LoginResult | null,
+  _: LoginResult | null,
   formData: FormData
 ): Promise<LoginResult> {
   const loginId = formData.get("loginId") as string
