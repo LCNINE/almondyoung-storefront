@@ -87,8 +87,13 @@ export async function login(
     console.error("Cart transfer error:", error)
   }
 
-  const targetPath = redirectTo ?? `${siteConfig.auth.redirect_to}`
+  const targetPath = redirectTo?.startsWith("/")
+    ? redirectTo
+    : redirectTo
+      ? `/${redirectTo}`
+      : siteConfig.auth.redirect_to
+
   revalidatePath("/", "layout")
   revalidatePath(targetPath)
-  redirect(targetPath)
+  redirect(`/${countryCode}${targetPath}`)
 }

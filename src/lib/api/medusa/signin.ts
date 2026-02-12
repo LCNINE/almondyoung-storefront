@@ -3,6 +3,7 @@
 import { sdk } from "@/lib/config/medusa"
 import {
   getAuthHeaders,
+  getCartId,
   getCacheTag,
   setCartId,
   setMedusaAuthToken,
@@ -18,6 +19,9 @@ export async function medusaSignin(): Promise<{
   message?: string
 }> {
   try {
+    // 로그인 전 게스트 카트 ID 저장
+    const guestCartId = await getCartId()
+
     const data = await api<{ token: string }>(
       "medusa",
       "/auth/customer/my-auth",
@@ -39,9 +43,9 @@ export async function medusaSignin(): Promise<{
       console.log("Transfer cart error:", error)
     }
 
-    //  고객의 활성 카트 조회 → cart_id 동기화
+    //  고객의 활성 카트 조회 → cart_id 동기화 + 게스트 카트 아이템 병합
     try {
-      await recoverCustomerCart()
+      await recoverCustomerCart(guestCartId)
     } catch (error: any) {
       console.log("Recover cart error:", error)
     }
@@ -60,8 +64,11 @@ export async function medusaSignin(): Promise<{
   }
 }
 
-/** 로그인한 고객의 미완료 카트를 조회하고 cart_id 쿠키를 동기화*/
-export async function recoverCustomerCart() {
+/**
+ * 로그인한 고객의 미완료 카트를 복구하고 cart_id 쿠키를 동기화
+ * @param guestCartId - 게스트 카트 ID (전달 시 게스트 아이템을 고객 카트에 병합)
+ */
+export async function recoverCustomerCart(guestCartId?: string) {
   const headers = {
     ...(await getAuthHeaders()),
   }
@@ -71,10 +78,12 @@ export async function recoverCustomerCart() {
   const res = await sdk.client.fetch<{ cart: { id: string } | null }>(
     "/store/customers/me/cart",
     {
-      method: "GET",
+      method: "POST",
       headers,
+      body: { guestCartId },
     }
   )
+
   if (res.cart?.id) {
     await setCartId(res.cart.id)
   }
