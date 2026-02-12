@@ -348,6 +348,8 @@ export function CartMainClient() {
               shippingFee={shippingTotal}
               finalPrice={finalPrice}
               selectedCount={selectedCount}
+              cartItems={cartItems}
+              checkedItems={checkedItems}
             />
           </div>
 
@@ -361,6 +363,8 @@ export function CartMainClient() {
             finalPrice={finalPrice}
             selectedCount={selectedCount}
             shippingFee={shippingTotal}
+            cartItems={cartItems}
+            checkedItems={checkedItems}
           />
         </div>
       </main>
