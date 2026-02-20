@@ -1,12 +1,9 @@
-import { PageTitle } from "@/components/shared/page-title"
 import { getOrders } from "@lib/api/medusa/orders"
-import { ReviewsTabs } from "../components/reviews-tabs"
-import type { WritableReview } from "../types"
+import { WritableReviewsSection } from "../../components/writable-reviews/writable-reviews-section"
+import type { WritableReview } from "../../types"
 
-export const ReviewsTemplate = async () => {
+export async function WritableReviewsWrapper() {
   const ordersData = await getOrders({ limit: 50, status: "completed" })
-
-  // 배송 완료된 주문에서 리뷰 작성 가능한 상품 추출
   const writableReviews: WritableReview[] =
     ordersData?.orders?.flatMap(
       (order) =>
@@ -24,17 +21,5 @@ export const ReviewsTemplate = async () => {
         })) ?? []
     ) ?? []
 
-  // TODO: 작성된 리뷰는 UGC 서비스에서 조회
-  // 현재는 사용자별 리뷰 조회 API가 없으므로 빈 배열
-  const writtenReviews: [] = []
-
-  return (
-    <main className="bg-white px-3 py-4 md:min-h-screen md:px-6">
-      <PageTitle>리뷰</PageTitle>
-      <ReviewsTabs
-        writableReviews={writableReviews}
-        writtenReviews={writtenReviews}
-      />
-    </main>
-  )
+  return <WritableReviewsSection reviews={writableReviews} />
 }

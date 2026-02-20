@@ -8,23 +8,16 @@ import {
   TabsList,
   TabsTrigger,
 } from "@components/common/ui/tabs"
-import {
-  updateReviewAction,
-  deleteReviewAction,
-} from "../actions/review-actions"
-import { WritableReviewsSection } from "./writable-reviews-section"
-import { WrittenReviewsSection } from "./written-reviews-section"
 import { REVIEW_TAB_VALUES } from "../utils/constants"
-import type { WritableReview, WrittenReview } from "../types"
 
 interface ReviewsTabsProps {
-  writableReviews: WritableReview[]
-  writtenReviews: WrittenReview[]
+  writableContent: React.ReactNode
+  writtenContent: React.ReactNode
 }
 
 export const ReviewsTabs = ({
-  writableReviews,
-  writtenReviews,
+  writableContent,
+  writtenContent,
 }: ReviewsTabsProps) => {
   const router = useRouter()
   const pathname = usePathname()
@@ -44,20 +37,6 @@ export const ReviewsTabs = ({
     [router, pathname, searchParams]
   )
 
-  const handleDeleteReview = useCallback((reviewId: string) => {
-    const shouldDelete = confirm("리뷰를 삭제하시겠습니까?")
-    if (shouldDelete) {
-      deleteReviewAction(reviewId)
-    }
-  }, [])
-
-  const handleUpdateReview = useCallback(
-    async (reviewId: string, data: { rating: number; text: string }) => {
-      await updateReviewAction(reviewId, data)
-    },
-    []
-  )
-
   return (
     <Tabs
       value={currentTab}
@@ -69,28 +48,22 @@ export const ReviewsTabs = ({
           value={REVIEW_TAB_VALUES.WRITABLE}
           className="rounded-none border-b-2 border-transparent bg-transparent px-4 py-3 text-[15px] font-bold text-[#666666] shadow-none transition-colors focus-visible:ring-0 focus-visible:outline-none data-[state=active]:border-[#f29219] data-[state=active]:text-[#f29219] data-[state=active]:shadow-none data-[state=inactive]:hover:text-[#333333]"
         >
-          작성 가능한 리뷰 ({writableReviews.length})
+          작성 가능한 리뷰
         </TabsTrigger>
         <TabsTrigger
           value={REVIEW_TAB_VALUES.WRITTEN}
           className="rounded-none border-b-2 border-transparent bg-transparent px-4 py-3 text-[15px] font-bold text-[#666666] shadow-none transition-colors focus-visible:ring-0 focus-visible:outline-none data-[state=active]:border-[#f29219] data-[state=active]:text-[#f29219] data-[state=active]:shadow-none data-[state=inactive]:hover:text-[#333333]"
         >
-          내가 작성한 리뷰 ({writtenReviews.length})
+          내가 작성한 리뷰
         </TabsTrigger>
       </TabsList>
 
-      {/* 작성 가능한 리뷰 탭 */}
       <TabsContent value={REVIEW_TAB_VALUES.WRITABLE} className="mt-4">
-        <WritableReviewsSection reviews={writableReviews} />
+        {writableContent}
       </TabsContent>
 
-      {/* 작성된 리뷰 탭 */}
       <TabsContent value={REVIEW_TAB_VALUES.WRITTEN} className="mt-4">
-        <WrittenReviewsSection
-          reviews={writtenReviews}
-          onUpdate={handleUpdateReview}
-          onDelete={handleDeleteReview}
-        />
+        {writtenContent}
       </TabsContent>
     </Tabs>
   )

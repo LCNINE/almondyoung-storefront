@@ -1,10 +1,8 @@
 import MypageLayout from "@/app/[countryCode]/(mypage)/_components/mypage-layout"
-import { MypageReviewsSkeleton } from "@/components/skeletons/page-skeletons"
 import { siteConfig } from "@/lib/config/site"
 import { getSEOTags } from "@/lib/seo"
 import { WithHeaderLayout } from "@components/layout"
-import { ReviewsTemplate } from "domains/reviews/manage/template/reviews-template"
-import { Suspense } from "react"
+import { ReviewsTemplate } from "@/domains/reviews/manage/template"
 
 export const metadata = getSEOTags({
   title: `${siteConfig.appName} | 리뷰`,
@@ -23,9 +21,7 @@ export default function MyReviewsPage() {
       }}
     >
       <MypageLayout>
-        <Suspense fallback={<MypageReviewsSkeleton />}>
-          <ReviewsTemplate />
-        </Suspense>
+        <ReviewsTemplate />
       </MypageLayout>
     </WithHeaderLayout>
   )

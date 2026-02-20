@@ -13,7 +13,7 @@ import { Button } from "@components/common/ui/button"
 import { Separator } from "@components/common/ui/separator"
 import { Textarea } from "@components/common/ui/textarea"
 import { getThumbnailUrl } from "@/lib/utils/get-thumbnail-url"
-import type { WritableReview, ReviewInfo } from "../types"
+import type { WritableReview, ReviewInfo } from "../../types"
 
 interface ReviewFormCardProps {
   review: WritableReview
@@ -21,9 +21,6 @@ interface ReviewFormCardProps {
   onCancel: () => void
 }
 
-/**
- * 리뷰 작성 폼 카드 컴포넌트
- */
 export const ReviewFormCard = ({
   review,
   onSave,
@@ -39,7 +36,6 @@ export const ReviewFormCard = ({
 
   const handleSaveClick = async () => {
     if (!canSave) return
-
     setIsLoading(true)
     try {
       await onSave({ rating: currentRating, text: currentText })
@@ -53,7 +49,6 @@ export const ReviewFormCard = ({
   return (
     <Card className="border-0 shadow-none">
       <article>
-        {/* 상품 정보 섹션 */}
         <CardHeader className="flex flex-row items-start gap-3 p-4">
           <figure className="relative h-20 w-20 shrink-0 overflow-hidden rounded-md border border-[#F0F0F0]">
             <Image
@@ -89,10 +84,8 @@ export const ReviewFormCard = ({
 
         <Separator className="mx-4 w-auto" />
 
-        {/* 리뷰 작성 섹션 */}
         <CardContent className="p-4">
           <div className="flex flex-col gap-4">
-            {/* 별점 선택 */}
             <div
               className="flex items-center gap-1.5"
               role="radiogroup"
@@ -134,7 +127,6 @@ export const ReviewFormCard = ({
               )}
             </div>
 
-            {/* 리뷰 텍스트 */}
             <Textarea
               value={currentText}
               onChange={(e) => setCurrentText(e.target.value)}
@@ -142,7 +134,6 @@ export const ReviewFormCard = ({
               className="min-h-[120px]"
             />
 
-            {/* 버튼 */}
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={onCancel} disabled={isLoading}>
                 취소

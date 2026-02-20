@@ -1,6 +1,6 @@
 import Image from "next/image"
 import { Button } from "@components/common/ui/button"
-import type { WritableReview } from "../types"
+import type { WritableReview } from "../../types"
 import { getThumbnailUrl } from "@/lib/utils/get-thumbnail-url"
 
 interface ReviewCardWritableProps {
@@ -8,9 +8,6 @@ interface ReviewCardWritableProps {
   onWriteReview: () => void
 }
 
-/**
- * 작성 가능한 리뷰 아이템을 표시하는 카드 컴포넌트
- */
 export const ReviewCardWritable = ({
   review,
   onWriteReview,
@@ -20,7 +17,6 @@ export const ReviewCardWritable = ({
   return (
     <article className="w-full bg-[#FFFFFF]">
       <div className="flex flex-col gap-3 p-4">
-        {/* 상품 정보 섹션 */}
         <section className="flex items-start gap-3">
           <figure className="relative h-24 w-24 shrink-0 overflow-hidden rounded-md border border-[#F0F0F0]">
             <Image
@@ -48,7 +44,6 @@ export const ReviewCardWritable = ({
           </div>
         </section>
 
-        {/* 액션 버튼 섹션 */}
         <section className="flex justify-end">
           <Button
             variant="default"

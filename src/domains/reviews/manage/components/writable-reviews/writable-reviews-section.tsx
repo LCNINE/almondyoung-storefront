@@ -1,8 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import type { WritableReview } from "domains/reviews/manage/types"
-import { createReviewAction } from "../actions/review-actions"
+import type { WritableReview } from "../../types"
+import { createReviewAction } from "../../actions/review-actions"
 import { ReviewBenefitBanner } from "./review-benefit-banner"
 import { ReviewCardWritable } from "./review-card-writable"
 import { ReviewFormCard } from "./review-form-card"
