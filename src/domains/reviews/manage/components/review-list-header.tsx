@@ -25,10 +25,6 @@ export const ReviewListHeader = ({
         <CircleHelp className="h-4 w-4 text-[#999999]" />
       </div>
 
-      {/* [웹퍼블리셔 규칙 #3] 단일 책임:
-        필터 컴포넌트(children)의 구체적인 내용은 알 필요 없이
-        제공된 children을 그대로 렌더링합니다.
-      */}
       {children}
     </header>
   )
