@@ -95,6 +95,7 @@ export function mapStoreProductToCardProps(
   return {
     title: product.title || "",
     id: product.id,
+    handle: product.handle || product.id,
     price: displayPrice,
     originalPrice: basePrice,
     discount,

@@ -207,7 +207,7 @@ export function CategoryBestSection({
                                   return (
                                     <Link
                                       key={product.id}
-                                      href={`/${countryCode}/products/${product.id}`}
+                                      href={`/${countryCode}/products/${product.handle}`}
                                       className="block"
                                     >
                                       <ProductCard>
