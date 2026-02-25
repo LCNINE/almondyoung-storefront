@@ -558,16 +558,16 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
               onValueChange={(v) => setActiveTab(v as Tab)}
               className="w-full"
             >
-              <TabsList className="sticky top-0 z-10 mb-8 flex h-auto w-full rounded-lg border-b bg-white p-0">
+              <TabsList className="sticky top-0 z-10 mb-8 inline-flex h-auto w-full rounded-none border-b border-[#e5e5e5] bg-white p-0">
                 <TabsTrigger
                   value="detail"
-                  className="flex-1 rounded-none border-b-2 border-transparent px-2 py-4 text-xs text-gray-600 shadow-none data-[state=active]:border-blue-500 data-[state=active]:bg-transparent data-[state=active]:text-blue-500 data-[state=active]:shadow-none lg:text-base"
+                  className="flex-1 rounded-none border-b-2 border-transparent bg-transparent px-4 py-3 text-sm font-bold text-[#666666] shadow-none transition-colors focus-visible:ring-0 focus-visible:outline-none data-[state=active]:border-[#f29219] data-[state=active]:bg-transparent data-[state=active]:text-[#f29219] data-[state=active]:shadow-none data-[state=inactive]:hover:text-[#333333] lg:text-base"
                 >
                   상세정보
                 </TabsTrigger>
                 <TabsTrigger
                   value="review"
-                  className="flex-1 rounded-none border-b-2 border-transparent px-2 py-4 text-xs text-gray-600 shadow-none data-[state=active]:border-blue-500 data-[state=active]:bg-transparent data-[state=active]:text-blue-500 data-[state=active]:shadow-none lg:text-base"
+                  className="flex-1 rounded-none border-b-2 border-transparent bg-transparent px-4 py-3 text-sm font-bold text-[#666666] shadow-none transition-colors focus-visible:ring-0 focus-visible:outline-none data-[state=active]:border-[#f29219] data-[state=active]:bg-transparent data-[state=active]:text-[#f29219] data-[state=active]:shadow-none data-[state=inactive]:hover:text-[#333333] lg:text-base"
                 >
                   리뷰
                   {reviewCount > 0 && (
@@ -578,7 +578,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
                 </TabsTrigger>
                 <TabsTrigger
                   value="qna"
-                  className="flex-1 rounded-none border-b-2 border-transparent px-2 py-4 text-xs text-gray-600 shadow-none data-[state=active]:border-blue-500 data-[state=active]:bg-transparent data-[state=active]:text-blue-500 data-[state=active]:shadow-none lg:text-base"
+                  className="flex-1 rounded-none border-b-2 border-transparent bg-transparent px-4 py-3 text-sm font-bold text-[#666666] shadow-none transition-colors focus-visible:ring-0 focus-visible:outline-none data-[state=active]:border-[#f29219] data-[state=active]:bg-transparent data-[state=active]:text-[#f29219] data-[state=active]:shadow-none data-[state=inactive]:hover:text-[#333333] lg:text-base"
                 >
                   Q&A
                   {qnaCount > 0 && (
