@@ -20,8 +20,8 @@ import { useRecentViews } from "@hooks/api/use-recent-views"
 import type { ProductDetail } from "@lib/types/ui/product"
 import type { UserDetail, WishlistItem } from "@lib/types/ui/user"
 import { isProductSoldOut } from "@lib/utils"
-import { useRouter } from "next/navigation"
-import { use, useEffect, useRef, useState, useTransition } from "react"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { use, useCallback, useEffect, useState, useTransition } from "react"
 import { createPortal } from "react-dom"
 import { toast } from "sonner"
 import { ProductBottomBar } from "./components/product-bottom-bar"
@@ -30,8 +30,8 @@ import { ProductDetailInfo } from "./components/product-detail-info"
 import { ProductImageGallery } from "./components/product-image-gallery"
 import { ProductInfoAccordion } from "./components/product-info-accordion"
 import { ProductInfoMobile } from "./components/product-info-mobile"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ProductSidebarPurchase } from "./components/product-sidebar-purchase"
-import { ProductTabs } from "./components/product-tabs"
 import { ProductQnaSection } from "./components"
 // import { Breadcrumb } from "@components/layout/components/breadcrumb"
 // import { ProductCard } from "@lib/types/ui/product"
@@ -62,6 +62,8 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
   const resolvedParams = use(params)
   const { countryCode } = resolvedParams
   const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
   const { isMembershipPricing } = useMembershipPricing()
   const {
     isLoaded,
@@ -69,9 +71,28 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
     isPending: isWishlistPending,
     toggle,
   } = useWishlist()
-  const [activeTab, setActiveTab] = useState<
-    "detail" | "review" | "qna" | "info"
-  >("detail")
+
+  type Tab = "detail" | "review" | "qna"
+  const validTabs: Tab[] = ["detail", "review", "qna"]
+  const tabParam = searchParams.get("tab") as Tab | null
+  const activeTab: Tab =
+    tabParam && validTabs.includes(tabParam) ? tabParam : "detail"
+
+  const setActiveTab = useCallback(
+    (tab: Tab) => {
+      const params = new URLSearchParams(searchParams.toString())
+      if (tab === "detail") {
+        params.delete("tab")
+      } else {
+        params.set("tab", tab)
+      }
+      const query = params.toString()
+      router.replace(`${pathname}${query ? `?${query}` : ""}`, {
+        scroll: false,
+      })
+    },
+    [pathname, router, searchParams]
+  )
   const [mainImage, setMainImage] = useState(
     product?.thumbnails?.[0] || product?.thumbnail || ""
   )
@@ -100,11 +121,6 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
   const [qnaCount, setQnaCount] = useState(0)
 
   const [isPending, startTransition] = useTransition()
-
-  const detailRef = useRef<HTMLDivElement>(null)
-  const reviewRef = useRef<HTMLDivElement>(null)
-  const qnaRef = useRef<HTMLDivElement>(null)
-  const infoRef = useRef<HTMLDivElement>(null)
 
   const { addToCart, isLoading: isAddToCartLoading } = useAddToCart()
 
@@ -143,24 +159,18 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
     )
   }
 
-  const scrollToSection = (tab: typeof activeTab) => {
-    const refs = {
-      detail: detailRef,
-      review: reviewRef,
-      qna: qnaRef,
-      info: infoRef,
-    }
-    refs[tab]?.current?.scrollIntoView({ behavior: "smooth", block: "start" })
-  }
-
   const resolvedWishlisted = isLoaded
     ? isWishlisted(product?.id || "")
     : !!wishlist
 
   const handleWishlistToggle = (productId: string) => {
     if (!user) {
-      toast.error(
-        "로그인이 필요한 기능입니다. 먼저 로그인 후 다시 시도해 주세요."
+      const pathWithoutCountry = window.location.pathname.replace(
+        `/${countryCode}`,
+        ""
+      )
+      router.push(
+        `/${countryCode}/login?redirect_to=${encodeURIComponent(pathWithoutCountry + window.location.search)}`
       )
       return
     }
@@ -496,8 +506,12 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
 
   const handleLoginConfirm = () => {
     setShowLoginDialog(false)
+    const pathWithoutCountry = window.location.pathname.replace(
+      `/${countryCode}`,
+      ""
+    )
     router.push(
-      `/${countryCode}/login?redirect_to=${encodeURIComponent(window.location.pathname)}`
+      `/${countryCode}/login?redirect_to=${encodeURIComponent(pathWithoutCountry + window.location.search)}`
     )
   }
 
@@ -538,51 +552,70 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
               itemsPerView={{ mobile: 1.2, tablet: 2.5, desktop: 4 }}
             /> */}
 
-            {/* 탭 네비게이션 */}
-            <ProductTabs
-              activeTab={activeTab}
-              reviewCount={reviewCount}
-              qnaCount={qnaCount}
-              onTabChange={(tab) => {
-                setActiveTab(tab)
-                scrollToSection(tab)
-              }}
-            />
-
-            {/* 상세정보 */}
-            <div ref={detailRef} id="detail-panel" role="tabpanel">
-              <ProductDetailInfo
-                productInfo={product.productInfo || {}}
-                descriptionHtml={product.descriptionHtml}
-                detailImages={product.detailImages || []}
-                productName={product.name}
-              />
-            </div>
-
-            {/* 리뷰 */}
-            <div
-              ref={reviewRef}
-              id="review-panel"
-              role="tabpanel"
-              className="mb-8 rounded-lg bg-white px-4 py-6 lg:px-6"
+            {/* 탭 네비게이션 + 콘텐츠 */}
+            <Tabs
+              value={activeTab}
+              onValueChange={(v) => setActiveTab(v as Tab)}
+              className="w-full"
             >
-              <ReviewDetailCardList
-                productId={product.pimMasterId || product.id}
-                totalReviews={0}
-                averageRating={0}
-                onTotalChange={setReviewCount}
-                onAverageRatingChange={setAverageRating}
-              />
-            </div>
+              <TabsList className="sticky top-0 z-10 mb-8 flex h-auto w-full rounded-lg border-b bg-white p-0">
+                <TabsTrigger
+                  value="detail"
+                  className="flex-1 rounded-none border-b-2 border-transparent px-2 py-4 text-xs text-gray-600 shadow-none data-[state=active]:border-blue-500 data-[state=active]:bg-transparent data-[state=active]:text-blue-500 data-[state=active]:shadow-none lg:text-base"
+                >
+                  상세정보
+                </TabsTrigger>
+                <TabsTrigger
+                  value="review"
+                  className="flex-1 rounded-none border-b-2 border-transparent px-2 py-4 text-xs text-gray-600 shadow-none data-[state=active]:border-blue-500 data-[state=active]:bg-transparent data-[state=active]:text-blue-500 data-[state=active]:shadow-none lg:text-base"
+                >
+                  리뷰
+                  {reviewCount > 0 && (
+                    <span className="ml-0.5 text-[0.65em] tabular-nums opacity-80">
+                      {reviewCount.toLocaleString()}
+                    </span>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger
+                  value="qna"
+                  className="flex-1 rounded-none border-b-2 border-transparent px-2 py-4 text-xs text-gray-600 shadow-none data-[state=active]:border-blue-500 data-[state=active]:bg-transparent data-[state=active]:text-blue-500 data-[state=active]:shadow-none lg:text-base"
+                >
+                  Q&A
+                  {qnaCount > 0 && (
+                    <span className="ml-0.5 text-[0.65em] tabular-nums opacity-80">
+                      {qnaCount.toLocaleString()}
+                    </span>
+                  )}
+                </TabsTrigger>
+              </TabsList>
 
-            <div ref={qnaRef} id="qna-panel" role="tabpanel">
-              <ProductQnaSection />
-            </div>
+              <TabsContent value="detail">
+                <ProductDetailInfo
+                  productInfo={product.productInfo || {}}
+                  descriptionHtml={product.descriptionHtml}
+                  detailImages={product.detailImages || []}
+                  productName={product.name}
+                />
+                <ProductInfoAccordion />
+              </TabsContent>
 
-            {/* 구매/반품 정보 */}
-            <div ref={infoRef} id="info-panel" role="tabpanel">
-              <ProductInfoAccordion />
-            </div>
+              <TabsContent
+                value="review"
+                className="mb-8 rounded-lg bg-white px-4 py-6 lg:px-6"
+              >
+                <ReviewDetailCardList
+                  productId={product.pimMasterId || product.id}
+                  totalReviews={0}
+                  averageRating={0}
+                  onTotalChange={setReviewCount}
+                  onAverageRatingChange={setAverageRating}
+                />
+              </TabsContent>
+
+              <TabsContent value="qna">
+                <ProductQnaSection />
+              </TabsContent>
+            </Tabs>
           </main>
 
           {/* 사이드바 (데스크탑)*/}
