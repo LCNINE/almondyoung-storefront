@@ -11,6 +11,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { siteConfig } from "@/lib/config/site"
+import { getPathWithoutCountry } from "@/lib/utils/get-path-without-country"
 import { useWishlist } from "@/contexts/wishlist-context"
 import { getQuestionsByProductId } from "@/lib/api/ugc"
 import { ReviewDetailCardList } from "@/domains/reviews/details"
@@ -165,12 +167,9 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
 
   const handleWishlistToggle = (productId: string) => {
     if (!user) {
-      const pathWithoutCountry = window.location.pathname.replace(
-        `/${countryCode}`,
-        ""
-      )
+      const path = getPathWithoutCountry(countryCode)
       router.push(
-        `/${countryCode}/login?redirect_to=${encodeURIComponent(pathWithoutCountry + window.location.search)}`
+        `/${countryCode}${siteConfig.auth.loginUrl}?redirect_to=${encodeURIComponent(path)}`
       )
       return
     }
@@ -506,12 +505,9 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
 
   const handleLoginConfirm = () => {
     setShowLoginDialog(false)
-    const pathWithoutCountry = window.location.pathname.replace(
-      `/${countryCode}`,
-      ""
-    )
+    const path = getPathWithoutCountry(countryCode)
     router.push(
-      `/${countryCode}/login?redirect_to=${encodeURIComponent(pathWithoutCountry + window.location.search)}`
+      `/${countryCode}${siteConfig.auth.loginUrl}?redirect_to=${encodeURIComponent(path)}`
     )
   }
 
@@ -604,6 +600,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
                 className="mb-8 rounded-lg bg-white px-4 py-6 lg:px-6"
               >
                 <ReviewDetailCardList
+                  countryCode={countryCode}
                   productId={product.pimMasterId || product.id}
                   totalReviews={0}
                   averageRating={0}
