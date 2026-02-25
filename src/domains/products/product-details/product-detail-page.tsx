@@ -1,33 +1,27 @@
 "use client"
 
-import { CartSuccessModal } from "@/components/modals/cart-success-modal"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
 import { siteConfig } from "@/lib/config/site"
 import { getPathWithoutCountry } from "@/lib/utils/get-path-without-country"
 import { useWishlist } from "@/contexts/wishlist-context"
 import { getQuestionsByProductId } from "@/lib/api/ugc"
-import { ReviewDetailCardList } from "@/domains/reviews/details"
 import { useMembershipPricing } from "@/hooks/use-membership-pricing"
 import { useAddToCart } from "@hooks/api/use-add-to-cart"
 import { useRecentViews } from "@hooks/api/use-recent-views"
 import type { ProductDetail } from "@lib/types/ui/product"
 import type { UserDetail, WishlistItem } from "@lib/types/ui/user"
 import { isProductSoldOut } from "@lib/utils"
+import dynamic from "next/dynamic"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { use, useCallback, useEffect, useState, useTransition } from "react"
+import {
+  use,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useTransition,
+} from "react"
 import { createPortal } from "react-dom"
 import { toast } from "sonner"
-import { ProductBottomBar } from "./components/product-bottom-bar"
-import { ProductBottomSheet } from "./components/product-bottom-sheet"
 import { ProductDetailInfo } from "./components/product-detail-info"
 import { ProductImageGallery } from "./components/product-image-gallery"
 import { ProductInfoAccordion } from "./components/product-info-accordion"
@@ -35,6 +29,61 @@ import { ProductInfoMobile } from "./components/product-info-mobile"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ProductSidebarPurchase } from "./components/product-sidebar-purchase"
 import { ProductQnaSection } from "./components"
+
+// 초기 렌더에 필요 없는 컴포넌트 동적 임포트
+const CartSuccessModal = dynamic(
+  () =>
+    import("@/components/modals/cart-success-modal").then(
+      (mod) => mod.CartSuccessModal
+    ),
+  { ssr: false }
+)
+const AlertDialog = dynamic(
+  () => import("@/components/ui/alert-dialog").then((mod) => mod.AlertDialog),
+  { ssr: false }
+)
+const AlertDialogAction = dynamic(() =>
+  import("@/components/ui/alert-dialog").then((mod) => mod.AlertDialogAction)
+)
+const AlertDialogCancel = dynamic(() =>
+  import("@/components/ui/alert-dialog").then((mod) => mod.AlertDialogCancel)
+)
+const AlertDialogContent = dynamic(() =>
+  import("@/components/ui/alert-dialog").then((mod) => mod.AlertDialogContent)
+)
+const AlertDialogDescription = dynamic(() =>
+  import("@/components/ui/alert-dialog").then(
+    (mod) => mod.AlertDialogDescription
+  )
+)
+const AlertDialogFooter = dynamic(() =>
+  import("@/components/ui/alert-dialog").then((mod) => mod.AlertDialogFooter)
+)
+const AlertDialogHeader = dynamic(() =>
+  import("@/components/ui/alert-dialog").then((mod) => mod.AlertDialogHeader)
+)
+const AlertDialogTitle = dynamic(() =>
+  import("@/components/ui/alert-dialog").then((mod) => mod.AlertDialogTitle)
+)
+const ReviewDetailCardList = dynamic(
+  () =>
+    import("@/domains/reviews/details").then((mod) => mod.ReviewDetailCardList),
+  { ssr: false }
+)
+const ProductBottomBar = dynamic(
+  () =>
+    import("./components/product-bottom-bar").then(
+      (mod) => mod.ProductBottomBar
+    ),
+  { ssr: false }
+)
+const ProductBottomSheet = dynamic(
+  () =>
+    import("./components/product-bottom-sheet").then(
+      (mod) => mod.ProductBottomSheet
+    ),
+  { ssr: false }
+)
 // import { Breadcrumb } from "@components/layout/components/breadcrumb"
 // import { ProductCard } from "@lib/types/ui/product"
 // import { ProductRecommandSlider } from "@components/products/product-recommand-slider"
@@ -77,11 +126,13 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
   type Tab = "detail" | "review" | "qna"
   const validTabs: Tab[] = ["detail", "review", "qna"]
   const tabParam = searchParams.get("tab") as Tab | null
-  const activeTab: Tab =
+  const initialTab: Tab =
     tabParam && validTabs.includes(tabParam) ? tabParam : "detail"
+  const [activeTab, setActiveTabState] = useState<Tab>(initialTab)
 
   const setActiveTab = useCallback(
     (tab: Tab) => {
+      setActiveTabState(tab)
       const params = new URLSearchParams(searchParams.toString())
       if (tab === "detail") {
         params.delete("tab")
@@ -89,11 +140,13 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
         params.set("tab", tab)
       }
       const query = params.toString()
-      router.replace(`${pathname}${query ? `?${query}` : ""}`, {
-        scroll: false,
-      })
+      window.history.replaceState(
+        null,
+        "",
+        `${pathname}${query ? `?${query}` : ""}`
+      )
     },
-    [pathname, router, searchParams]
+    [pathname, searchParams]
   )
   const [mainImage, setMainImage] = useState(
     product?.thumbnails?.[0] || product?.thumbnail || ""
@@ -203,7 +256,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
   }
 
   // 선택된 옵션을 기반으로 각 옵션 값의 품절 여부 계산
-  const getOptionsWithSoldOut = () => {
+  const optionsWithSoldOut = useMemo(() => {
     const options = product.options ?? []
     const optionOrder = options.map((o) => o.label)
 
@@ -278,9 +331,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
         return { ...value, isSoldOut: !hasAnyStock }
       }),
     }))
-  }
-
-  const optionsWithSoldOut = getOptionsWithSoldOut()
+  }, [product.options, product.skuIndex, product.skuStock, selectedOptions])
 
   const getVariantPrice = (variantId?: string) => {
     const resolvePrice = (base?: number, actual?: number) => {
