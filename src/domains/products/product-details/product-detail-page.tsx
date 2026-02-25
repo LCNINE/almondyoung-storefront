@@ -176,14 +176,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
 
     startTransition(async () => {
       try {
-        const action = await toggle(productId)
-        if (action) {
-          toast.success(
-            action === "removed"
-              ? "찜 목록에서 상품이 삭제되었습니다."
-              : "상품이 찜 목록에 추가되었습니다."
-          )
-        }
+        await toggle(productId)
       } catch (error) {
         console.error("찜하기 실패", error)
         toast.error("찜 처리 중 오류가 발생했습니다. 다시 시도해 주세요.")
