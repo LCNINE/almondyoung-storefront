@@ -2,7 +2,7 @@ import type { StoreProductCategoryTree } from "@/lib/types/medusa-category"
 import { Suspense } from "react"
 import { HeroBanner } from "../components/banner/hero-banner"
 import { LoginPromptBanner } from "../components/banner/login-prompt-banner"
-import { CategoryBestSectionWrapper } from "../components/sections/category-best"
+import { CategoryBestSectionContainer } from "../components/sections/category-best"
 import { ProductListSection } from "../components/shared/product-list-section"
 import { UserDetail } from "@/lib/types/ui/user"
 import { CategoryBestSectionSkeleton } from "@/components/skeletons/page-skeletons"
@@ -225,7 +225,7 @@ export async function HomeLogoutTemplate({
       {/* 카테고리별 제품 섹션  */}
       <ProductListSection>
         <Suspense fallback={<CategoryBestSectionSkeleton />}>
-          <CategoryBestSectionWrapper
+          <CategoryBestSectionContainer
             initialCategories={initialCategories}
             regionId={regionId}
           />
