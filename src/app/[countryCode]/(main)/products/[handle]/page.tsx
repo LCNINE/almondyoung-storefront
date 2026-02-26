@@ -62,8 +62,6 @@ export default async function Page(props: Props) {
     notFound()
   }
 
-  console.log("pricedProduct:", pricedProduct)
-
   return (
     <div className="md:bg-muted/50 min-h-screen bg-white">
       <ProductTemplate

@@ -47,6 +47,13 @@ interface ToggleReactionResponseDto {
   count: number
 }
 
+interface RatingSummaryResponseDto {
+  productId: string
+  averageRating: number
+  totalCount: number
+  ratingDistribution: Record<number, number>
+}
+
 interface CreateCommentDto {
   content: string
 }
@@ -118,6 +125,7 @@ export type {
   ReviewListQueryDto,
   ToggleReactionDto,
   ToggleReactionResponseDto,
+  RatingSummaryResponseDto,
   CreateCommentDto,
   CommentResponseDto,
   QuestionResponseDto,

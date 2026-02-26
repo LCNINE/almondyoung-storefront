@@ -43,8 +43,9 @@ export function ProductTemplate({
           <SideBar
             brand={(product.metadata?.brand as string) ?? ""}
             productName={product.title ?? ""}
-            productId={product.id}
+            product={product}
             countryCode={countryCode}
+            handle={product.handle}
           />
         </div>
       </div>

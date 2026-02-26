@@ -14,12 +14,14 @@ interface Props {
   productId: string
   isWishlisted: boolean
   countryCode: string
+  disabled?: boolean
 }
 
 export function WishlistButton({
   productId,
   isWishlisted,
   countryCode,
+  disabled,
 }: Props) {
   const { user } = useUser()
   const router = useRouter()
@@ -52,7 +54,7 @@ export function WishlistButton({
     <Button
       variant="ghost"
       onClick={handleToggle}
-      disabled={isPending}
+      disabled={disabled || isPending}
       aria-label="관심 상품 등록"
       className="cursor-pointer hover:bg-transparent"
     >

@@ -2,7 +2,7 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { usePathname, useSearchParams } from "next/navigation"
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 export type SectionTab = "detail" | "review" | "qna"
 
@@ -30,6 +30,8 @@ export function SectionTabs({
     tabParam && VALID_TABS.includes(tabParam) ? tabParam : "detail"
   const [activeTab, setActiveTabState] = useState<SectionTab>(initialTab)
 
+  const tabsRef = useRef<HTMLDivElement>(null)
+
   const setActiveTab = useCallback(
     (tab: SectionTab) => {
       setActiveTabState(tab)
@@ -49,8 +51,21 @@ export function SectionTabs({
     [pathname, searchParams]
   )
 
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const tab = (e as CustomEvent<SectionTab>).detail
+      if (VALID_TABS.includes(tab)) {
+        setActiveTab(tab)
+        tabsRef.current?.scrollIntoView({ behavior: "smooth" })
+      }
+    }
+    window.addEventListener("navigate-tab", handler)
+    return () => window.removeEventListener("navigate-tab", handler)
+  }, [setActiveTab])
+
   return (
     <Tabs
+      ref={tabsRef}
       value={activeTab}
       onValueChange={(v) => setActiveTab(v as SectionTab)}
       className="w-full"
