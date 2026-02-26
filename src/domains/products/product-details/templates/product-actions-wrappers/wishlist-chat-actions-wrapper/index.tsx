@@ -7,12 +7,19 @@ interface Props {
   countryCode: string
 }
 
-export async function WishlistChatActionsWrapper({ productId, countryCode }: Props) {
-  const wishlist = await getWishlistByProductId(productId)
+export async function WishlistChatActionsWrapper({
+  productId,
+  countryCode,
+}: Props) {
+  const wishlist = await getWishlistByProductId(productId).catch(() => null)
 
   return (
     <div className="flex items-center gap-2">
-      <WishlistButton productId={productId} isWishlisted={!!wishlist} countryCode={countryCode} />
+      <WishlistButton
+        productId={productId}
+        isWishlisted={!!wishlist}
+        countryCode={countryCode}
+      />
       {/* <ChatButton /> */}
     </div>
   )

@@ -98,14 +98,6 @@ export function CategoryBestSection({
     startTransition(async () => {
       const nextProducts = await getCategoryBestProducts(activeTab, regionId)
 
-      if (process.env.NODE_ENV !== "production") {
-        console.log(
-          "[Home][CategoryBest] products",
-          nextProducts.map((product) => ({
-            ...product,
-          }))
-        )
-      }
       setProducts(nextProducts)
     })
   }, [activeTab, regionId])
