@@ -5,7 +5,6 @@ export default async function PreviewPrice({ price }: { price: VariantPrice }) {
   if (!price) {
     return null
   }
-todo: 여기 스타일 
   return (
     <>
       {price.price_type === "sale" && <>{price.original_price}</>}
