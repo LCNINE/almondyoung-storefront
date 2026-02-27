@@ -6,6 +6,7 @@ import { RatingActionsWrapper } from "../../templates/product-actions-wrappers/r
 import { WishlistChatActionsWrapper } from "../../templates/product-actions-wrappers/wishlist-chat-actions-wrapper"
 import { WishlistButton } from "../actions/wishlist-button"
 
+// todo: 임시
 function RatingSkeleton() {
   return (
     <div className="flex animate-pulse items-center gap-1.5 py-1">

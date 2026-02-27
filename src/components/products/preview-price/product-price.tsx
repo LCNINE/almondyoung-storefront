@@ -1,6 +1,4 @@
 import { VariantPrice } from "@/lib/types/common/price"
-import { cn } from "@/lib/utils"
-import { MembershipTagIcon } from "@/icons/membership-tag-icon"
 import { ProductMembershipBadge } from "../prodcut-card/parts/product-membership-badge"
 
 interface Props {
@@ -13,23 +11,34 @@ export default async function ProductPrice({ price, membershipPrice }: Props) {
     return null
   }
 
-  return (
-    <>
-      <div>원가 {price.original_price}</div>
-    </>
+  const membershipDiscountRate = Math.round(
+    ((price.original_price_number - membershipPrice) /
+      price.original_price_number) *
+      100
   )
 
-  // return (
-  //   <>
-  //     <div>원가 {price.original_price}</div>
-  //     <div
-  //       className={cn("text-ui-fg-muted", {
-  //         "text-ui-fg-interactive": price.price_type === "sale",
-  //       })}
-  //       data-testid="price"
-  //     >
-  //       {price.calculated_price}
-  //     </div>
-  //   </>
-  // )
+  const membershipSavings = price.original_price_number - membershipPrice
+
+  return (
+    <>
+      <div className="flex flex-col gap-1">
+        <div className="flex items-center gap-2">
+          <ProductMembershipBadge size="md" label="멤버십할인가" />
+          {membershipDiscountRate > 0 && (
+            <span className="inline-block text-sm font-semibold text-[#F29219]">
+              {membershipDiscountRate}% OFF
+            </span>
+          )}
+          <span className="text-lg font-bold text-[#F29219]">
+            {membershipPrice?.toLocaleString()}원
+          </span>
+        </div>
+
+        {/* todo: 멤버십인유저는 이거 안보이게 해야함 */}
+        <p className="text-xs font-medium text-[#F29219]">
+          멤버십 가입 시 {membershipSavings.toLocaleString()}원 절약
+        </p>
+      </div>
+    </>
+  )
 }

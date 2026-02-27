@@ -9,7 +9,7 @@ import { useAddToCart } from "@hooks/api/use-add-to-cart"
 import { useRecentViews } from "@hooks/api/use-recent-views"
 import type { ProductDetail } from "@lib/types/ui/product"
 import type { UserDetail, WishlistItem } from "@lib/types/ui/user"
-import { isProductSoldOut } from "@lib/utils"
+import { isProductSoldOut } from "@/lib/utils/is-product-sold-out"
 import dynamic from "next/dynamic"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import {
