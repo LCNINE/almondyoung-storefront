@@ -37,6 +37,8 @@ export function SideBar({
   countryCode,
   handle,
 }: Props) {
+  // todo: 현재 로그인한 사용자가 멤버십인지 유무 파악하는 로직 필요
+
   // 실제 상품 가격, 주석은 지울 예정
   const { cheapestPrice } = getProductPrice({
     product,

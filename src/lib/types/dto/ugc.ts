@@ -69,6 +69,8 @@ interface CommentResponseDto {
 
 // ─── Q&A ───
 
+type QuestionStatus = "active" | "answered" | "deleted"
+
 interface QuestionResponseDto {
   id: string
   userId: string
@@ -76,7 +78,7 @@ interface QuestionResponseDto {
   title: string
   content: string
   isSecret: boolean
-  status: string
+  status: QuestionStatus
   mediaFileIds: string[]
   answer: AnswerResponseDto | null
   createdAt: string
@@ -134,4 +136,5 @@ export type {
   UpdateQuestionDto,
   QuestionListQueryDto,
   CreateAnswerDto,
+  QuestionStatus,
 }
