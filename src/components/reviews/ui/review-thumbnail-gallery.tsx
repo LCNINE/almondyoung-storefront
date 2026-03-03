@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/carousel"
 import { getThumbnailUrl } from "@/lib/utils/get-thumbnail-url"
 import { useState } from "react"
-import { ReviewImageModal } from "../ui"
+import { ReviewImageModal } from "."
 
 type Props = {
   thumbnails: string[]

@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { ReviewSectionSkeleton } from "@/components/skeletons/review-section-skeleton"
+import { ProductReviewSkeleton } from "@/components/skeletons/product-detail-skeletons"
 import { getReviewsByProductId } from "@/lib/api/ugc"
 import { ReviewRatingFilter, ReviewSortOption } from "@/lib/types/common/filter"
 import { ReviewDetail } from "@/lib/types/ui/ugc"
@@ -42,7 +42,7 @@ const RATING_FILTERS: { label: string; value: ReviewRatingFilter | "all" }[] = [
   { label: "1점", value: "1" },
 ]
 
-export function ReviewDetailCardList2({
+export function ReviewDetailCardList({
   countryCode,
   productId,
   totalReviews,
@@ -152,7 +152,7 @@ export function ReviewDetailCardList2({
 
       {/* 리뷰 목록 */}
       {isLoading ? (
-        <ReviewSectionSkeleton />
+        <ProductReviewSkeleton />
       ) : reviews.length === 0 ? (
         <div className="py-12 text-center text-gray-500">
           {selectedFilter === "all"

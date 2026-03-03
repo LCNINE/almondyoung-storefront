@@ -6,9 +6,13 @@ import { ImageGallery } from "../components2/image-gallery"
 import { ProductInfoAccordion } from "../components2/product-detail-info/product-info-accordion"
 import { SectionTabPanel } from "../components2/section-nav"
 import { SideBar } from "../components2/side-bar"
-import { ReviewSectionSkeleton } from "@/components/skeletons/review-section-skeleton"
-import { ProductDetailInfoSkeleton } from "../components2/skeleton"
+import {
+  ProductDetailInfoSkeleton,
+  ProductQnaSkeleton,
+  ProductReviewSkeleton,
+} from "@/components/skeletons/product-detail-skeletons"
 import { ProductDetailInfoWrapper } from "./product-actions-wrappers/product-detail-info-wrapper"
+import { QnaSectionWrapper } from "./product-actions-wrappers/qna-section-wrapper"
 import { ReviewSectionWrapper } from "./product-actions-wrappers/review-section-wrapper"
 import { SectionTabsWrapper } from "./product-actions-wrappers/section-tabs-wrapper"
 
@@ -28,7 +32,7 @@ export function ProductTemplate({
   }
 
   return (
-    <div className="lg:bg-muted/50 min-h-screen bg-white">
+    <div className="min-h-screen bg-white">
       <div className="mx-auto max-w-[1360px] px-[15px] lg:px-[40px]">
         <div className="py-2 lg:flex lg:gap-4">
           {/* 메인 콘텐츠 */}
@@ -56,7 +60,7 @@ export function ProductTemplate({
                 <ErrorBoundary
                   fallback={<div>리뷰를 불러오지 못했습니다.</div>}
                 >
-                  <Suspense fallback={<ReviewSectionSkeleton />}>
+                  <Suspense fallback={<ProductReviewSkeleton />}>
                     <ReviewSectionWrapper
                       productId={product.metadata?.pimMasterId as string}
                       countryCode={countryCode}
@@ -67,7 +71,11 @@ export function ProductTemplate({
 
               {/* Q&A Tab Panel */}
               <SectionTabPanel value="qna">
-                <div>Q&A 콘텐츠</div>
+                <ErrorBoundary fallback={<div>Q&A를 불러오지 못했습니다.</div>}>
+                  <Suspense fallback={<ProductQnaSkeleton />}>
+                    <QnaSectionWrapper product={product} />
+                  </Suspense>
+                </ErrorBoundary>
               </SectionTabPanel>
             </SectionTabsWrapper>
           </main>

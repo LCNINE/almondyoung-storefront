@@ -1,4 +1,4 @@
-import { ReviewDetailCardList2 } from "@/domains/reviews/details/review-detail-card-list2"
+import { ReviewDetailCardList } from "@/components/reviews/details/review-detail-card-list"
 import { getRatingSummary, getReviewsByProductId } from "@/lib/api/ugc/reviews"
 import type { ReviewSortOption } from "@/lib/types/common/filter"
 import type { RatingSummaryResponseDto } from "@/lib/types/dto/ugc"
@@ -28,7 +28,7 @@ export async function ReviewSectionWrapper({ productId, countryCode }: Props) {
   )
 
   return (
-    <ReviewDetailCardList2
+    <ReviewDetailCardList
       countryCode={countryCode}
       productId={productId}
       totalReviews={reviewResult.total ?? 0}
