@@ -18,8 +18,8 @@ interface SectionTabsProps {
 }
 
 export function SectionTabs({
-  reviewCount = 0,
-  qnaCount = 0,
+  reviewCount,
+  qnaCount,
   children,
 }: SectionTabsProps) {
   const pathname = usePathname()
@@ -76,7 +76,7 @@ export function SectionTabs({
         </TabsTrigger>
         <TabsTrigger value="review" className={triggerClassName}>
           리뷰
-          {reviewCount > 0 && (
+          {reviewCount && reviewCount > 0 && (
             <span className="ml-0.5 text-[0.65em] tabular-nums opacity-80">
               {reviewCount.toLocaleString()}
             </span>
@@ -84,7 +84,7 @@ export function SectionTabs({
         </TabsTrigger>
         <TabsTrigger value="qna" className={triggerClassName}>
           Q&A
-          {qnaCount > 0 && (
+          {qnaCount && qnaCount > 0 && (
             <span className="ml-0.5 text-[0.65em] tabular-nums opacity-80">
               {qnaCount.toLocaleString()}
             </span>

@@ -5,22 +5,30 @@ import Image from "next/image"
 import { useState } from "react"
 import { cn } from "@lib/utils"
 import { Button } from "@/components/ui/button"
-import { ProductInfo } from "../templates/product-actions-wrappers/product-detail-info-wrapper"
-import { HttpTypes } from "@medusajs/types"
+
+type ProductInfo = {
+  productNumber?: string
+  weight?: string
+  dimensions?: string
+  origin?: string
+  capacity?: string
+  expirationDate?: string
+  manufacturer?: string
+  brand?: string
+  material?: string
+  usage?: string
+  [key: string]: string | undefined
+}
 
 type Props = {
   productInfo: ProductInfo
   descriptionHtml?: string
-  detailImages: HttpTypes.StoreProductImage[] | (string | null)[]
+  detailImages: string[]
   productName: string
 }
 
 const COLLAPSED_HEIGHT = 500
 
-/**
- * @description 상품 상세 정보 섹션
- * 시맨틱: <article>과 <dl> 사용
- */
 export function ProductDetailInfo({
   productInfo,
   descriptionHtml,
@@ -116,7 +124,7 @@ export function ProductDetailInfo({
 
         {/* 그라데이션 오버레이 (접혀있을 때) */}
         {!isExpanded && (
-          <div className="pointer-events-none absolute right-0 bottom-0 left-0 h-24 bg-gradient-to-t from-white to-transparent" />
+          <div className="pointer-events-none absolute right-0 bottom-0 left-0 h-24 bg-linear-to-t from-white to-transparent" />
         )}
       </div>
 

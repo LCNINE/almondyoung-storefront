@@ -1,5 +1,4 @@
 import { ProductTemplate } from "@/domains/products/product-details/templates"
-import { getCurrentSubscription } from "@/lib/api/membership"
 import { listProducts } from "@lib/api/medusa/products"
 import { getRegion } from "@lib/api/medusa/regions"
 import { Metadata } from "next"
@@ -52,15 +51,6 @@ export default async function Page(props: Props) {
     countryCode: params.countryCode,
     queryParams: { handle: params.handle },
   }).then(({ response }) => response.products[0])
-
-  // const pimDetail = await getProductDetailByMasterId(
-  //   pricedProduct?.metadata?.pimMasterId as string
-  // )
-
-  // console.log("pimDetail:", pimDetail)
-
-  const subscription = await getCurrentSubscription().catch(() => null)
-  console.log("subscription:", subscription)
 
   if (!pricedProduct) {
     notFound()

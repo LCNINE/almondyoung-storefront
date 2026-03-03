@@ -1,8 +1,16 @@
+import { ErrorBoundary } from "@/components/shared/error-boundary"
 import { HttpTypes } from "@medusajs/types"
 import { notFound } from "next/navigation"
+import { Suspense } from "react"
 import { ImageGallery } from "../components2/image-gallery"
-import { SectionTabPanel, SectionTabs } from "../components2/section-nav"
+import { ProductInfoAccordion } from "../components2/product-detail-info/product-info-accordion"
+import { SectionTabPanel } from "../components2/section-nav"
 import { SideBar } from "../components2/side-bar"
+import { ReviewSectionSkeleton } from "@/components/skeletons/review-section-skeleton"
+import { ProductDetailInfoSkeleton } from "../components2/skeleton"
+import { ProductDetailInfoWrapper } from "./product-actions-wrappers/product-detail-info-wrapper"
+import { ReviewSectionWrapper } from "./product-actions-wrappers/review-section-wrapper"
+import { SectionTabsWrapper } from "./product-actions-wrappers/section-tabs-wrapper"
 
 type ProductTemplateProps = {
   product: HttpTypes.StoreProduct
@@ -27,17 +35,41 @@ export function ProductTemplate({
           <main className="w-full min-w-0 flex-1 pb-24 lg:pb-0">
             <ImageGallery product={product} />
 
-            <SectionTabs>
+            <SectionTabsWrapper
+              productId={product.metadata?.pimMasterId as string}
+            >
+              {/* 상품 상세정보 Tab Panel */}
               <SectionTabPanel value="detail">
-                <div>상세정보 콘텐츠</div>
+                <ErrorBoundary
+                  fallback={<div>상품 정보를 불러오지 못했습니다.</div>}
+                >
+                  <Suspense fallback={<ProductDetailInfoSkeleton />}>
+                    <ProductDetailInfoWrapper pricedProduct={product} />
+                  </Suspense>
+                </ErrorBoundary>
+
+                <ProductInfoAccordion />
               </SectionTabPanel>
+
+              {/* 리뷰 Tab Panel */}
               <SectionTabPanel value="review">
-                <div>리뷰 콘텐츠</div>
+                <ErrorBoundary
+                  fallback={<div>리뷰를 불러오지 못했습니다.</div>}
+                >
+                  <Suspense fallback={<ReviewSectionSkeleton />}>
+                    <ReviewSectionWrapper
+                      productId={product.metadata?.pimMasterId as string}
+                      countryCode={countryCode}
+                    />
+                  </Suspense>
+                </ErrorBoundary>
               </SectionTabPanel>
+
+              {/* Q&A Tab Panel */}
               <SectionTabPanel value="qna">
                 <div>Q&A 콘텐츠</div>
               </SectionTabPanel>
-            </SectionTabs>
+            </SectionTabsWrapper>
           </main>
 
           <SideBar
