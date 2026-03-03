@@ -1,6 +1,10 @@
 import { getRatingSummary } from "@/lib/api/ugc/reviews"
-import { RatingSummaryResponseDto } from "@/lib/types/dto/ugc"
+import {
+  QnaSummaryResponseDto,
+  RatingSummaryResponseDto,
+} from "@/lib/types/dto/ugc"
 import { SectionTabs } from "../../../components2/section-nav"
+import { getQnaSummary } from "@/lib/api/ugc"
 
 interface Props {
   productId: string
@@ -12,8 +16,15 @@ export async function SectionTabsWrapper({ productId, children }: Props) {
     productId
   ).catch(() => null)
 
+  const questionSummary: QnaSummaryResponseDto | null = await getQnaSummary(
+    productId
+  ).catch(() => null)
+
   return (
-    <SectionTabs reviewCount={ratingSummary?.totalCount ?? 0}>
+    <SectionTabs
+      reviewCount={ratingSummary?.totalCount ?? 0}
+      qnaCount={questionSummary?.totalCount ?? 0}
+    >
       {children}
     </SectionTabs>
   )

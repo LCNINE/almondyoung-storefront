@@ -4,9 +4,14 @@ import { SharedPagination } from "@/components/shared/pagination"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { ProductQnaSkeleton } from "@/components/skeletons/product-detail-skeletons"
-import { getQuestionsByProductId } from "@/lib/api/ugc/qna"
+import { deleteQuestion, getQuestionsByProductId } from "@/lib/api/ugc/qna"
 import type { QuestionResponseDto } from "@/lib/types/dto/ugc"
-import { useCallback, useState } from "react"
+import { useUser } from "@/contexts/user-context"
+import { siteConfig } from "@/lib/config/site"
+import { getPathWithoutCountry } from "@/lib/utils/get-path-without-country"
+import { useParams, useRouter } from "next/navigation"
+import { useCallback, useState, useTransition } from "react"
+import { toast } from "sonner"
 import { QnaCard } from "./qna-card"
 import { QnaInquiryDialog } from "./qna-inquiry-dialog"
 
@@ -27,6 +32,10 @@ export function QnaList({
   totalQuestions,
   initialQuestions,
 }: Props) {
+  const { user } = useUser()
+  const router = useRouter()
+  const { countryCode } = useParams()
+
   const [questions, setQuestions] =
     useState<QuestionResponseDto[]>(initialQuestions)
   const [isLoading, setIsLoading] = useState(false)
@@ -34,6 +43,10 @@ export function QnaList({
   const [total, setTotal] = useState(totalQuestions)
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [isInquiryOpen, setIsInquiryOpen] = useState(false)
+  const [editQuestion, setEditQuestion] = useState<
+    QuestionResponseDto | undefined
+  >(undefined)
+  const [isDeleting, startDeleteTransition] = useTransition()
 
   const totalPages = Math.ceil(total / ITEMS_PER_PAGE)
 
@@ -72,6 +85,35 @@ export function QnaList({
     setExpandedId((prev) => (prev === id ? null : id))
   }
 
+  const handleEdit = (question: QuestionResponseDto) => {
+    setEditQuestion(question)
+    setIsInquiryOpen(true)
+  }
+
+  const handleDelete = (questionId: string) => {
+    startDeleteTransition(async () => {
+      try {
+        await deleteQuestion(questionId)
+        toast.success("문의가 삭제되었습니다.")
+        fetchQuestions(currentPage)
+      } catch (error) {
+        console.error("문의 삭제 실패:", error)
+        const err = error as Error & { digest?: string }
+        if (err.digest === "UNAUTHORIZED" || err.message === "UNAUTHORIZED") {
+          throw error
+        }
+        toast.error("문의 삭제에 실패했습니다. 다시 시도해주세요.")
+      }
+    })
+  }
+
+  const handleInquiryOpenChange = (open: boolean) => {
+    setIsInquiryOpen(open)
+    if (!open) {
+      setEditQuestion(undefined)
+    }
+  }
+
   return (
     <section className="space-y-0">
       {/* 상품 문의 / 배송·반품·교환 문의 버튼 */}
@@ -79,7 +121,16 @@ export function QnaList({
         <Button
           variant="outline"
           className="h-[42px] flex-1 cursor-pointer rounded-lg text-[15px] font-medium"
-          onClick={() => setIsInquiryOpen(true)}
+          onClick={() => {
+            if (!user) {
+              const path = getPathWithoutCountry(countryCode as string)
+              router.push(
+                `/${countryCode}${siteConfig.auth.loginUrl}?redirect_to=${encodeURIComponent(path)}`
+              )
+              return
+            }
+            setIsInquiryOpen(true)
+          }}
         >
           상품 문의
         </Button>
@@ -118,6 +169,10 @@ export function QnaList({
                   question={question}
                   isExpanded={expandedId === question.id}
                   onToggle={() => handleToggle(question.id)}
+                  isAuthor={user?.id === question.userId}
+                  isDeleting={isDeleting}
+                  onEdit={() => handleEdit(question)}
+                  onDelete={() => handleDelete(question.id)}
                 />
                 {index < questions.length - 1 && <Separator />}
               </li>
@@ -138,11 +193,12 @@ export function QnaList({
 
       <QnaInquiryDialog
         open={isInquiryOpen}
-        onOpenChange={setIsInquiryOpen}
+        onOpenChange={handleInquiryOpenChange}
         productId={productId}
         productName={productName}
         productThumbnail={productThumbnail}
-        onSuccess={() => fetchQuestions(1)}
+        editQuestion={editQuestion}
+        onSuccess={() => fetchQuestions(currentPage)}
       />
     </section>
   )

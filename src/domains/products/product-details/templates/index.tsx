@@ -71,7 +71,9 @@ export function ProductTemplate({
 
               {/* Q&A Tab Panel */}
               <SectionTabPanel value="qna">
-                <ErrorBoundary fallback={<div>Q&A를 불러오지 못했습니다.</div>}>
+                <ErrorBoundary
+                  fallback={<div>Q&A를 불러오지 못했습니다.</div>}
+                >
                   <Suspense fallback={<ProductQnaSkeleton />}>
                     <QnaSectionWrapper product={product} />
                   </Suspense>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState, useTransition } from "react"
 import Image from "next/image"
 import { ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -11,9 +11,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
-import { createQuestion } from "@/lib/api/ugc/qna"
+import { useUser } from "@/contexts/user-context"
+import { createQuestion, updateQuestion } from "@/lib/api/ugc/qna"
+import type { QuestionResponseDto } from "@/lib/types/dto/ugc"
 import { getThumbnailUrl } from "@/lib/utils/get-thumbnail-url"
 import Link from "next/link"
+import { toast } from "sonner"
 
 const MAX_LENGTH = 250
 
@@ -24,6 +27,7 @@ interface QnaInquiryDialogProps {
   productName: string
   productThumbnail: string | null
   onSuccess?: () => void
+  editQuestion?: QuestionResponseDto
 }
 
 export function QnaInquiryDialog({
@@ -33,28 +37,59 @@ export function QnaInquiryDialog({
   productName,
   productThumbnail,
   onSuccess,
+  editQuestion,
 }: QnaInquiryDialogProps) {
+  const { user } = useUser()
+  const isEditMode = !!editQuestion
+
   const [content, setContent] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isPending, startTransition] = useTransition()
 
-  const handleSubmit = async () => {
-    if (!content.trim() || isSubmitting) return
-
-    setIsSubmitting(true)
-    try {
-      await createQuestion({
-        productId,
-        title: content.slice(0, 50),
-        content,
-      })
-      setContent("")
-      onOpenChange(false)
-      onSuccess?.()
-    } catch {
-      alert("문의 등록에 실패했습니다. 다시 시도해주세요.")
-    } finally {
-      setIsSubmitting(false)
+  useEffect(() => {
+    if (open && editQuestion) {
+      setContent(editQuestion.content)
     }
+  }, [open, editQuestion])
+
+  const handleSubmit = () => {
+    if (!content.trim() || isPending) return
+
+    startTransition(async () => {
+      try {
+        if (isEditMode) {
+          await updateQuestion(editQuestion.id, {
+            title: content.slice(0, 50),
+            content,
+          })
+        } else {
+          await createQuestion({
+            productId,
+            nickname: user?.nickname ?? "",
+            title: content.slice(0, 50),
+            content,
+          })
+        }
+        setContent("")
+        onOpenChange(false)
+        onSuccess?.()
+      } catch (error: unknown) {
+        const err = error as Error & { digest?: string }
+        if (err.digest === "UNAUTHORIZED" || err.message === "UNAUTHORIZED") {
+          throw error
+        }
+
+        const message =
+          error instanceof Error
+            ? error.message
+            : "알 수 없는 오류가 발생했습니다."
+
+        const fallbackMessage = isEditMode
+          ? "문의 수정에 실패했습니다. 다시 시도해주세요."
+          : "문의 등록에 실패했습니다. 다시 시도해주세요."
+
+        toast.error(message?.trim() ? message : fallbackMessage)
+      }
+    })
   }
 
   const handleOpenChange = (value: boolean) => {
@@ -68,7 +103,9 @@ export function QnaInquiryDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-h-[90vh] gap-0 overflow-y-auto p-6 sm:max-w-[480px]">
         <DialogHeader className="mb-5">
-          <DialogTitle className="text-lg font-bold">상품 문의하기</DialogTitle>
+          <DialogTitle className="text-lg font-bold">
+            {isEditMode ? "문의 수정하기" : "상품 문의하기"}
+          </DialogTitle>
         </DialogHeader>
 
         {/* 상품 정보 */}
@@ -145,10 +182,16 @@ export function QnaInquiryDialog({
         {/* 등록 버튼 */}
         <Button
           className="h-[52px] w-full rounded-lg text-[16px] font-medium"
-          disabled={!content.trim() || isSubmitting}
+          disabled={!content.trim() || isPending}
           onClick={handleSubmit}
         >
-          {isSubmitting ? "등록 중..." : "등록하기"}
+          {isPending
+            ? isEditMode
+              ? "수정 중..."
+              : "등록 중..."
+            : isEditMode
+              ? "수정하기"
+              : "등록하기"}
         </Button>
       </DialogContent>
     </Dialog>

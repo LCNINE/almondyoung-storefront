@@ -74,6 +74,7 @@ type QuestionStatus = "active" | "answered" | "deleted"
 interface QuestionResponseDto {
   id: string
   userId: string
+  nickname: string
   productId: string
   title: string
   content: string
@@ -96,6 +97,7 @@ interface AnswerResponseDto {
 
 interface CreateQuestionDto {
   productId: string
+  nickname: string
   title: string
   content: string
   isSecret?: boolean
@@ -120,6 +122,13 @@ interface CreateAnswerDto {
   content: string
 }
 
+interface QnaSummaryResponseDto {
+  productId: string
+  totalCount: number
+  answeredCount: number
+  unansweredCount: number
+}
+
 export type {
   ReviewResponseDto,
   CreateReviewDto,
@@ -137,4 +146,5 @@ export type {
   QuestionListQueryDto,
   CreateAnswerDto,
   QuestionStatus,
+  QnaSummaryResponseDto,
 }
