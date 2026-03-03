@@ -17,7 +17,10 @@ export class ErrorBoundary extends Component<Props, State> {
     this.state = { hasError: false }
   }
 
-  static getDerivedStateFromError(): State {
+  static getDerivedStateFromError(error: Error & { digest?: string }): State {
+    if (error.digest === "UNAUTHORIZED" || error.message === "UNAUTHORIZED") {
+      throw error
+    }
     return { hasError: true }
   }
 
