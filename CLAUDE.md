@@ -209,21 +209,31 @@ type RequestOptions = {
 - `HttpApiError` (403, 기타): HTTP 에러
 - `ApiNetworkError`: 네트워크 에러
 
-서버 액션에서는 `ApiResponse<T>` 타입으로 래핑하여 프론트에 전달:
+#### 인증이 필요한 mutation (POST/PATCH/DELETE)은 반드시 Server Action + `startTransition`으로 호출
+
+클라이언트 이벤트 핸들러(`onClick` 등)에서 직접 `try-catch`로 감싸면 401 에러가 `error.tsx` Error Boundary로 전파되지 않습니다.
+`error.tsx`가 401을 감지하여 토큰 복구(`restore-token`)를 처리하므로, **인증이 필요한 API 호출은 Server Action(`"use server"`)으로 만들고 클라이언트에서 `startTransition`으로 호출**해야 합니다. UNAUTHORIZED 에러는 catch하지 않고 re-throw하여 `error.tsx`로 전파시킵니다.
 
 ```tsx
-import { type ApiResponse } from "@/lib/api/api"
+// 클라이언트 컴포넌트에서 Server Action 호출 패턴
+import { useTransition } from "react"
 
-export async function updateProfile(data: ProfileInput): Promise<ApiResponse<ProfileDto>> {
-  try {
-    const result = await api<ProfileDto>("users", "/users/me", {
-      method: "PATCH",
-      body: data,
-    })
-    return { data: result }
-  } catch (error) {
-    return { success: false, error: { message: "업데이트 실패", status: 500 } }
-  }
+const [isPending, startTransition] = useTransition()
+
+const handleSubmit = () => {
+  startTransition(async () => {
+    try {
+      await someServerAction(data)
+    } catch (error: unknown) {
+      const err = error as Error & { digest?: string }
+      // UNAUTHORIZED는 re-throw → error.tsx에서 토큰 복구 처리
+      if (err.digest === "UNAUTHORIZED" || err.message === "UNAUTHORIZED") {
+        throw error
+      }
+      // 그 외 에러만 UI에서 처리
+      toast.error("실패했습니다. 다시 시도해주세요.")
+    }
+  })
 }
 ```
 
