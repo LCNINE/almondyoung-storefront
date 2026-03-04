@@ -24,6 +24,7 @@ import {
 } from "react"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner"
+import CartAddedModal from "./cart-added-modal"
 import MobileActions from "./mobile-actions"
 import OptionSelect from "./option-select"
 import ProductDetailPrice from "./product-detail-price"
@@ -71,6 +72,7 @@ export default function ProductActions({
 
   const [options, setOptions] = useState<Record<string, string | undefined>>({})
   const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([])
+  const [showCartModal, setShowCartModal] = useState(false)
 
   const isSimple = (product.variants?.length ?? 0) <= 1
 
@@ -231,6 +233,8 @@ export default function ProductActions({
   const handleAddToCart = () => {
     if (selectedItems.length === 0) return
 
+    setShowCartModal(true)
+
     startTransition(async () => {
       try {
         for (const item of selectedItems) {
@@ -242,9 +246,11 @@ export default function ProductActions({
         }
       } catch (error: unknown) {
         const err = error as Error & { digest?: string }
+        setShowCartModal(false)
         if (err.digest === "UNAUTHORIZED" || err.message === "UNAUTHORIZED") {
           throw error
         }
+        toast.error("장바구니 담기에 실패했습니다.")
       }
     })
   }
@@ -425,16 +431,12 @@ export default function ProductActions({
             variant="outline"
             onClick={handleAddToCart}
             disabled={
-              selectedItems.length === 0 ||
-              !allInStock ||
-              !!disabled ||
-              isPending
+              selectedItems.length === 0 || !allInStock || !!disabled
             }
             className="border-yellow-30 text-yellow-30 hover:text-primary h-12 w-full flex-1 cursor-pointer text-base hover:bg-transparent"
             data-testid="add-product-button"
           >
             {(() => {
-              if (isPending) return "담는 중..."
               if (selectedItems.length === 0) return "옵션을 선택해주세요"
               if (!allInStock) return "품절"
               return "장바구니 담기"
@@ -468,6 +470,12 @@ export default function ProductActions({
         handleBuyNow={handleBuyNow}
         isPending={isPending}
         show={!inView}
+      />
+
+      <CartAddedModal
+        open={showCartModal}
+        onOpenChange={setShowCartModal}
+        product={product}
       />
     </>
   )
