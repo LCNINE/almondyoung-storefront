@@ -1,16 +1,16 @@
-import ProductPrice from "@/components/products/preview-price/product-price"
-import { getProductPrice } from "@/lib/utils/get-product-price"
 import { HttpTypes } from "@medusajs/types"
 import { Suspense } from "react"
 import { RatingActionsWrapper } from "../../templates/product-actions-wrappers/rating-actions-wrapper"
 import { WishlistChatActionsWrapper } from "../../templates/product-actions-wrappers/wishlist-chat-actions-wrapper"
 import { WishlistButton } from "../actions/wishlist-button"
 import { RatingSkeleton } from "@/components/skeletons/product-detail-skeletons"
+import ProductActions from "../../templates/product-actions-wrappers/product-actions"
 
 interface Props {
   brand: string
   productName: string
   product: HttpTypes.StoreProduct
+  region: HttpTypes.StoreRegion
   countryCode: string
   handle: string
 }
@@ -19,16 +19,10 @@ export function SideBar({
   brand,
   productName,
   product,
+  region,
   countryCode,
   handle,
 }: Props) {
-  // todo: 현재 로그인한 사용자가 멤버십인지 유무 파악하는 로직 필요
-
-  // 실제 상품 가격, 주석은 지울 예정
-  const { cheapestPrice } = getProductPrice({
-    product,
-  })
-
   return (
     <aside className="hidden w-full min-w-[383px] overflow-y-auto lg:sticky lg:top-0 lg:block lg:max-h-screen lg:max-w-[480px]">
       <div className="bg-background h-full p-6">
@@ -63,14 +57,9 @@ export function SideBar({
           <RatingActionsWrapper handle={handle} />
         </Suspense>
 
-        {cheapestPrice && (
-          <ProductPrice
-            price={cheapestPrice}
-            membershipPrice={
-              product.variants?.[0]?.metadata?.membershipPrice as number
-            }
-          />
-        )}
+        <Suspense>
+          <ProductActions product={product} region={region} />
+        </Suspense>
       </div>
     </aside>
   )

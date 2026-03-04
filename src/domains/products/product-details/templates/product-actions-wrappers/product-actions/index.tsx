@@ -1,23 +1,39 @@
 "use client"
 
-import { addToCart } from "@lib/data/cart"
-import { useIntersection } from "@lib/hooks/use-in-view"
+import { addToCart } from "@/lib/api/medusa/cart"
+import { useIntersection } from "@/hooks/use-intersection"
+import { Button } from "@/components/ui/button"
+import { getPricesForVariant } from "@/lib/utils/get-product-price"
+import { VariantPrice } from "@/lib/types/common/price"
 import { HttpTypes } from "@medusajs/types"
-import { Button } from "@medusajs/ui"
-import Divider from "@modules/common/components/divider"
-import OptionSelect from "@modules/products/components/product-actions/option-select"
 import { isEqual } from "lodash"
+import { Minus, Plus, X } from "lucide-react"
 import { useParams, usePathname, useSearchParams } from "next/navigation"
-import { useEffect, useMemo, useRef, useState } from "react"
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from "react"
+import { Separator } from "@/components/ui/separator"
 import MobileActions from "./mobile-actions"
-import { useRouter } from "next/navigation"
-import ProductPrice from "@/components/products/preview-price/product-price"
-// import ProductPrice from "@/components/products/product-price"
+import OptionSelect from "./option-select"
+import ProductDetailPrice from "./product-detail-price"
 
 type ProductActionsProps = {
   product: HttpTypes.StoreProduct
   region: HttpTypes.StoreRegion
   disabled?: boolean
+}
+
+type SelectedItem = {
+  variantId: string
+  quantity: number
+  variant: HttpTypes.StoreProductVariant
+  price: VariantPrice
+  label: string
 }
 
 const optionsAsKeymap = (
@@ -28,31 +44,53 @@ const optionsAsKeymap = (
     return acc
   }, {})
 }
-// s,m,l,xl add to cart button
+
+const getVariantLabel = (variant: HttpTypes.StoreProductVariant) => {
+  return (
+    variant.options?.map((o: any) => o.value).join(" / ") ||
+    variant.title ||
+    "기본 옵션값"
+  )
+}
+
 export default function ProductActions({
   product,
   disabled,
 }: ProductActionsProps) {
-  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-
-  const [options, setOptions] = useState<Record<string, string | undefined>>({})
-  const [isAdding, setIsAdding] = useState(false)
   const countryCode = useParams().countryCode as string
 
-  // 변형이 1개뿐이면 옵션을 미리 선택
-  useEffect(() => {
-    if (product.variants?.length === 1) {
-      const variantOptions = optionsAsKeymap(product.variants[0].options)
-      setOptions(variantOptions ?? {})
-    }
-  }, [product.variants])
+  // 현재 옵션 선택 상태 (옵션 셀렉터용)
+  const [options, setOptions] = useState<Record<string, string | undefined>>({})
+  // 장바구니에 담을 선택된 항목 리스트
+  const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([])
 
-  const selectedVariant = useMemo(() => {
-    if (!product.variants || product.variants.length === 0) {
-      return
+  const isSimple = (product.variants?.length ?? 0) <= 1
+
+  // 변형이 1개뿐이면 자동으로 선택 리스트에 추가
+  useEffect(() => {
+    if (isSimple && product.variants?.length === 1) {
+      const variant = product.variants[0]
+      const price = getPricesForVariant(variant)
+      if (price) {
+        setSelectedItems([
+          {
+            variantId: variant.id,
+            quantity: 1,
+            variant,
+            price,
+            label: getVariantLabel(variant),
+          },
+        ])
+      }
     }
+  }, [product.variants, isSimple])
+
+  // 옵션 선택으로 매칭되는 variant 찾기
+  const matchedVariant = useMemo(() => {
+    if (!product.variants || product.variants.length === 0) return undefined
 
     return product.variants.find((v) => {
       const variantOptions = optionsAsKeymap(v.options)
@@ -60,7 +98,30 @@ export default function ProductActions({
     })
   }, [product.variants, options])
 
-  // 변형이 선택되면 옵션 업데이트
+  // 옵션 선택 시: 매칭된 variant를 선택 리스트에 추가
+  useEffect(() => {
+    if (!matchedVariant || isSimple) return
+
+    const alreadySelected = selectedItems.some(
+      (item) => item.variantId === matchedVariant.id
+    )
+    if (alreadySelected) return
+
+    const price = getPricesForVariant(matchedVariant)
+    if (!price) return
+
+    setSelectedItems((prev) => [
+      ...prev,
+      {
+        variantId: matchedVariant.id,
+        quantity: 1,
+        variant: matchedVariant,
+        price,
+        label: getVariantLabel(matchedVariant),
+      },
+    ])
+  }, [matchedVariant, isSimple, selectedItems])
+
   const setOptionValue = (optionId: string, value: string) => {
     setOptions((prev) => ({
       ...prev,
@@ -68,21 +129,40 @@ export default function ProductActions({
     }))
   }
 
-  // 선택한 옵션이 유효한 변형인지 확인
-  const isValidVariant = useMemo(() => {
-    return product.variants?.some((v) => {
-      const variantOptions = optionsAsKeymap(v.options)
-      return isEqual(variantOptions, options)
-    })
-  }, [product.variants, options])
+  // 수량 변경
+  const updateQuantity = useCallback((variantId: string, delta: number) => {
+    setSelectedItems((prev) =>
+      prev.map((item) =>
+        item.variantId === variantId
+          ? { ...item, quantity: Math.max(1, item.quantity + delta) }
+          : item
+      )
+    )
+  }, [])
 
+  // 항목 삭제
+  const removeItem = useCallback((variantId: string) => {
+    setSelectedItems((prev) =>
+      prev.filter((item) => item.variantId !== variantId)
+    )
+  }, [])
+
+  // 총 수량 & 총 가격
+  const totalQuantity = selectedItems.reduce(
+    (sum, item) => sum + item.quantity,
+    0
+  )
+  const totalPrice = selectedItems.reduce(
+    (sum, item) => sum + item.price.calculated_price_number * item.quantity,
+    0
+  )
+
+  // URL에 첫 번째 선택 variant ID 동기화
   useEffect(() => {
     const params = new URLSearchParams(searchParams.toString())
-    const value = isValidVariant ? selectedVariant?.id : null
+    const value = selectedItems.length > 0 ? selectedItems[0].variantId : null
 
-    if (params.get("v_id") === value) {
-      return
-    }
+    if (params.get("v_id") === value) return
 
     if (value) {
       params.set("v_id", value)
@@ -90,112 +170,189 @@ export default function ProductActions({
       params.delete("v_id")
     }
 
-    router.replace(pathname + "?" + params.toString())
-  }, [selectedVariant, isValidVariant])
-
-  // 선택한 변형의 재고 여부 확인
-  const inStock = useMemo(() => {
-    // 재고를 관리하지 않으면 항상 장바구니에 담을 수 있음
-    if (selectedVariant && !selectedVariant.manage_inventory) {
-      return true
-    }
-
-    // 변형에서 백오더를 허용하면 장바구니에 담을 수 있음
-    if (selectedVariant?.allow_backorder) {
-      return true
-    }
-
-    // 재고가 있으면 장바구니에 담을 수 있음
-    if (
-      selectedVariant?.manage_inventory &&
-      (selectedVariant?.inventory_quantity || 0) > 0
-    ) {
-      return true
-    }
-
-    // 그 외에는 장바구니에 담을 수 없음
-    return false
-  }, [selectedVariant])
+    window.history.replaceState(null, "", pathname + "?" + params.toString())
+  }, [selectedItems, pathname, searchParams])
 
   const actionsRef = useRef<HTMLDivElement>(null)
-
   const inView = useIntersection(actionsRef, "0px")
 
-  // 선택한 변형을 장바구니에 담기
-  const handleAddToCart = async () => {
-    if (!selectedVariant?.id) return null
+  // 선택된 항목 중 첫 번째 variant (가격 표시용)
+  const displayVariant =
+    selectedItems.length > 0 ? selectedItems[0].variant : undefined
 
-    setIsAdding(true)
+  // 장바구니 담기 - 선택된 모든 variant를 순차적으로 담기
+  const handleAddToCart = () => {
+    if (selectedItems.length === 0) return
 
-    await addToCart({
-      variantId: selectedVariant.id,
-      quantity: 1,
-      countryCode,
+    startTransition(async () => {
+      try {
+        for (const item of selectedItems) {
+          await addToCart({
+            variantId: item.variantId,
+            quantity: item.quantity,
+            countryCode,
+          })
+        }
+      } catch (error: unknown) {
+        const err = error as Error & { digest?: string }
+        if (err.digest === "UNAUTHORIZED" || err.message === "UNAUTHORIZED") {
+          throw error
+        }
+      }
     })
-
-    setIsAdding(false)
   }
 
+  // 재고 확인 (선택된 모든 항목이 재고 있는지)
+  const allInStock = selectedItems.every((item) => {
+    const v = item.variant
+
+    if (!v.manage_inventory) return true
+    if (v.allow_backorder) return true
+    return (v.inventory_quantity || 0) > 0
+  })
+
   return (
-    <>
-      <div className="flex flex-col gap-y-2" ref={actionsRef}>
-        <div>
-          {(product.variants?.length ?? 0) > 1 && (
-            <div className="flex flex-col gap-y-4">
-              {(product.options || []).map((option) => {
-                return (
-                  <div key={option.id}>
-                    <OptionSelect
-                      option={option}
-                      current={options[option.id]}
-                      updateOption={setOptionValue}
-                      title={option.title ?? ""}
-                      data-testid="product-options"
-                      disabled={!!disabled || isAdding}
-                    />
-                  </div>
+    <div className="flex flex-col gap-y-2" ref={actionsRef}>
+      <ProductDetailPrice product={product} selectedVariant={displayVariant} />
+
+      <Separator />
+
+      {/* 옵션 선택 - variant가 2개 이상일 때만 표시 */}
+      {!isSimple && (
+        <div className="flex flex-col gap-y-4 py-2">
+          {(product.options || []).map((option) => {
+            // 이미 선택된 항목들에서 이 옵션 그룹의 선택된 값 추출
+            const selectedValuesForOption = selectedItems
+              .map((item) => {
+                const opt = item.variant.options?.find(
+                  (o: any) => o.option_id === option.id
                 )
-              })}
-              <Divider />
-            </div>
-          )}
+                return (opt as any)?.value as string | undefined
+              })
+              .filter((v): v is string => !!v)
+
+            return (
+              <div key={option.id}>
+                <OptionSelect
+                  option={option}
+                  current={options[option.id]}
+                  selectedValues={selectedValuesForOption}
+                  updateOption={setOptionValue}
+                  title={option.title ?? ""}
+                  data-testid="product-options"
+                  disabled={!!disabled || isPending}
+                />
+              </div>
+            )
+          })}
         </div>
+      )}
 
-        <ProductPrice product={product} variant={selectedVariant} />
+      {/* 선택된 항목 리스트 */}
+      {selectedItems.length > 0 && (
+        <>
+          {!isSimple && <Separator />}
+          <div className="flex flex-col gap-3 py-2">
+            {selectedItems.map((item) => (
+              <div
+                key={item.variantId}
+                className="flex items-center justify-between gap-4 rounded-lg px-4 py-3"
+              >
+                <div className="flex flex-col gap-2">
+                  {!isSimple && (
+                    <span className="text-sm font-medium">{item.label}</span>
+                  )}
+                  {/* 수량 조절 */}
+                  <div className="flex items-center">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => updateQuantity(item.variantId, -1)}
+                      disabled={item.quantity <= 1}
+                      className="h-8 w-8 rounded-r-none"
+                    >
+                      <Minus className="h-3.5 w-3.5" />
+                    </Button>
+                    <div className="flex h-8 w-10 items-center justify-center border-y text-sm">
+                      {item.quantity}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => updateQuantity(item.variantId, 1)}
+                      className="h-8 w-8 rounded-l-none"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-base font-bold">
+                    {(
+                      item.price.calculated_price_number * item.quantity
+                    ).toLocaleString()}
+                    원
+                  </span>
+                  {!isSimple && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeItem(item.variantId)}
+                      className="h-6 w-6 text-gray-400 hover:text-gray-600"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
 
-        <Button
-          onClick={handleAddToCart}
-          disabled={
-            !inStock ||
-            !selectedVariant ||
-            !!disabled ||
-            isAdding ||
-            !isValidVariant
-          }
-          variant="primary"
-          className="h-10 w-full"
-          isLoading={isAdding}
-          data-testid="add-product-button"
-        >
-          {!selectedVariant && !options
-            ? "Select variant"
-            : !inStock || !isValidVariant
-              ? "Out of stock"
-              : "Add to cart"}
-        </Button>
+      {/* 구매수량 / 총 가격 */}
+      {selectedItems.length > 0 && (
+        <>
+          <Separator />
+          <div className="flex items-center justify-between py-2">
+            <span className="text-sm font-bold">
+              구매수량 {totalQuantity}개
+            </span>
+            <span className="text-xl font-bold">
+              총 {totalPrice.toLocaleString()}원
+            </span>
+          </div>
+        </>
+      )}
 
-        <MobileActions
-          product={product}
-          variant={selectedVariant}
-          options={options}
-          updateOptions={setOptionValue}
-          inStock={inStock}
-          handleAddToCart={handleAddToCart}
-          isAdding={isAdding}
-          show={!inView}
-          optionsDisabled={!!disabled || isAdding}
-        />
-      </div>
-    </>
+      <Button
+        onClick={handleAddToCart}
+        disabled={
+          selectedItems.length === 0 || !allInStock || !!disabled || isPending
+        }
+        className="h-12 w-full text-base"
+        data-testid="add-product-button"
+      >
+        {isPending
+          ? "담는 중..."
+          : selectedItems.length === 0
+            ? "옵션을 선택해주세요"
+            : !allInStock
+              ? "품절"
+              : "장바구니 담기"}
+      </Button>
+
+      <MobileActions
+        product={product}
+        variant={displayVariant}
+        options={options}
+        updateOptions={setOptionValue}
+        inStock={allInStock}
+        handleAddToCart={handleAddToCart}
+        isPending={isPending}
+        show={!inView}
+        optionsDisabled={!!disabled || isPending}
+      />
+    </div>
   )
 }

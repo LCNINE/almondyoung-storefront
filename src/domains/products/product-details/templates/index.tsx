@@ -84,6 +84,7 @@ export function ProductTemplate({
             brand={(product.metadata?.brand as string) ?? ""}
             productName={product.title ?? ""}
             product={product}
+            region={region}
             countryCode={countryCode}
             handle={product.handle}
           />
