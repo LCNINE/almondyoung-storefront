@@ -84,7 +84,7 @@ export function SectionTabs({
         </TabsTrigger>
         <TabsTrigger value="qna" className={triggerClassName}>
           Q&A
-          {qnaCount && qnaCount > 0 && (
+          {qnaCount != null && qnaCount > 0 && (
             <span className="ml-0.5 text-[0.65em] tabular-nums opacity-80">
               {qnaCount.toLocaleString()}
             </span>
