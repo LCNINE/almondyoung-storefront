@@ -15,6 +15,7 @@ import { ProductDetailInfoWrapper } from "./product-actions-wrappers/product-det
 import { QnaSectionWrapper } from "./product-actions-wrappers/qna-section-wrapper"
 import { ReviewSectionWrapper } from "./product-actions-wrappers/review-section-wrapper"
 import { SectionTabsWrapper } from "./product-actions-wrappers/section-tabs-wrapper"
+import ProductActions from "./product-actions-wrappers/product-actions"
 
 type ProductTemplateProps = {
   product: HttpTypes.StoreProduct
@@ -80,14 +81,21 @@ export function ProductTemplate({
             </SectionTabsWrapper>
           </main>
 
-          <SideBar
-            brand={(product.metadata?.brand as string) ?? ""}
-            productName={product.title ?? ""}
-            product={product}
-            region={region}
-            countryCode={countryCode}
-            handle={product.handle}
-          />
+          <div className="lg:sticky lg:top-0 lg:max-h-screen lg:w-full lg:min-w-[383px] lg:max-w-[480px] lg:overflow-y-auto">
+            <div className="hidden lg:block">
+              <SideBar
+                brand={(product.metadata?.brand as string) ?? ""}
+                productName={product.title ?? ""}
+                productId={product.id}
+                countryCode={countryCode}
+                handle={product.handle}
+              />
+            </div>
+
+            <Suspense>
+              <ProductActions product={product} region={region} />
+            </Suspense>
+          </div>
         </div>
       </div>
     </div>

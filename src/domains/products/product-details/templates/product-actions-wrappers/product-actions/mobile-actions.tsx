@@ -13,7 +13,6 @@ import { getProductPrice } from "@/lib/utils/get-product-price"
 import { HttpTypes } from "@medusajs/types"
 import { ChevronDown, X } from "lucide-react"
 import React, { useMemo, useState } from "react"
-import { createPortal } from "react-dom"
 import OptionSelect from "./option-select"
 
 type MobileActionsProps = {
@@ -54,15 +53,12 @@ const MobileActions: React.FC<MobileActionsProps> = ({
 
   const isSimple = product.variants?.length === 1
 
-  // Portal로 document.body에 직접 렌더링 (SideBar의 hidden 부모를 우회)
-  if (typeof window === "undefined") return null
-
-  return createPortal(
+  return (
     <>
       {/* 하단 고정 바 */}
       <div
         className={cn(
-          "fixed inset-x-0 bottom-0 z-50 transition-all duration-300 lg:hidden",
+          "fixed inset-x-0 bottom-0 z-999 transition-all duration-300 lg:hidden",
           show
             ? "translate-y-0 opacity-100"
             : "pointer-events-none translate-y-full opacity-0"
@@ -111,9 +107,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
               >
                 <div className="flex w-full items-center justify-between">
                   <span>
-                    {variant
-                      ? Object.values(options).join(" / ")
-                      : "옵션 선택"}
+                    {variant ? Object.values(options).join(" / ") : "옵션 선택"}
                   </span>
                   <ChevronDown className="h-4 w-4" />
                 </div>
@@ -167,8 +161,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
           </div>
         </DrawerContent>
       </Drawer>
-    </>,
-    document.body
+    </>
   )
 }
 

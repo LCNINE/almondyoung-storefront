@@ -4,7 +4,7 @@ export function useIntersection(
   ref: RefObject<HTMLElement | null>,
   rootMargin = "0px"
 ): boolean {
-  const [isIntersecting, setIsIntersecting] = useState(true)
+  const [isIntersecting, setIsIntersecting] = useState(false)
 
   useEffect(() => {
     const element = ref.current

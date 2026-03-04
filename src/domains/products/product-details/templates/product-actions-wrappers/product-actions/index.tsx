@@ -244,161 +244,166 @@ export default function ProductActions({
   }
 
   return (
-    <div className="flex flex-col gap-y-2" ref={actionsRef}>
-      <ProductDetailPrice product={product} selectedVariant={displayVariant} />
+    <>
+      <div className="hidden lg:flex lg:flex-col lg:gap-y-2" ref={actionsRef}>
+        <ProductDetailPrice
+          product={product}
+          selectedVariant={displayVariant}
+        />
 
-      <Separator />
+        <Separator />
 
-      {/* 옵션 선택 - variant가 2개 이상일 때만 표시 */}
-      {!isSimple && (
-        <div className="flex flex-col gap-y-4 py-2">
-          {(product.options || []).map((option) => (
-            <div key={option.id}>
-              <OptionSelect
-                option={option}
-                current={options[option.id]}
-                updateOption={setOptionValue}
-                title={option.title ?? ""}
-                disabledValues={disabledValuesMap[option.id]}
-                data-testid="product-options"
-                disabled={!!disabled || isPending}
-              />
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* 선택된 항목 리스트 */}
-      {selectedItems.length > 0 && (
-        <>
-          {!isSimple && <Separator />}
-          <div className="flex flex-col gap-3 py-2">
-            {selectedItems.map((item) => (
-              <div
-                key={item.variantId}
-                className="flex items-center justify-between gap-4 rounded-lg px-4 py-3"
-              >
-                <div className="flex flex-col gap-2">
-                  {!isSimple && (
-                    <span className="text-sm font-medium">{item.label}</span>
-                  )}
-                  <div className="flex items-center">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => updateQuantity(item.variantId, -1)}
-                      className="h-8 w-8 rounded-r-none"
-                    >
-                      <Minus className="h-3.5 w-3.5" />
-                    </Button>
-
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      value={item.quantity}
-                      onChange={(e) => {
-                        const raw = e.target.value
-                        if (raw === "") {
-                          setSelectedItems((prev) =>
-                            prev.map((si) =>
-                              si.variantId === item.variantId
-                                ? { ...si, quantity: 0 as any }
-                                : si
-                            )
-                          )
-                          return
-                        }
-                        const val = parseInt(raw, 10)
-                        if (!isNaN(val)) {
-                          setSelectedItems((prev) =>
-                            prev.map((si) =>
-                              si.variantId === item.variantId
-                                ? { ...si, quantity: val }
-                                : si
-                            )
-                          )
-                        }
-                      }}
-                      onBlur={(e) => {
-                        const val = parseInt(e.target.value, 10)
-                        if (isNaN(val) || val < 1) {
-                          setSelectedItems((prev) =>
-                            prev.map((si) =>
-                              si.variantId === item.variantId
-                                ? { ...si, quantity: 1 }
-                                : si
-                            )
-                          )
-                          toast.info("최소 수량은 1개입니다.")
-                        }
-                      }}
-                      className="h-8 w-12 border-y text-center text-sm outline-none"
-                    />
-
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => updateQuantity(item.variantId, 1)}
-                      className="h-8 w-8 rounded-l-none"
-                    >
-                      <Plus className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-base font-bold">
-                    {(
-                      item.price.calculated_price_number * item.quantity
-                    ).toLocaleString()}
-                    원
-                  </span>
-                  {!isSimple && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeItem(item.variantId)}
-                      className="h-6 w-6 text-gray-400 hover:text-gray-600"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
+        {/* 옵션 선택 - variant가 2개 이상일 때만 표시 */}
+        {!isSimple && (
+          <div className="flex flex-col gap-y-4 py-2">
+            {(product.options || []).map((option) => (
+              <div key={option.id}>
+                <OptionSelect
+                  option={option}
+                  current={options[option.id]}
+                  updateOption={setOptionValue}
+                  title={option.title ?? ""}
+                  disabledValues={disabledValuesMap[option.id]}
+                  data-testid="product-options"
+                  disabled={!!disabled || isPending}
+                />
               </div>
             ))}
           </div>
-        </>
-      )}
+        )}
 
-      {/* 구매수량 / 총 가격 */}
-      {selectedItems.length > 0 && (
-        <>
-          <Separator />
-          <div className="flex items-center justify-between py-2">
-            <span className="text-sm font-bold">
-              구매수량 {totalQuantity}개
-            </span>
-            <span className="text-xl font-bold">
-              총 {totalPrice.toLocaleString()}원
-            </span>
-          </div>
-        </>
-      )}
+        {/* 선택된 항목 리스트 */}
+        {selectedItems.length > 0 && (
+          <>
+            {!isSimple && <Separator />}
+            <div className="flex flex-col gap-3 py-2">
+              {selectedItems.map((item) => (
+                <div
+                  key={item.variantId}
+                  className="flex items-center justify-between gap-4 rounded-lg px-4 py-3"
+                >
+                  <div className="flex flex-col gap-2">
+                    {!isSimple && (
+                      <span className="text-sm font-medium">{item.label}</span>
+                    )}
+                    <div className="flex items-center">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => updateQuantity(item.variantId, -1)}
+                        className="h-8 w-8 rounded-r-none"
+                      >
+                        <Minus className="h-3.5 w-3.5" />
+                      </Button>
 
-      <Button
-        onClick={handleAddToCart}
-        disabled={
-          selectedItems.length === 0 || !allInStock || !!disabled || isPending
-        }
-        className="h-12 w-full text-base"
-        data-testid="add-product-button"
-      >
-        {(() => {
-          if (isPending) return "담는 중..."
-          if (selectedItems.length === 0) return "옵션을 선택해주세요"
-          if (!allInStock) return "품절"
-          return "장바구니 담기"
-        })()}
-      </Button>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={item.quantity}
+                        onChange={(e) => {
+                          const raw = e.target.value
+                          if (raw === "") {
+                            setSelectedItems((prev) =>
+                              prev.map((si) =>
+                                si.variantId === item.variantId
+                                  ? { ...si, quantity: 0 as any }
+                                  : si
+                              )
+                            )
+                            return
+                          }
+                          const val = parseInt(raw, 10)
+                          if (!isNaN(val)) {
+                            setSelectedItems((prev) =>
+                              prev.map((si) =>
+                                si.variantId === item.variantId
+                                  ? { ...si, quantity: val }
+                                  : si
+                              )
+                            )
+                          }
+                        }}
+                        onBlur={(e) => {
+                          const val = parseInt(e.target.value, 10)
+                          if (isNaN(val) || val < 1) {
+                            setSelectedItems((prev) =>
+                              prev.map((si) =>
+                                si.variantId === item.variantId
+                                  ? { ...si, quantity: 1 }
+                                  : si
+                              )
+                            )
+                            toast.info("최소 수량은 1개입니다.")
+                          }
+                        }}
+                        className="h-8 w-12 border-y text-center text-sm outline-none"
+                      />
+
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => updateQuantity(item.variantId, 1)}
+                        className="h-8 w-8 rounded-l-none"
+                      >
+                        <Plus className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-base font-bold">
+                      {(
+                        item.price.calculated_price_number * item.quantity
+                      ).toLocaleString()}
+                      원
+                    </span>
+                    {!isSimple && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeItem(item.variantId)}
+                        className="h-6 w-6 text-gray-400 hover:text-gray-600"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* 구매수량 / 총 가격 */}
+        {selectedItems.length > 0 && (
+          <>
+            <Separator />
+            <div className="flex items-center justify-between py-2">
+              <span className="text-sm font-bold">
+                구매수량 {totalQuantity}개
+              </span>
+              <span className="text-xl font-bold">
+                총 {totalPrice.toLocaleString()}원
+              </span>
+            </div>
+          </>
+        )}
+
+        <Button
+          onClick={handleAddToCart}
+          disabled={
+            selectedItems.length === 0 || !allInStock || !!disabled || isPending
+          }
+          className="h-12 w-full text-base"
+          data-testid="add-product-button"
+        >
+          {(() => {
+            if (isPending) return "담는 중..."
+            if (selectedItems.length === 0) return "옵션을 선택해주세요"
+            if (!allInStock) return "품절"
+            return "장바구니 담기"
+          })()}
+        </Button>
+      </div>
 
       <MobileActions
         product={product}
@@ -411,6 +416,6 @@ export default function ProductActions({
         show={!inView}
         optionsDisabled={!!disabled || isPending}
       />
-    </div>
+    </>
   )
 }
