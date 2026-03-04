@@ -90,6 +90,37 @@ export default function ProductActions({
     }
   }, [product.variants, isSimple])
 
+  // 현재 선택된 옵션 기준으로, 각 옵션별 선택 불가능한 값 계산
+  const disabledValuesMap = useMemo(() => {
+    const map: Record<string, Set<string>> = {}
+    if (!product.options || !product.variants) return map
+
+    for (const option of product.options) {
+      const disabledSet = new Set<string>()
+
+      for (const optValue of option.values ?? []) {
+        // 현재 선택된 다른 옵션 + 이 값의 조합으로 variant가 존재하는지 확인
+        const testOptions = { ...options, [option.id]: optValue.value }
+
+        const hasVariant = product.variants.some((v) => {
+          const variantOptions = optionsAsKeymap(v.options)
+          // testOptions에서 설정된 키만 비교 (아직 선택 안 된 옵션은 무시)
+          return Object.entries(testOptions).every(
+            ([key, val]) => val === undefined || variantOptions?.[key] === val
+          )
+        })
+
+        if (!hasVariant) {
+          disabledSet.add(optValue.value)
+        }
+      }
+
+      map[option.id] = disabledSet
+    }
+
+    return map
+  }, [product.options, product.variants, options])
+
   // 옵션으로 매칭되는 variant 찾기
   const matchedVariant = useMemo(() => {
     if (!product.variants || product.variants.length === 0) return undefined
@@ -132,15 +163,19 @@ export default function ProductActions({
     }))
   }
 
-  // 수량 변경
+  // 수량 변경 (1에서 -1 누르면 삭제)
   const updateQuantity = useCallback((variantId: string, delta: number) => {
-    setSelectedItems((prev) =>
-      prev.map((item) =>
-        item.variantId === variantId
-          ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-          : item
+    setSelectedItems((prev) => {
+      const item = prev.find((i) => i.variantId === variantId)
+      if (item && item.quantity + delta < 1) {
+        return prev.filter((i) => i.variantId !== variantId)
+      }
+      return prev.map((i) =>
+        i.variantId === variantId
+          ? { ...i, quantity: i.quantity + delta }
+          : i
       )
-    )
+    })
   }, [])
 
   // 항목 삭제
@@ -229,6 +264,7 @@ export default function ProductActions({
                 current={options[option.id]}
                 updateOption={setOptionValue}
                 title={option.title ?? ""}
+                disabledValues={disabledValuesMap[option.id]}
                 data-testid="product-options"
                 disabled={!!disabled || isPending}
               />
@@ -256,7 +292,6 @@ export default function ProductActions({
                       variant="outline"
                       size="icon"
                       onClick={() => updateQuantity(item.variantId, -1)}
-                      disabled={item.quantity <= 1}
                       className="h-8 w-8 rounded-r-none"
                     >
                       <Minus className="h-3.5 w-3.5" />
