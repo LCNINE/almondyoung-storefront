@@ -118,6 +118,7 @@ export default function ProductActions({
         label: getVariantLabel(matchedVariant),
       },
     ])
+    setOptions({})
   }, [matchedVariant, isSimple, selectedItems])
 
   const setOptionValue = (optionId: string, value: string) => {
