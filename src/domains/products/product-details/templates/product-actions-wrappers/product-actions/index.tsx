@@ -8,7 +8,12 @@ import { VariantPrice } from "@/lib/types/common/price"
 import { HttpTypes } from "@medusajs/types"
 import { isEqual } from "lodash"
 import { Minus, Plus, X } from "lucide-react"
-import { useParams, usePathname, useSearchParams } from "next/navigation"
+import {
+  useParams,
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from "next/navigation"
 import {
   useCallback,
   useEffect,
@@ -59,6 +64,7 @@ export default function ProductActions({
   disabled,
 }: ProductActionsProps) {
   const [isPending, startTransition] = useTransition()
+  const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const countryCode = useParams().countryCode as string
@@ -215,7 +221,7 @@ export default function ProductActions({
   // 재고 확인
   const allInStock = selectedItems.every((item) => {
     const v = item.variant
-    console.log("v:", v)
+
     if (!v.manage_inventory) return true
     if (v.allow_backorder) return true
     return (v.inventory_quantity || 0) > 0
@@ -234,6 +240,29 @@ export default function ProductActions({
             countryCode,
           })
         }
+      } catch (error: unknown) {
+        const err = error as Error & { digest?: string }
+        if (err.digest === "UNAUTHORIZED" || err.message === "UNAUTHORIZED") {
+          throw error
+        }
+      }
+    })
+  }
+
+  // 바로구매
+  const handleBuyNow = () => {
+    if (selectedItems.length === 0) return
+
+    startTransition(async () => {
+      try {
+        for (const item of selectedItems) {
+          await addToCart({
+            variantId: item.variantId,
+            quantity: item.quantity,
+            countryCode,
+          })
+        }
+        router.push(`/${countryCode}/checkout`)
       } catch (error: unknown) {
         const err = error as Error & { digest?: string }
         if (err.digest === "UNAUTHORIZED" || err.message === "UNAUTHORIZED") {
@@ -388,33 +417,57 @@ export default function ProductActions({
           </>
         )}
 
-        <Button
-          onClick={handleAddToCart}
-          disabled={
-            selectedItems.length === 0 || !allInStock || !!disabled || isPending
-          }
-          className="h-12 w-full text-base"
-          data-testid="add-product-button"
+        <div
+          className="flex w-full gap-x-3 border-t border-gray-200 bg-white p-4"
+          data-testid="mobile-actions"
         >
-          {(() => {
-            if (isPending) return "담는 중..."
-            if (selectedItems.length === 0) return "옵션을 선택해주세요"
-            if (!allInStock) return "품절"
-            return "장바구니 담기"
-          })()}
-        </Button>
+          <Button
+            variant="outline"
+            onClick={handleAddToCart}
+            disabled={
+              selectedItems.length === 0 ||
+              !allInStock ||
+              !!disabled ||
+              isPending
+            }
+            className="border-yellow-30 text-yellow-30 hover:text-primary h-12 w-full flex-1 cursor-pointer text-base hover:bg-transparent"
+            data-testid="add-product-button"
+          >
+            {(() => {
+              if (isPending) return "담는 중..."
+              if (selectedItems.length === 0) return "옵션을 선택해주세요"
+              if (!allInStock) return "품절"
+              return "장바구니 담기"
+            })()}
+          </Button>
+
+          <Button
+            onClick={handleBuyNow}
+            disabled={selectedItems.length === 0 || !!disabled || isPending}
+            className="h-12 w-full flex-1 cursor-pointer text-base"
+            data-testid="buy-now-button"
+          >
+            바로구매
+          </Button>
+        </div>
       </div>
 
       <MobileActions
         product={product}
-        variant={displayVariant}
         options={options}
-        updateOptions={setOptionValue}
+        setOptionValue={setOptionValue}
+        selectedItems={selectedItems}
+        updateQuantity={updateQuantity}
+        removeItem={removeItem}
+        disabledValuesMap={disabledValuesMap}
+        totalQuantity={totalQuantity}
+        totalPrice={totalPrice}
+        isSimple={isSimple}
         inStock={allInStock}
         handleAddToCart={handleAddToCart}
+        handleBuyNow={handleBuyNow}
         isPending={isPending}
         show={!inView}
-        optionsDisabled={!!disabled || isPending}
       />
     </>
   )

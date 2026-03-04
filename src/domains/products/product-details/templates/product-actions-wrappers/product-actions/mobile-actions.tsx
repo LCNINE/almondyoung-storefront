@@ -1,57 +1,57 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer"
+import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer"
+import { VariantPrice } from "@/lib/types/common/price"
 import { cn } from "@/lib/utils"
-import { getProductPrice } from "@/lib/utils/get-product-price"
 import { HttpTypes } from "@medusajs/types"
-import { ChevronDown, X } from "lucide-react"
-import React, { useMemo, useState } from "react"
-import OptionSelect from "./option-select"
+import { Minus, Plus, ShoppingCart, X } from "lucide-react"
+import React, { useState } from "react"
+
+type SelectedItem = {
+  variantId: string
+  quantity: number
+  variant: HttpTypes.StoreProductVariant
+  price: VariantPrice
+  label: string
+}
 
 type MobileActionsProps = {
   product: HttpTypes.StoreProduct
-  variant?: HttpTypes.StoreProductVariant
   options: Record<string, string | undefined>
-  updateOptions: (optionId: string, value: string) => void
-  inStock?: boolean
+  setOptionValue: (optionId: string, value: string) => void
+  selectedItems: SelectedItem[]
+  updateQuantity: (variantId: string, delta: number) => void
+  removeItem: (variantId: string) => void
+  disabledValuesMap: Record<string, Set<string>>
+  totalQuantity: number
+  totalPrice: number
+  isSimple: boolean
+  inStock: boolean
   handleAddToCart: () => void
-  isPending?: boolean
+  handleBuyNow: () => void
+  isPending: boolean
   show: boolean
-  optionsDisabled: boolean
 }
 
 const MobileActions: React.FC<MobileActionsProps> = ({
   product,
-  variant,
   options,
-  updateOptions,
+  setOptionValue,
+  selectedItems,
+  updateQuantity,
+  removeItem,
+  disabledValuesMap,
+  totalQuantity,
+  totalPrice,
+  isSimple,
   inStock,
   handleAddToCart,
+  handleBuyNow,
   isPending,
   show,
-  optionsDisabled,
 }) => {
   const [open, setOpen] = useState(false)
-
-  const price = getProductPrice({
-    product,
-    variantId: variant?.id,
-  })
-
-  const selectedPrice = useMemo(() => {
-    if (!price) return null
-    const { variantPrice, cheapestPrice } = price
-    return variantPrice || cheapestPrice || null
-  }, [price])
-
-  const isSimple = product.variants?.length === 1
 
   return (
     <>
@@ -59,105 +59,186 @@ const MobileActions: React.FC<MobileActionsProps> = ({
       <div
         className={cn(
           "fixed inset-x-0 bottom-0 z-999 transition-all duration-300 lg:hidden",
-          show
+          show && !open
             ? "translate-y-0 opacity-100"
             : "pointer-events-none translate-y-full opacity-0"
         )}
       >
         <div
-          className="flex h-full w-full flex-col items-center justify-center gap-y-3 border-t border-gray-200 bg-white p-4"
+          className="flex w-full gap-x-3 border-t border-gray-200 bg-white p-4"
           data-testid="mobile-actions"
         >
-          <div className="flex items-center gap-x-2">
-            <span className="text-sm font-medium" data-testid="mobile-title">
-              {product.title}
-            </span>
-            <span className="text-gray-300">—</span>
-            {selectedPrice ? (
-              <div className="flex items-end gap-x-2">
-                {selectedPrice.price_type === "sale" && (
-                  <span className="text-sm text-gray-400 line-through">
-                    {selectedPrice.original_price}
-                  </span>
-                )}
-                <span
-                  className={cn(
-                    "text-sm font-bold",
-                    selectedPrice.price_type === "sale" && "text-red-500"
-                  )}
-                >
-                  {selectedPrice.calculated_price}
-                </span>
-              </div>
-            ) : (
-              <div />
-            )}
-          </div>
-          <div
-            className={cn("grid w-full grid-cols-2 gap-x-4", {
-              "grid-cols-1!": isSimple,
-            })}
+          <Button
+            variant="outline"
+            onClick={() => {
+              if (isSimple && selectedItems.length > 0) {
+                handleAddToCart()
+              } else {
+                setOpen(true)
+              }
+            }}
+            disabled={isPending}
+            className="border-yellow-30 text-yellow-30 hover:text-primary h-12 w-full flex-1 cursor-pointer text-base hover:bg-transparent"
+            data-testid="mobile-cart-button"
           >
-            {!isSimple && (
-              <Button
-                onClick={() => setOpen(true)}
-                variant="outline"
-                className="w-full"
-                data-testid="mobile-actions-button"
-              >
-                <div className="flex w-full items-center justify-between">
-                  <span>
-                    {variant ? Object.values(options).join(" / ") : "옵션 선택"}
-                  </span>
-                  <ChevronDown className="h-4 w-4" />
-                </div>
-              </Button>
-            )}
-            <Button
-              onClick={handleAddToCart}
-              disabled={!inStock || !variant || isPending}
-              className="w-full"
-              data-testid="mobile-cart-button"
-            >
-              {isPending
-                ? "담는 중..."
-                : !variant
-                  ? "옵션을 선택해주세요"
-                  : !inStock
-                    ? "품절"
-                    : "장바구니 담기"}
-            </Button>
-          </div>
+            {isPending ? "담는 중..." : "장바구니 담기"}
+          </Button>
+          <Button
+            onClick={() => {
+              if (isSimple && selectedItems.length > 0) {
+                handleBuyNow()
+              } else {
+                setOpen(true)
+              }
+            }}
+            disabled={isPending}
+            className="h-12 flex-1 cursor-pointer text-base"
+            data-testid="mobile-buy-button"
+          >
+            바로구매
+          </Button>
         </div>
       </div>
 
-      {/* 옵션 선택 Drawer */}
+      {/* 옵션 선택 바텀시트 */}
       <Drawer open={open} onOpenChange={setOpen}>
-        <DrawerContent data-testid="mobile-actions-modal">
-          <DrawerHeader className="flex items-center justify-between">
-            <DrawerTitle>옵션 선택</DrawerTitle>
-            <DrawerClose asChild>
-              <button className="rounded-full p-1 hover:bg-gray-100">
-                <X className="h-5 w-5" />
-              </button>
-            </DrawerClose>
-          </DrawerHeader>
-          <div className="px-6 pb-8">
-            {(product.variants?.length ?? 0) > 1 && (
-              <div className="flex flex-col gap-y-6">
+        <DrawerContent className="max-h-[85vh]">
+          <DrawerTitle className="sr-only">옵션 선택</DrawerTitle>
+
+          <div className="overflow-y-auto px-4 pt-2 pb-2">
+            {/* 옵션 선택 */}
+            {!isSimple && (
+              <div className="flex flex-col gap-y-4 py-2">
                 {(product.options || []).map((option) => (
-                  <div key={option.id}>
-                    <OptionSelect
-                      option={option}
-                      current={options[option.id]}
-                      updateOption={updateOptions}
-                      title={option.title ?? ""}
-                      disabled={optionsDisabled}
-                    />
+                  <div key={option.id} className="flex flex-col gap-y-3">
+                    <span className="text-sm font-medium">
+                      {option.title} 선택
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {(option.values ?? []).map((optValue) => {
+                        const isUnavailable = disabledValuesMap[option.id]?.has(
+                          optValue.value
+                        )
+                        const isSelected = options[option.id] === optValue.value
+                        return (
+                          <button
+                            key={optValue.value}
+                            onClick={() =>
+                              setOptionValue(option.id, optValue.value)
+                            }
+                            disabled={isUnavailable || isPending}
+                            className={cn(
+                              "rounded-full border px-4 py-2 text-sm transition-colors",
+                              {
+                                "border-primary bg-primary text-primary-foreground":
+                                  isSelected && !isUnavailable,
+                                "border-gray-200 hover:border-gray-400":
+                                  !isSelected && !isUnavailable,
+                                "border-gray-100 text-gray-400": isUnavailable,
+                              }
+                            )}
+                          >
+                            {optValue.value}
+                            {isUnavailable && (
+                              <span className="ml-1 text-xs text-gray-300">
+                                (품절)
+                              </span>
+                            )}
+                          </button>
+                        )
+                      })}
+                    </div>
                   </div>
                 ))}
               </div>
             )}
+
+            {/* 선택된 항목 리스트 */}
+            {!isSimple && selectedItems.length > 0 && (
+              <div className="flex flex-col gap-2 py-3">
+                {selectedItems.map((item) => (
+                  <div
+                    key={item.variantId}
+                    className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <span className="text-sm">{item.label}</span>
+                      <div className="flex items-center">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => updateQuantity(item.variantId, -1)}
+                          className="h-7 w-7 rounded-r-none"
+                        >
+                          <Minus className="h-3 w-3" />
+                        </Button>
+                        <span className="flex h-7 w-10 items-center justify-center border-y text-sm">
+                          {item.quantity}
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => updateQuantity(item.variantId, 1)}
+                          className="h-7 w-7 rounded-l-none"
+                        >
+                          <Plus className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold">
+                        {(
+                          item.price.calculated_price_number * item.quantity
+                        ).toLocaleString()}
+                        원
+                      </span>
+                      <button
+                        onClick={() => removeItem(item.variantId)}
+                        className="text-gray-400 hover:text-gray-600"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* 요약 + 액션 버튼 */}
+          <div className="border-t border-gray-200 px-4 pt-3 pb-4">
+            <div className="flex items-center justify-between pb-3">
+              <span className="text-sm font-medium">
+                구매수량 {totalQuantity}개
+              </span>
+              <span className="text-lg font-bold">
+                총 {totalPrice.toLocaleString()}원
+              </span>
+            </div>
+            <div className="flex gap-x-3">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  handleAddToCart()
+                  setOpen(false)
+                }}
+                disabled={selectedItems.length === 0 || !inStock || isPending}
+                className="h-12 flex-1 gap-2 text-base"
+              >
+                <ShoppingCart className="h-4 w-4" />
+                장바구니 담기
+              </Button>
+              <Button
+                onClick={() => {
+                  handleBuyNow()
+                  setOpen(false)
+                }}
+                disabled={selectedItems.length === 0 || !inStock || isPending}
+                className="h-12 flex-1 text-base"
+              >
+                바로 구매
+              </Button>
+            </div>
           </div>
         </DrawerContent>
       </Drawer>
