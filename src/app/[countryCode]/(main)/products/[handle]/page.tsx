@@ -1,4 +1,5 @@
 import { ProductTemplate } from "@/domains/products/product-details/templates"
+import { retrieveCustomer } from "@/lib/api/medusa/customer"
 import { listProducts } from "@lib/api/medusa/products"
 import { getRegion } from "@lib/api/medusa/regions"
 import { Metadata } from "next"
@@ -55,6 +56,10 @@ export default async function Page(props: Props) {
   if (!pricedProduct) {
     notFound()
   }
+
+  const customer = await retrieveCustomer()
+
+  console.log("customer:", customer)
 
   return (
     <div className="md:bg-muted/50 min-h-screen bg-white">

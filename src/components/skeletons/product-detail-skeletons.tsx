@@ -70,3 +70,18 @@ export function ProductQnaSkeleton() {
     </div>
   )
 }
+
+export function RatingSkeleton() {
+  return (
+    <div className="flex animate-pulse items-center gap-1.5 py-1">
+      <div className="flex gap-0">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="bg-gray-10 h-4 w-4 rounded-sm" />
+        ))}
+      </div>
+      <div className="bg-gray-10 h-4 w-6 rounded" />
+      <div className="bg-gray-10 h-4 w-px" />
+      <div className="bg-gray-10 h-4 w-16 rounded" />
+    </div>
+  )
+}

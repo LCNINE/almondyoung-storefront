@@ -183,6 +183,7 @@ export default function ProductActions({
               ? "Out of stock"
               : "Add to cart"}
         </Button>
+
         <MobileActions
           product={product}
           variant={selectedVariant}
