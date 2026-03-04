@@ -68,9 +68,6 @@ export default function ProductActions({
 
   const isSimple = (product.variants?.length ?? 0) <= 1
 
-  console.log("optiopns:", product.options)
-  console.log("variants:", product.variants)
-
   // 변형이 1개뿐이면 자동으로 선택 리스트에 추가
   useEffect(() => {
     if (isSimple && product.variants?.length === 1) {
@@ -171,9 +168,7 @@ export default function ProductActions({
         return prev.filter((i) => i.variantId !== variantId)
       }
       return prev.map((i) =>
-        i.variantId === variantId
-          ? { ...i, quantity: i.quantity + delta }
-          : i
+        i.variantId === variantId ? { ...i, quantity: i.quantity + delta } : i
       )
     })
   }, [])
