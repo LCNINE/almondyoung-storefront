@@ -39,13 +39,10 @@ type SelectedItem = {
 const optionsAsKeymap = (
   variantOptions: HttpTypes.StoreProductVariant["options"]
 ) => {
-  return variantOptions?.reduce(
-    (acc: Record<string, string>, varopt: any) => {
-      acc[varopt.option_id] = varopt.value
-      return acc
-    },
-    {}
-  )
+  return variantOptions?.reduce((acc: Record<string, string>, varopt: any) => {
+    acc[varopt.option_id] = varopt.value
+    return acc
+  }, {})
 }
 
 const getVariantLabel = (variant: HttpTypes.StoreProductVariant) => {
@@ -212,10 +209,7 @@ export default function ProductActions({
 
   return (
     <div className="flex flex-col gap-y-2" ref={actionsRef}>
-      <ProductDetailPrice
-        product={product}
-        selectedVariant={displayVariant}
-      />
+      <ProductDetailPrice product={product} selectedVariant={displayVariant} />
 
       <Separator />
 
@@ -321,13 +315,12 @@ export default function ProductActions({
         className="h-12 w-full text-base"
         data-testid="add-product-button"
       >
-        {isPending
-          ? "담는 중..."
-          : selectedItems.length === 0
-            ? "옵션을 선택해주세요"
-            : !allInStock
-              ? "품절"
-              : "장바구니 담기"}
+        {(() => {
+          if (isPending) return "담는 중..."
+          if (selectedItems.length === 0) return "옵션을 선택해주세요"
+          if (!allInStock) return "품절"
+          return "장바구니 담기"
+        })()}
       </Button>
 
       <MobileActions
