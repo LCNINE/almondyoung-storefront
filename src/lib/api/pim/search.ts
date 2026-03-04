@@ -3,7 +3,11 @@
 import { api } from "@lib/api/api"
 import { ApiNetworkError, HttpApiError } from "@lib/api/api-error"
 import type { ApiResponse } from "@lib/api/api"
-import type { ProductSearchResponseDto, TagFilterDto } from "@lib/types/dto/pim"
+import type {
+  SearchServiceProductsResponse,
+  SearchServiceTrendingKeywordsResponse,
+  SearchServiceSuggestionsResponse,
+} from "@lib/types/dto/search"
 
 // 급상승 검색어 타입
 export interface TrendingKeyword {
@@ -19,26 +23,26 @@ export interface PopularKeyword {
   searchCount?: number
 }
 
-// 엘라스틱서치 기반 상품 검색
+// search 서비스 기반 상품 검색
 export const searchProducts = async (params?: {
-  keyword?: string
-  categoryId?: string
+  q?: string
+  categoryIds?: string[]
   brands?: string[]
   minPrice?: number
   maxPrice?: number
-  status?: string
-  tagFilters?: TagFilterDto[]
-  sortBy?: "relevance" | "price" | "createdAt"
-  sortOrder?: "asc" | "desc"
+  sort?: string
   page?: number
-  limit?: number
-}): Promise<ApiResponse<ProductSearchResponseDto>> => {
+  size?: number
+}): Promise<ApiResponse<SearchServiceProductsResponse>> => {
   try {
-    // URLSearchParams를 사용하여 배열 파라미터 처리
     const searchParams = new URLSearchParams()
 
-    if (params?.keyword) searchParams.set("keyword", params.keyword)
-    if (params?.categoryId) searchParams.set("categoryId", params.categoryId)
+    if (params?.q) searchParams.set("q", params.q)
+    if (params?.categoryIds?.length) {
+      params.categoryIds.forEach((categoryId) =>
+        searchParams.append("categoryIds", categoryId)
+      )
+    }
     if (params?.brands && params.brands.length > 0) {
       params.brands.forEach((brand) => searchParams.append("brands", brand))
     }
@@ -46,27 +50,14 @@ export const searchProducts = async (params?: {
       searchParams.set("minPrice", params.minPrice.toString())
     if (params?.maxPrice !== undefined)
       searchParams.set("maxPrice", params.maxPrice.toString())
-    if (params?.status) searchParams.set("status", params.status)
-    if (params?.tagFilters && params.tagFilters.length > 0) {
-      params.tagFilters.forEach((filter, index) => {
-        searchParams.set(`tagFilters[${index}][groupId]`, filter.groupId)
-        filter.valueIds.forEach((valueId) => {
-          searchParams.append(`tagFilters[${index}][valueIds][]`, valueId)
-        })
-      })
-    }
-    if (params?.sortBy) searchParams.set("sortBy", params.sortBy)
-    if (params?.sortOrder) searchParams.set("sortOrder", params.sortOrder)
+    if (params?.sort) searchParams.set("sort", params.sort)
     if (params?.page) searchParams.set("page", params.page.toString())
-    if (params?.limit) searchParams.set("limit", params.limit.toString())
+    if (params?.size) searchParams.set("size", params.size.toString())
 
-    // 쿼리 문자열을 경로에 직접 포함 (배열 파라미터 처리)
     const queryString = searchParams.toString()
-    const path = queryString
-      ? `/products/search?${queryString}`
-      : "/products/search"
+    const path = queryString ? `/search/products?${queryString}` : "/search/products"
 
-    const result = await api<ProductSearchResponseDto>("pim", path, {
+    const result = await api<SearchServiceProductsResponse>("search", path, {
       method: "GET",
       withAuth: false,
     })
@@ -88,91 +79,99 @@ export const searchProducts = async (params?: {
 }
 
 // 급상승 검색어 조회
-// TODO: 서버 API 구현 후 실제 API 호출로 변경
-export const getTrendingKeywords = async (): Promise<
-  ApiResponse<{ keywords: TrendingKeyword[]; updatedAt: string }>
-> => {
-  // Mock 데이터 (서버 API 구현 전까지 사용)
-  const mockData: TrendingKeyword[] = [
-    { keyword: "비타민D", status: "up", rank: 1 },
-    { keyword: "저당 젤리", status: "new", rank: 2 },
-    { keyword: "식물성 단백질", status: "up", rank: 3 },
-    { keyword: "아르기닌 6000", status: "down", rank: 4 },
-    { keyword: "콜라겐 스틱", status: "new", rank: 5 },
-    { keyword: "유산균", status: "up", rank: 6 },
-    { keyword: "오메가3", status: "new", rank: 7 },
-    { keyword: "다이어트 쉐이크", status: "up", rank: 8 },
-    { keyword: "선크림", status: "down", rank: 9 },
-    { keyword: "비타민C", status: "new", rank: 10 },
-  ]
+export const getTrendingKeywords = async (params?: {
+  size?: number
+}): Promise<ApiResponse<{ keywords: TrendingKeyword[]; updatedAt: string }>> => {
+  try {
+    const searchParams = new URLSearchParams()
+    if (params?.size) searchParams.set("size", params.size.toString())
 
-  // 현재 시간 기준 (정각)
-  const now = new Date()
-  now.setMinutes(0, 0, 0)
-  const updatedAt = now.toISOString()
+    const queryString = searchParams.toString()
+    const path = queryString
+      ? `/search/products/trending-keywords?${queryString}`
+      : "/search/products/trending-keywords"
 
-  return {
-    data: {
-      keywords: mockData,
-      updatedAt,
-    },
+    const result = await api<SearchServiceTrendingKeywordsResponse>(
+      "search",
+      path,
+      { method: "GET", withAuth: false }
+    )
+
+    const keywords: TrendingKeyword[] = result.items.map((item, idx) => ({
+      keyword: item.keyword,
+      status: "stable" as const,
+      rank: idx + 1,
+    }))
+
+    const updatedAt =
+      result.items[0]?.lastSearchedAt ?? new Date().toISOString()
+
+    return { data: { keywords, updatedAt } }
+  } catch (error) {
+    if (error instanceof HttpApiError) {
+      return { error: { message: error.message, status: error.status } }
+    }
+    if (error instanceof ApiNetworkError) {
+      return {
+        error: { message: "네트워크 오류가 발생했습니다.", status: 500 },
+      }
+    }
+    return {
+      error: { message: "알 수 없는 오류가 발생했습니다.", status: 500 },
+    }
   }
-
-  // TODO: 서버 API 구현 후 아래 코드로 교체
-  // try {
-  //   const result = await api<{ keywords: TrendingKeyword[]; updatedAt: string }>(
-  //     "analytics",
-  //     "/search/trending",
-  //     { method: "GET", withAuth: false }
-  //   )
-  //   return { data: result }
-  // } catch (error) {
-  //   if (error instanceof HttpApiError) {
-  //     return { error: { message: error.message, status: error.status } }
-  //   }
-  //   return { error: { message: "알 수 없는 오류가 발생했습니다.", status: 500 } }
-  // }
 }
 
-// 인기/추천 검색어 조회
-// TODO: 서버 API 구현 후 실제 API 호출로 변경
+// 인기/추천 검색어 조회 — trending 데이터 재사용
 export const getPopularKeywords = async (): Promise<
   ApiResponse<{ keywords: PopularKeyword[] }>
 > => {
-  // Mock 데이터 (서버 API 구현 전까지 사용)
-  const mockData: PopularKeyword[] = [
-    { keyword: "퍼마" },
-    { keyword: "펌제" },
-    { keyword: "노몬드" },
-    { keyword: "롤리킹" },
-    { keyword: "국가고시" },
-    { keyword: "네일" },
-    { keyword: "헤어" },
-    { keyword: "샴푸" },
-    { keyword: "로레알" },
-    { keyword: "데미" },
-    { keyword: "클리닉" },
-    { keyword: "가발" },
-  ]
+  const trendingResult = await getTrendingKeywords({ size: 12 })
 
-  return {
-    data: {
-      keywords: mockData,
-    },
+  if ("error" in trendingResult && trendingResult.error) {
+    return { error: trendingResult.error }
   }
 
-  // TODO: 서버 API 구현 후 아래 코드로 교체
-  // try {
-  //   const result = await api<{ keywords: PopularKeyword[] }>(
-  //     "analytics",
-  //     "/search/popular",
-  //     { method: "GET", withAuth: false }
-  //   )
-  //   return { data: result }
-  // } catch (error) {
-  //   if (error instanceof HttpApiError) {
-  //     return { error: { message: error.message, status: error.status } }
-  //   }
-  //   return { error: { message: "알 수 없는 오류가 발생했습니다.", status: 500 } }
-  // }
+  const keywords: PopularKeyword[] =
+    trendingResult.data?.keywords.map((item) => ({
+      keyword: item.keyword,
+    })) ?? []
+
+  return { data: { keywords } }
+}
+
+// 자동완성 제안 조회
+export const getSuggestions = async (params: {
+  q?: string
+  size?: number
+}): Promise<ApiResponse<SearchServiceSuggestionsResponse>> => {
+  try {
+    const searchParams = new URLSearchParams()
+    if (params.q) searchParams.set("q", params.q)
+    if (params.size) searchParams.set("size", params.size.toString())
+
+    const queryString = searchParams.toString()
+    const path = queryString
+      ? `/search/products/suggestions?${queryString}`
+      : "/search/products/suggestions"
+
+    const result = await api<SearchServiceSuggestionsResponse>("search", path, {
+      method: "GET",
+      withAuth: false,
+    })
+
+    return { data: result }
+  } catch (error) {
+    if (error instanceof HttpApiError) {
+      return { error: { message: error.message, status: error.status } }
+    }
+    if (error instanceof ApiNetworkError) {
+      return {
+        error: { message: "네트워크 오류가 발생했습니다.", status: 500 },
+      }
+    }
+    return {
+      error: { message: "알 수 없는 오류가 발생했습니다.", status: 500 },
+    }
+  }
 }

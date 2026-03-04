@@ -1,5 +1,9 @@
 import { EmptyCartView } from "@/components/cart/empty-cart-view"
-import { listCartShippingMethods, retrieveCart } from "@/lib/api/medusa/cart"
+import {
+  addCartShippingMethodDuringRender,
+  listCartShippingMethods,
+  retrieveCart,
+} from "@/lib/api/medusa/cart"
 import { listCartPaymentMethods } from "@/lib/api/medusa/payment"
 import { getMyPromotions } from "@/lib/api/medusa/promotion"
 import { getPointBalance, getTaxInvoice } from "@/lib/api/wallet"
@@ -12,21 +16,30 @@ import { notFound } from "next/navigation"
 
 export default async function CheckoutPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ countryCode: string }>
+  searchParams: Promise<{ cartId?: string }>
 }) {
   const { countryCode } = await params
+  const { cartId } = await searchParams
 
   return (
     <ProtectedRoute>
-      <CheckoutManager countryCode={countryCode} />
+      <CheckoutManager countryCode={countryCode} cartId={cartId} />
     </ProtectedRoute>
   )
 }
 
-async function CheckoutManager({ countryCode }: { countryCode: string }) {
+async function CheckoutManager({
+  countryCode,
+  cartId,
+}: {
+  countryCode: string
+  cartId?: string
+}) {
   const currentUser = await fetchMe()
-  const cart = (await retrieveCart()) as CartResponseDto["cart"]
+  const cart = (await retrieveCart(cartId)) as CartResponseDto["cart"]
 
   if (!cart) {
     return notFound()
@@ -52,6 +65,12 @@ async function CheckoutManager({ countryCode }: { countryCode: string }) {
       })),
     ])
 
+  // 배송 수단이 카트에 추가되지 않은 경우 자동으로 첫 번째 옵션 추가
+  // revalidateTag는 렌더 중 호출 불가이므로 DuringRender 전용 함수 사용
+  if (!cart.shipping_methods?.length && shippingMethods?.length) {
+    await addCartShippingMethodDuringRender(cart.id, shippingMethods[0].id)
+  }
+
   const [pointBalance, taxInvoice] = await Promise.all([
     getPointBalance(),
     getTaxInvoice(),
@@ -69,6 +88,7 @@ async function CheckoutManager({ countryCode }: { countryCode: string }) {
     <CheckoutTemplate
       user={currentUser}
       cart={cart}
+      checkoutCartId={cart.id}
       shipping={shipping}
       promotions={promotionsResponse.promotions}
       pointBalance={pointBalance}

@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useMemo, useEffect, useCallback } from "react"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import type { CartItem } from "@lib/types/ui/cart"
 import { CartHeader } from "./cart-header"
 import { CartTabsMobile } from "./cart-tabs-mobile"
@@ -12,10 +12,12 @@ import { RecommendedProducts } from "./recommended-products"
 import {
   retrieveCart,
   getOrSetCart,
+  createCheckoutCartFromLineItems,
   listCartShippingMethods,
   updateLineItem,
   deleteLineItem,
 } from "@lib/api/medusa/cart"
+import { getProductDetail } from "@lib/api/medusa/products"
 import { transferCart } from "@lib/api/medusa/customer"
 import type { HttpTypes } from "@medusajs/types"
 import { toast } from "sonner"
@@ -38,6 +40,16 @@ function mapMedusaItemToCartItem(item: HttpTypes.StoreCartLineItem): CartItem {
       selectedOptions[optionTitle] = opt.value
     }
   }
+  const selectedOptionText =
+    Object.keys(selectedOptions).length > 0
+      ? Object.entries(selectedOptions)
+          .map(([key, value]) => `${key}: ${value}`)
+          .join(", ")
+      : typeof variant?.title === "string" &&
+          variant.title.trim() &&
+          variant.title !== "Default Variant"
+        ? variant.title
+        : undefined
 
   // 가격 정보
   const compareAtUnitPrice = item.compare_at_unit_price ?? null
@@ -50,41 +62,37 @@ function mapMedusaItemToCartItem(item: HttpTypes.StoreCartLineItem): CartItem {
     typeof compareAtUnitPrice === "number" && compareAtUnitPrice > 0
       ? compareAtUnitPrice
       : derivedBasePrice
-  const rawMembershipPrice = (variant?.metadata as any)?.membershipPrice
-  const parsedMembershipPrice =
-    typeof rawMembershipPrice === "string" ? Number(rawMembershipPrice) : null
-  const membershipPrice =
-    typeof rawMembershipPrice === "number"
-      ? rawMembershipPrice
-      : Number.isFinite(parsedMembershipPrice)
-        ? parsedMembershipPrice
-        : null
-  const normalizedMembershipPrice =
-    membershipPrice != null && basePrice > membershipPrice
-      ? membershipPrice
-      : null
   const unitPrice = item.unit_price || basePrice
   const isMembershipOnly = (product?.metadata as any)?.isMembershipOnly || false
+
+  // 재고 정보 추출
+  const manageInventory = variant?.manage_inventory ?? false
+  const inventoryQuantity = variant?.inventory_quantity ?? 0
 
   return {
     id: item.id,
     productId: product?.id || "",
+    variantId: variant?.id || undefined,
     product: {
       name: item.title || product?.title || "상품명 없음",
       thumbnail: item.thumbnail || product?.thumbnail || "",
       basePrice,
-      membershipPrice: normalizedMembershipPrice || undefined,
+      membershipPrice: undefined,
       unitPrice,
       brand: product?.subtitle || (product?.metadata as any)?.brand || "",
       isMembershipOnly,
     },
     selectedOptions,
+    selectedOptionText,
     quantity: item.quantity,
     isSelected: true,
+    manageInventory,
+    inventoryQuantity,
   }
 }
 
 export function CartMainClient() {
+  const router = useRouter()
   const params = useParams() as { countryCode?: string }
   const countryCode = params?.countryCode || "kr"
   const [cartItems, setCartItems] = useState<CartItem[]>([])
@@ -95,6 +103,12 @@ export function CartMainClient() {
   const [cartId, setCartId] = useState<string | null>(null)
   const { isMembershipPricing } = useMembershipPricing()
 
+  const getItemDisplayLabel = useCallback((item: CartItem) => {
+    return item.selectedOptionText
+      ? `${item.product.name} (${item.selectedOptionText})`
+      : item.product.name
+  }, [])
+
   const getEstimatedShippingTotal = useCallback(
     async (id: string) => {
       const options = await listCartShippingMethods(id, "no-store")
@@ -103,12 +117,12 @@ export function CartMainClient() {
         options?.[0]
       return standard?.amount ?? 0
     },
-    [listCartShippingMethods]
+    []
   )
 
   // 장바구니 데이터 로드
   const loadCart = useCallback(async () => {
-    console.log("[장바구니] 로드 시작...")
+    // console.log("[장바구니] 로드 시작...")
     setIsLoading(true)
     try {
       // customer_id도 함께 조회
@@ -121,16 +135,26 @@ export function CartMainClient() {
         }
       }
 
-      console.log("[장바구니] API 응답:", cart)
+      // console.log("[장바구니] API 응답:", cart)
 
       // 카트가 있지만 고객에게 연결되지 않은 경우 연결 시도
       if (cart && !cart.customer_id) {
         try {
           await transferCart()
-          console.log("[장바구니] 카트를 고객에게 연결 완료")
+          if (cart.id) {
+            const transferredCart = await retrieveCart(
+              cart.id,
+              undefined,
+              "no-store"
+            )
+            if (transferredCart) {
+              cart = transferredCart
+            }
+          }
+          // console.log("[장바구니] 카트를 고객에게 연결 완료")
         } catch (error) {
           // 로그인 안 된 상태면 실패할 수 있음 - 무시
-          console.log("[장바구니] 카트 연결 스킵 (로그인 필요)")
+          // console.log("[장바구니] 카트 연결 스킵 (로그인 필요)")
         }
       }
 
@@ -138,10 +162,97 @@ export function CartMainClient() {
 
       if (updatedCart?.items && updatedCart.items.length > 0) {
         const items = updatedCart.items.map(mapMedusaItemToCartItem)
-        console.log("[장바구니] 매핑된 아이템:", items)
-        setCartItems(items)
-        // 기본으로 모든 아이템 선택
-        setCheckedItems(items.map((item) => item.id))
+
+        // 상세와 동일 기준으로 variant 재고를 보정
+        const productIds = Array.from(
+          new Set(items.map((item) => item.productId).filter(Boolean))
+        )
+        const stockEntries = await Promise.all(
+          productIds.map(async (productId) => {
+            try {
+              const detail = await getProductDetail(productId, updatedCart.region_id)
+              const stockMap = new Map<
+                string,
+                { manageInventory: boolean; inventoryQuantity: number }
+              >()
+              for (const variant of detail.variants ?? []) {
+                if (!variant?.id) continue
+                const manageInventory = variant.manage_inventory ?? false
+                const inventoryQuantity =
+                  variant.manage_inventory === false
+                    ? Number.POSITIVE_INFINITY
+                    : (variant.inventory_quantity ?? 0)
+                stockMap.set(variant.id, { manageInventory, inventoryQuantity })
+              }
+              return [productId, stockMap] as const
+            } catch {
+              return [productId, null] as const
+            }
+          })
+        )
+        const stockByProductId = new Map(stockEntries)
+        const normalizedItems = items.map((item) => {
+          const variantStock = item.variantId
+            ? stockByProductId.get(item.productId)?.get(item.variantId)
+            : undefined
+          if (!variantStock) return item
+          return {
+            ...item,
+            manageInventory: variantStock.manageInventory,
+            inventoryQuantity: variantStock.inventoryQuantity,
+          }
+        })
+        // 재고 초과 수량은 재고 수량으로 자동 조정
+        const quantityAdjustments = normalizedItems
+          .filter(
+            (item) =>
+              item.manageInventory &&
+              Number.isFinite(item.inventoryQuantity) &&
+              (item.inventoryQuantity ?? 0) > 0 &&
+              item.quantity > (item.inventoryQuantity ?? 0)
+          )
+          .map((item) => ({
+            lineId: item.id,
+            quantity: item.inventoryQuantity as number,
+          }))
+
+        if (quantityAdjustments.length > 0) {
+          await Promise.all(
+            quantityAdjustments.map(({ lineId, quantity }) =>
+              updateLineItem({ lineId, quantity }).catch(() => null)
+            )
+          )
+        }
+
+        const adjustedItems = normalizedItems.map((item) => {
+          if (
+            item.manageInventory &&
+            Number.isFinite(item.inventoryQuantity) &&
+            (item.inventoryQuantity ?? 0) > 0 &&
+            item.quantity > (item.inventoryQuantity ?? 0)
+          ) {
+            return {
+              ...item,
+              quantity: item.inventoryQuantity as number,
+            }
+          }
+          return item
+        })
+
+        if (quantityAdjustments.length > 0) {
+          toast.info("재고를 반영해 장바구니 수량을 자동 조정했어요.")
+        }
+
+        // console.log("[장바구니] 매핑된 아이템:", adjustedItems)
+        setCartItems(adjustedItems)
+        
+        // 품절되지 않은 아이템만 선택
+        const availableItems = adjustedItems.filter((item) => {
+          const isSoldOut = item.manageInventory && (item.inventoryQuantity ?? 0) <= 0
+          return !isSoldOut
+        })
+        setCheckedItems(availableItems.map((item) => item.id))
+        
         if (updatedCart.id) {
           const estimatedShipping = await getEstimatedShippingTotal(
             updatedCart.id
@@ -152,14 +263,14 @@ export function CartMainClient() {
         }
         setCartId(updatedCart.id)
       } else {
-        console.log("[장바구니] 아이템 없음")
+        // console.log("[장바구니] 아이템 없음")
         setCartItems([])
         setCheckedItems([])
         setShippingTotal(updatedCart?.shipping_total ?? 0)
         setCartId(updatedCart?.id ?? null)
       }
     } catch (error) {
-      console.error("[장바구니] 로드 실패:", error)
+      // console.error("[장바구니] 로드 실패:", error)
       setCartItems([])
       setCheckedItems([])
       setShippingTotal(0)
@@ -180,7 +291,7 @@ export function CartMainClient() {
         // TODO: 실제 추천 제품 API 호출로 교체 필요
         setRecommendedProducts([])
       } catch (error) {
-        console.error("추천 제품 로드 실패:", error)
+        // console.error("추천 제품 로드 실패:", error)
         setRecommendedProducts([])
       }
     }
@@ -189,13 +300,32 @@ export function CartMainClient() {
   }, [])
 
   const handleCheckItem = (id: string, checked: boolean) => {
+    const item = cartItems.find((item) => item.id === id)
+    if (!item) return
+    
+    // 품절 상품은 체크할 수 없음
+    const isSoldOut = item.manageInventory && (item.inventoryQuantity ?? 0) <= 0
+    if (checked && isSoldOut) {
+      toast.error("품절된 상품은 선택할 수 없습니다.")
+      return
+    }
+    
     setCheckedItems((prev) =>
       checked ? [...prev, id] : prev.filter((itemId) => itemId !== id)
     )
   }
 
   const handleCheckAll = (checked: boolean) => {
-    setCheckedItems(checked ? cartItems.map((item) => item.id) : [])
+    if (checked) {
+      // 품절되지 않은 아이템만 선택
+      const availableItems = cartItems.filter((item) => {
+        const isSoldOut = item.manageInventory && (item.inventoryQuantity ?? 0) <= 0
+        return !isSoldOut
+      })
+      setCheckedItems(availableItems.map((item) => item.id))
+    } else {
+      setCheckedItems([])
+    }
   }
 
   const handleDeleteItem = async (id: string) => {
@@ -209,7 +339,7 @@ export function CartMainClient() {
       }
       toast.success("상품이 삭제되었습니다.")
     } catch (error) {
-      console.error("상품 삭제 실패:", error)
+      // console.error("상품 삭제 실패:", error)
       toast.error("상품 삭제에 실패했습니다.")
     }
   }
@@ -229,7 +359,7 @@ export function CartMainClient() {
       }
       toast.success("선택한 상품이 삭제되었습니다.")
     } catch (error) {
-      console.error("선택 상품 삭제 실패:", error)
+      // console.error("선택 상품 삭제 실패:", error)
       toast.error("상품 삭제에 실패했습니다.")
       // 실패 시 다시 로드
       await loadCart()
@@ -237,7 +367,29 @@ export function CartMainClient() {
   }
 
   const handleQuantityChange = async (id: string, newQuantity: number) => {
-    const quantity = Math.max(1, newQuantity)
+    const targetItem = cartItems.find((item) => item.id === id)
+    if (!targetItem) return
+
+    let quantity = Math.max(1, newQuantity)
+    if (
+      targetItem.manageInventory &&
+      Number.isFinite(targetItem.inventoryQuantity)
+    ) {
+      const maxQuantity = Math.max(
+        0,
+        Math.floor(targetItem.inventoryQuantity ?? 0)
+      )
+      if (maxQuantity <= 0) {
+        toast.error("품절된 상품입니다.")
+        return
+      }
+      if (quantity > maxQuantity) {
+        quantity = maxQuantity
+        toast.error(
+          `${getItemDisplayLabel(targetItem)}은 ${maxQuantity}개 이하로 구매해주세요.`
+        )
+      }
+    }
 
     // 낙관적 업데이트
     setCartItems((prev) =>
@@ -266,6 +418,51 @@ export function CartMainClient() {
       await loadCart()
     }
   }
+
+  const handleCheckout = useCallback(async () => {
+    const selectedItems = cartItems.filter((item) => checkedItems.includes(item.id))
+
+    if (selectedItems.length === 0) {
+      toast.error("구매할 상품을 선택해주세요.")
+      return false
+    }
+
+    const invalidItem = selectedItems.find(
+      (item) =>
+        item.manageInventory &&
+        Number.isFinite(item.inventoryQuantity) &&
+        item.quantity > (item.inventoryQuantity ?? 0)
+    )
+
+    if (invalidItem) {
+      const maxQuantity = Math.max(
+        0,
+        Math.floor(invalidItem.inventoryQuantity ?? 0)
+      )
+      toast.error(
+        `${getItemDisplayLabel(invalidItem)}은 ${maxQuantity}개 이하로 구매해주세요.`
+      )
+      return false
+    }
+
+    try {
+      const result = await createCheckoutCartFromLineItems({
+        countryCode,
+        lineItemIds: selectedItems.map((item) => item.id),
+      })
+
+      if (!result?.cartId) {
+        throw new Error("Checkout cart was not created")
+      }
+
+      router.push(`/${countryCode}/checkout?cartId=${result.cartId}`)
+      return true
+    } catch (error) {
+      // console.error("체크아웃 처리 실패:", error)
+      toast.error("체크아웃 처리 중 오류가 발생했습니다.")
+      return false
+    }
+  }, [cartItems, checkedItems, countryCode, getItemDisplayLabel, router])
 
   // 가격 계산
   const {
@@ -369,9 +566,7 @@ export function CartMainClient() {
               membershipPreviewSavings={membershipPreviewSavings}
               shippingFee={shippingTotal}
               finalPrice={finalPrice}
-              selectedCount={selectedCount}
-              cartItems={cartItems}
-              checkedItems={checkedItems}
+              onCheckout={handleCheckout}
             />
           </div>
 
@@ -388,8 +583,7 @@ export function CartMainClient() {
             finalPrice={finalPrice}
             selectedCount={selectedCount}
             shippingFee={shippingTotal}
-            cartItems={cartItems}
-            checkedItems={checkedItems}
+            onCheckout={handleCheckout}
           />
         </div>
       </main>

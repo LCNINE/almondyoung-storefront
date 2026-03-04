@@ -14,6 +14,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import type { Cafe24SignupBootstrapData } from "@lib/api/users/auth/signup-cafe24"
 import { createUser } from "@lib/api/users/auth/signup-base"
 import { formatBirthday } from "@lib/utils/format-birthday"
+import { toE164Korean } from "@lib/utils/format-phone-number"
 import { signupSchema, SignupSchema } from "domains/auth/schemas/signup-schema"
 import { setFormError } from "domains/auth/utils/set-form-error"
 import { useParams, useRouter, useSearchParams } from "next/navigation"
@@ -47,7 +48,9 @@ const decodeLegacyMessage = (value: string) => {
 
 export function SignupForm({ mode, cafe24Bootstrap }: SignupFormProps) {
   const router = useRouter()
-  const { countryCode: rawCountryCode } = useParams() as { countryCode?: string }
+  const { countryCode: rawCountryCode } = useParams() as {
+    countryCode?: string
+  }
   const searchParams = useSearchParams()
   const countryCode = rawCountryCode ?? "kr"
   const redirectTo = searchParams.get("redirect_to") || "/"
@@ -82,7 +85,7 @@ export function SignupForm({ mode, cafe24Bootstrap }: SignupFormProps) {
       password: "",
       passwordConfirm: "",
       birthday: normalizeBirthday(prefill?.birthday),
-      phoneNumber: prefill?.phoneNumber ?? "",
+      phoneNumber: toE164Korean(prefill?.phoneNumber ?? ""),
       verificationCode: "",
       countryCode: "KR",
       isPhoneVerified: isCafe24Mode,
@@ -152,8 +155,7 @@ export function SignupForm({ mode, cafe24Bootstrap }: SignupFormProps) {
       `${window.location.origin}/${countryCode}/signup/cafe24/confirm` +
       `?redirect_to=${encodeURIComponent(redirectTo)}`
 
-    window.location.href =
-      `${CAFE24_MIGRATOR_BASE}?redirect_to=${encodeURIComponent(confirmUrl)}`
+    window.location.href = `${CAFE24_MIGRATOR_BASE}?redirect_to=${encodeURIComponent(confirmUrl)}`
   }
 
   const onSubmit = async (data: SignupSchema) => {

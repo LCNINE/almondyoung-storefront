@@ -1,4 +1,4 @@
-import { addToCart } from "@lib/api/medusa/cart"
+import { addToCart, createBuyNowCart } from "@lib/api/medusa/cart"
 import { useState } from "react"
 import { toast } from "sonner"
 
@@ -9,6 +9,13 @@ interface AddToCartParams {
   productName?: string
   productImage?: string
   quantity?: number
+}
+
+interface CreateBuyNowCartParams {
+  items: Array<{
+    variantId: string
+    quantity: number
+  }>
 }
 
 export function useAddToCart() {
@@ -51,8 +58,42 @@ export function useAddToCart() {
     }
   }
 
+  const createBuyNowCartAction = async ({ items }: CreateBuyNowCartParams) => {
+    try {
+      setIsLoading(true)
+
+      const result = await createBuyNowCart({
+        countryCode: "kr",
+        items,
+      })
+
+      return { success: true, data: result }
+    } catch (error) {
+      if (error) {
+        const rawMessage = error instanceof Error ? error.message : ""
+
+        let errorMessage = "바로구매 처리 중 오류가 발생했습니다"
+        if (rawMessage.includes("inventory")) {
+          errorMessage = "재고가 부족합니다"
+        } else if (rawMessage.includes("not found")) {
+          errorMessage = "상품을 찾을 수 없습니다"
+        }
+
+        toast.error(errorMessage)
+      }
+
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      }
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return {
     addToCart: addToCartAction,
+    createBuyNowCart: createBuyNowCartAction,
     isLoading,
   }
 }

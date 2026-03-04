@@ -40,7 +40,6 @@ export function CartItemList({
             const {
               baseUnitPrice,
               hasMembershipPrice,
-              memberUnitPrice,
               displayUnitPrice,
               quantity,
               isMembershipApplied,
@@ -56,13 +55,7 @@ export function CartItemList({
                 onDelete={() => onDelete(item.id)}
                 thumbnail={item.product.thumbnail || ""}
                 title={item.product.name}
-                option={
-                  Object.keys(item.selectedOptions).length > 0
-                    ? Object.entries(item.selectedOptions)
-                      .map(([key, value]) => `${key}: ${value}`)
-                      .join(", ")
-                    : undefined
-                }
+                option={item.selectedOptionText}
                 brand={item.product.brand || ""}
                 badge="4시 이전 주문 시 당일 출고 보장"
                 originalPrice={
@@ -70,9 +63,7 @@ export function CartItemList({
                     ? baseUnitPrice * quantity
                     : undefined
                 }
-                discountedPrice={
-                  (isMember ? displayUnitPrice : memberUnitPrice) * quantity
-                }
+                discountedPrice={displayUnitPrice * quantity}
                 actualPrice={displayUnitPrice * quantity}
                 discountRate={discountRate}
                 isMembership={isMembershipApplied}
@@ -81,6 +72,8 @@ export function CartItemList({
                 onQuantityChange={(qty) => onQuantityChange(item.id, qty)}
                 productId={item.productId}
                 countryCode={countryCode}
+                manageInventory={item.manageInventory}
+                inventoryQuantity={item.inventoryQuantity}
               />
             )
           })}
@@ -95,7 +88,6 @@ export function CartItemList({
         const {
           baseUnitPrice,
           hasMembershipPrice,
-          memberUnitPrice,
           displayUnitPrice,
           quantity,
           isMembershipApplied,
@@ -111,13 +103,7 @@ export function CartItemList({
             onDelete={() => onDelete(item.id)}
             thumbnail={item.product.thumbnail || ""}
             title={item.product.name}
-            option={
-              Object.keys(item.selectedOptions).length > 0
-                ? Object.entries(item.selectedOptions)
-                  .map(([key, value]) => `${key}: ${value}`)
-                  .join(", ")
-                : undefined
-            }
+            option={item.selectedOptionText}
             brand={item.product.brand || ""}
             badge="4시 이전 주문 시 당일 출고 보장"
             originalPrice={
@@ -125,9 +111,7 @@ export function CartItemList({
                 ? baseUnitPrice * quantity
                 : undefined
             }
-            discountedPrice={
-              (isMember ? displayUnitPrice : memberUnitPrice) * quantity
-            }
+            discountedPrice={displayUnitPrice * quantity}
             discountRate={discountRate}
             isMembership={isMembershipApplied}
             actualPrice={displayUnitPrice * quantity}
@@ -136,6 +120,8 @@ export function CartItemList({
             onQuantityChange={(qty) => onQuantityChange(item.id, qty)}
             productId={item.productId}
             countryCode={countryCode}
+            manageInventory={item.manageInventory}
+            inventoryQuantity={item.inventoryQuantity}
           />
         )
       })}
