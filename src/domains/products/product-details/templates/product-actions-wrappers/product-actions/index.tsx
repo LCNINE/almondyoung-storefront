@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button"
 import { HttpTypes } from "@medusajs/types"
 import { isEqual } from "lodash"
 import { useParams, usePathname, useSearchParams } from "next/navigation"
+import { getPricesForVariant } from "@/lib/utils/get-product-price"
+import { Minus, Plus } from "lucide-react"
 import { useEffect, useMemo, useRef, useState, useTransition } from "react"
 import { Separator } from "@/components/ui/separator"
 import MobileActions from "./mobile-actions"
@@ -40,6 +42,7 @@ export default function ProductActions({
   const countryCode = useParams().countryCode as string
 
   const [options, setOptions] = useState<Record<string, string | undefined>>({})
+  const [quantity, setQuantity] = useState(1)
 
   // 변형이 1개뿐이면 자동으로 옵션 세팅
   useEffect(() => {
@@ -75,6 +78,14 @@ export default function ProductActions({
     return (selectedVariant.inventory_quantity || 0) > 0
   }, [selectedVariant])
 
+  // 선택 variant의 가격
+  const variantPrice = useMemo(() => {
+    if (!selectedVariant) return null
+    return getPricesForVariant(selectedVariant)
+  }, [selectedVariant])
+
+  const totalPrice = (variantPrice?.calculated_price_number ?? 0) * quantity
+
   const setOptionValue = (optionId: string, value: string) => {
     setOptions((prev) => ({
       ...prev,
@@ -109,7 +120,7 @@ export default function ProductActions({
       try {
         await addToCart({
           variantId: selectedVariant.id,
-          quantity: 1,
+          quantity,
           countryCode,
         })
       } catch (error: unknown) {
@@ -146,6 +157,40 @@ export default function ProductActions({
             </div>
           ))}
         </div>
+      )}
+
+      {/* 수량 선택 & 총 가격 */}
+      {isValidVariant && (
+        <>
+          <Separator />
+          <div className="flex items-center justify-between py-2">
+            <div className="flex items-center">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                disabled={quantity <= 1}
+                className="h-8 w-8 rounded-r-none"
+              >
+                <Minus className="h-3.5 w-3.5" />
+              </Button>
+              <div className="flex h-8 w-10 items-center justify-center border-y text-sm">
+                {quantity}
+              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setQuantity((q) => q + 1)}
+                className="h-8 w-8 rounded-l-none"
+              >
+                <Plus className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+            <span className="text-xl font-bold">
+              총 {totalPrice.toLocaleString()}원
+            </span>
+          </div>
+        </>
       )}
 
       <Button
