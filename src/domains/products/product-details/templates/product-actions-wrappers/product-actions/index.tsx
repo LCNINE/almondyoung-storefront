@@ -18,6 +18,7 @@ import {
   useTransition,
 } from "react"
 import { Separator } from "@/components/ui/separator"
+import { toast } from "sonner"
 import MobileActions from "./mobile-actions"
 import OptionSelect from "./option-select"
 import ProductDetailPrice from "./product-detail-price"
@@ -66,6 +67,9 @@ export default function ProductActions({
   const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([])
 
   const isSimple = (product.variants?.length ?? 0) <= 1
+
+  console.log("optiopns:", product.options)
+  console.log("variants:", product.variants)
 
   // 변형이 1개뿐이면 자동으로 선택 리스트에 추가
   useEffect(() => {
@@ -181,6 +185,7 @@ export default function ProductActions({
   // 재고 확인
   const allInStock = selectedItems.every((item) => {
     const v = item.variant
+    console.log("v:", v)
     if (!v.manage_inventory) return true
     if (v.allow_backorder) return true
     return (v.inventory_quantity || 0) > 0
@@ -256,9 +261,50 @@ export default function ProductActions({
                     >
                       <Minus className="h-3.5 w-3.5" />
                     </Button>
-                    <div className="flex h-8 w-10 items-center justify-center border-y text-sm">
-                      {item.quantity}
-                    </div>
+
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={item.quantity}
+                      onChange={(e) => {
+                        const raw = e.target.value
+                        if (raw === "") {
+                          setSelectedItems((prev) =>
+                            prev.map((si) =>
+                              si.variantId === item.variantId
+                                ? { ...si, quantity: 0 as any }
+                                : si
+                            )
+                          )
+                          return
+                        }
+                        const val = parseInt(raw, 10)
+                        if (!isNaN(val)) {
+                          setSelectedItems((prev) =>
+                            prev.map((si) =>
+                              si.variantId === item.variantId
+                                ? { ...si, quantity: val }
+                                : si
+                            )
+                          )
+                        }
+                      }}
+                      onBlur={(e) => {
+                        const val = parseInt(e.target.value, 10)
+                        if (isNaN(val) || val < 1) {
+                          setSelectedItems((prev) =>
+                            prev.map((si) =>
+                              si.variantId === item.variantId
+                                ? { ...si, quantity: 1 }
+                                : si
+                            )
+                          )
+                          toast.info("최소 수량은 1개입니다.")
+                        }
+                      }}
+                      className="h-8 w-12 border-y text-center text-sm outline-none"
+                    />
+
                     <Button
                       variant="outline"
                       size="icon"
