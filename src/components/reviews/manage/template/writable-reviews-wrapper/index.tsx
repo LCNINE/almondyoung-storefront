@@ -4,6 +4,7 @@ import type { WritableReview } from "../../types"
 
 export async function WritableReviewsWrapper() {
   const ordersData = await getOrders({ limit: 50, status: "completed" })
+  console.log("ordersData:", ordersData)
   const writableReviews: WritableReview[] =
     ordersData?.orders?.flatMap(
       (order) =>
