@@ -43,8 +43,7 @@ export default function OrderCardContent({
   showInquiry = true,
 }: OrderCardContentProps) {
   const resolvedProductImage = getThumbnailUrl(productImage)
-  const quantityText =
-    typeof quantity === "number" ? `${quantity}개` : quantity
+  const quantityText = typeof quantity === "number" ? `${quantity}개` : quantity
 
   return (
     <div className="flex flex-col rounded-[5px] border border-gray-200 bg-white px-3 py-3.5 md:flex-row md:items-center md:gap-9 md:px-5">
