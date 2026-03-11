@@ -1,3 +1,5 @@
+"use client"
+
 import React from "react"
 import { CustomCheckbox } from "@/components/shared/checkbox"
 import { CustomButton } from "@/components/shared/custom-buttons/custom-button"
