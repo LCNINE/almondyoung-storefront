@@ -14,7 +14,32 @@ type ItemsTemplateProps = {
 }
 
 export default function ItemsTemplate({ cart }: ItemsTemplateProps) {
-  const items = cart?.items
+  // TODO: 테스트용 더미 데이터 - 나중에 제거
+  const dummyItems: HttpTypes.StoreCartLineItem[] = Array.from(
+    { length: 10 },
+    (_, i) => ({
+      id: `dummy-${i}`,
+      title: `테스트 상품 ${i + 1}`,
+      subtitle: "기본 품목",
+      thumbnail: null,
+      quantity: Math.floor(Math.random() * 3) + 1,
+      variant_id: `variant-${i}`,
+      product_id: `product-${i}`,
+      product_title: `노몬드 속눈썹펌 롯드 0${i + 1} / C컬`,
+      product_handle: `test-product-${i}`,
+      unit_price: 3990 + i * 1000,
+      compare_at_unit_price: 4990 + i * 1000,
+      created_at: new Date().toISOString(),
+      variant: {
+        id: `variant-${i}`,
+        title: "기본 품목",
+        manage_inventory: false,
+        inventory_quantity: 99,
+      },
+    })
+  ) as HttpTypes.StoreCartLineItem[]
+
+  const items = [...(cart?.items ?? []), ...dummyItems]
 
   return (
     <>

@@ -28,21 +28,23 @@ export default function CartTemplate({ cart, customer }: Props) {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent>
-            {cart && cart.region && (
-              <div className="py-6">
-                <Summary
-                  cart={
-                    cart as HttpTypes.StoreCart & {
-                      promotions: HttpTypes.StorePromotion[]
+        <div className="lg:sticky lg:top-5">
+          <Card>
+            <CardContent>
+              {cart && cart.region && (
+                <div className="py-6">
+                  <Summary
+                    cart={
+                      cart as HttpTypes.StoreCart & {
+                        promotions: HttpTypes.StorePromotion[]
+                      }
                     }
-                  }
-                />
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                  />
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </main>
   )

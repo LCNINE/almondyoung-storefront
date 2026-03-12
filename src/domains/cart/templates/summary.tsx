@@ -32,8 +32,7 @@ const Summary = ({ cart }: SummaryProps) => {
 
   // 필수 금액 값이 유효한지 체크
   const isTotalValid = cart.total !== null && cart.total !== undefined
-  // const hasError = !isTotalValid
-  const hasError = true
+  const hasError = !isTotalValid
 
   const handleRefresh = () => {
     router.refresh()
