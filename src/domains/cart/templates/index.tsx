@@ -1,5 +1,5 @@
+import { OrderStepper } from "@/components/order-stepper"
 import { Card, CardContent } from "@/components/ui/card"
-import { CartHeader } from "@/domains/cart/components/header"
 import { HttpTypes } from "@medusajs/types"
 import Items from "../components/items"
 import MobileCheckoutBar from "../components/mobile-checkout-bar"
@@ -13,7 +13,7 @@ export default function CartTemplate({ cart }: Props) {
   return (
     <>
       <main className="bg-background container mx-auto max-w-[1360px] px-4 py-8">
-        <CartHeader />
+        <OrderStepper currentStep={1} />
 
         <div className="grid grid-cols-1 gap-x-10 lg:grid-cols-[1fr_360px]">
           <Card>
