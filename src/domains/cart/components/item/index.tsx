@@ -4,6 +4,7 @@ import { useState } from "react"
 import Image from "next/image"
 import { Loader2, Trash2 } from "lucide-react"
 import { HttpTypes } from "@medusajs/types"
+import { toast } from "sonner"
 
 import { TableCell, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
@@ -36,7 +37,10 @@ export default function Item({ item, type = "full", currencyCode }: ItemProps) {
     setUpdating(true)
 
     await updateLineItem({ lineId: item.id, quantity })
-      .catch((err: Error) => setError(err.message))
+      .catch((err: Error) => {
+        toast.error("수량 변경에 실패했습니다")
+        setError(err.message)
+      })
       .finally(() => setUpdating(false))
 
     setUpdating(false)
@@ -44,8 +48,13 @@ export default function Item({ item, type = "full", currencyCode }: ItemProps) {
 
   const handleDelete = async () => {
     setDeleting(true)
-    await deleteLineItem(item.id)
-    setDeleting(false)
+    try {
+      await deleteLineItem(item.id)
+    } catch {
+      toast.error("일시적인 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.")
+    } finally {
+      setDeleting(false)
+    }
   }
 
   // 재고 관리 활성화: 실제 재고 수량 기반 (최대 99개)

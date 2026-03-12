@@ -7,13 +7,12 @@ import MobileCheckoutBar from "./mobile-checkout-bar"
 
 type Props = {
   cart: HttpTypes.StoreCart | null
-  customer: HttpTypes.StoreCustomer | null
 }
 
-export default function CartTemplate({ cart, customer }: Props) {
+export default function CartTemplate({ cart }: Props) {
   return (
     <>
-      <main className="bg-background container mx-auto max-w-[1360px] px-4 pb-40 md:px-[40px] md:py-8 md:pb-8">
+      <main className="bg-background container mx-auto max-w-[1360px] px-4 py-8">
         <CartHeader />
 
         <div className="grid grid-cols-1 gap-x-10 md:grid-cols-[1fr_360px]">

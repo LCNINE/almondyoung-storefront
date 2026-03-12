@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ChevronUp } from "lucide-react"
 import { AnimatePresence, motion } from "framer-motion"
 
@@ -29,6 +29,7 @@ function getCheckoutStep(cart: HttpTypes.StoreCart) {
 
 export default function MobileCheckoutBar({ cart }: MobileCheckoutBarProps) {
   const [isExpanded, setIsExpanded] = useState(false)
+  const [showScrollFade, setShowScrollFade] = useState(false)
   const step = getCheckoutStep(cart)
   const isTotalValid = cart.total !== null && cart.total !== undefined
   const hasError = !isTotalValid
@@ -36,8 +37,37 @@ export default function MobileCheckoutBar({ cart }: MobileCheckoutBarProps) {
   const { originalTotal, membershipDiscount, itemCount } =
     calculateCartDiscount(cart.items)
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY
+      const windowHeight = window.innerHeight
+      const documentHeight = document.documentElement.scrollHeight
+
+      // 스크롤 가능한 여유가 있고, 맨 아래가 아닐 때 페이드 표시
+      const isScrollable = documentHeight > windowHeight + 100
+      const isNotAtBottom = scrollTop + windowHeight < documentHeight - 50
+
+      setShowScrollFade(isScrollable && isNotAtBottom)
+    }
+
+    handleScroll() // 초기 상태 설정
+    window.addEventListener("scroll", handleScroll)
+    window.addEventListener("resize", handleScroll)
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll)
+      window.removeEventListener("resize", handleScroll)
+    }
+  }, [])
+
   return (
     <div className="fixed inset-x-0 bottom-16 z-99 border-t bg-white md:hidden">
+      {/* 스크롤 페이드 인디케이터 */}
+      <div
+        className={`pointer-events-none absolute inset-x-0 -top-12 h-12 bg-gradient-to-t from-white to-transparent transition-opacity duration-300 ${
+          showScrollFade ? "opacity-100" : "opacity-0"
+        }`}
+      />
       {/* 할인 상세 펼침 영역 */}
       <AnimatePresence>
         {isExpanded && membershipDiscount > 0 && (
