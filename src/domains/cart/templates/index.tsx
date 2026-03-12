@@ -1,4 +1,4 @@
-import { CartHeader } from "@/app/[countryCode]/cart/(components)/cart-header"
+import { CartHeader } from "@/domains/cart/components/header"
 import { Card, CardContent } from "@/components/ui/card"
 import { HttpTypes } from "@medusajs/types"
 import ItemsTemplate from "./items"
