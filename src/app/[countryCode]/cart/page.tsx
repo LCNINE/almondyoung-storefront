@@ -14,7 +14,6 @@ export default async function Cart() {
     console.error(error)
     return notFound()
   })
-  console.log("cart", cart)
 
   if (!cart) {
     return <EmptyCartView showHeader={false} bgColor="bg-muted" />
@@ -23,7 +22,6 @@ export default async function Cart() {
   // shipping method가 없으면 기본 배송 옵션 추가
   if (!cart.shipping_methods?.length) {
     const options = await listCartShippingMethods(cart.id)
-    console.log("options", options)
     if (options?.[0]) {
       const updatedCart = await addCartShippingMethodDuringRender(
         cart.id,

@@ -1,7 +1,17 @@
 "use client"
 
-import { convertToLocale } from "@/lib/utils/price-utils"
+import { formatPrice } from "@/lib/utils/price-utils"
 import React from "react"
+
+type CartItem = {
+  quantity: number
+  compare_at_unit_price?: number | null
+  variant?: {
+    metadata?: {
+      membershipPrice?: number
+    } | null
+  } | null
+}
 
 type CartTotalsProps = {
   totals: {
@@ -11,49 +21,80 @@ type CartTotalsProps = {
     item_subtotal?: number | null
     shipping_total?: number | null
     discount_total?: number | null
+    items?: CartItem[]
   }
+}
+
+/** 금액을 안전하게 포맷 (값이 없으면 "-" 반환) */
+const safeFormatPrice = (value: number | null | undefined): string => {
+  if (value === null || value === undefined) return "-"
+  return `${formatPrice(value)}원`
 }
 
 const CartTotals: React.FC<CartTotalsProps> = ({ totals }) => {
   const {
-    currency_code, // 통화 코드
     total, // 최종 결제 금액
     item_subtotal, // 총 상품 가격
     shipping_total, // 배송비
-    discount_total, // 할인 금액
+    discount_total, // 할인 금액 (쿠폰/프로모션)
+    items,
   } = totals
+
+  // 멤버십 할인 금액 계산
+  const membershipDiscount =
+    items?.reduce((acc, item) => {
+      const compareAt = item.compare_at_unit_price
+      const membershipPrice = item.variant?.metadata?.membershipPrice
+
+      // compareAt과 membershipPrice가 모두 있고, 정가보다 낮을 때만 멤버십 할인
+      if (compareAt && membershipPrice && compareAt > membershipPrice) {
+        return acc + (compareAt - membershipPrice) * item.quantity
+      }
+      return acc
+    }, 0) ?? 0
 
   return (
     <div>
       <div className="txt-medium text-ui-fg-subtle flex flex-col gap-y-2">
         <div className="flex items-center justify-between">
           <span>총 상품 가격</span>
-          <span data-testid="cart-subtotal" data-value={item_subtotal || 0}>
-            {convertToLocale({ amount: item_subtotal ?? 0, currency_code })}
+          <span data-testid="cart-subtotal" data-value={item_subtotal ?? ""}>
+            {safeFormatPrice(item_subtotal)}
           </span>
         </div>
-        <div className="flex items-center justify-between">
-          <span>배송비</span>
-          <span data-testid="cart-shipping" data-value={shipping_total || 0}>
-            {convertToLocale({ amount: shipping_total ?? 0, currency_code })}
-          </span>
-        </div>
-        {!!discount_total && (
+
+        {membershipDiscount > 0 && (
           <div className="flex items-center justify-between">
-            <span>Discount</span>
+            <span>멤버십 할인</span>
             <span
-              className="text-ui-fg-interactive"
-              data-testid="cart-discount"
-              data-value={discount_total || 0}
+              className="text-destructive"
+              data-testid="cart-membership-discount"
+              data-value={membershipDiscount}
             >
-              -{" "}
-              {convertToLocale({
-                amount: discount_total ?? 0,
-                currency_code,
-              })}
+              -{formatPrice(membershipDiscount)}원
             </span>
           </div>
         )}
+
+        {!!discount_total && (
+          <div className="flex items-center justify-between">
+            <span>쿠폰/프로모션 할인</span>
+            <span
+              className="text-destructive"
+              data-testid="cart-discount"
+              data-value={discount_total}
+            >
+              -{formatPrice(discount_total)}원
+            </span>
+          </div>
+        )}
+
+        <div className="flex items-center justify-between">
+          <span>배송비</span>
+          <span data-testid="cart-shipping" data-value={shipping_total ?? ""}>
+            {safeFormatPrice(shipping_total)}
+          </span>
+        </div>
       </div>
       <div className="my-4 h-px w-full border-b border-gray-200" />
       <div className="text-ui-fg-base txt-medium mb-2 flex items-center justify-between">
@@ -61,9 +102,9 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals }) => {
         <span
           className="txt-xlarge-plus"
           data-testid="cart-total"
-          data-value={total || 0}
+          data-value={total ?? ""}
         >
-          {convertToLocale({ amount: total ?? 0, currency_code })}
+          {safeFormatPrice(total)}
         </span>
       </div>
       <div className="mt-4 h-px w-full border-b border-gray-200" />
