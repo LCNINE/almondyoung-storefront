@@ -17,20 +17,9 @@ type MobileCheckoutBarProps = {
   }
 }
 
-function getCheckoutStep(cart: HttpTypes.StoreCart) {
-  if (!cart?.shipping_address?.address_1 || !cart.email) {
-    return "address"
-  } else if (cart?.shipping_methods?.length === 0) {
-    return "delivery"
-  } else {
-    return "payment"
-  }
-}
-
 export default function MobileCheckoutBar({ cart }: MobileCheckoutBarProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [showScrollFade, setShowScrollFade] = useState(false)
-  const step = getCheckoutStep(cart)
   const isTotalValid = cart.total !== null && cart.total !== undefined
   const hasError = !isTotalValid
 
@@ -148,7 +137,7 @@ export default function MobileCheckoutBar({ cart }: MobileCheckoutBarProps) {
             </div>
 
             {/* 구매 버튼 */}
-            <LocalizedClientLink href={"/checkout?step=" + step}>
+            <LocalizedClientLink href="/checkout">
               <Button className="h-12 w-full">
                 총 {itemCount}개 상품 구매하기
               </Button>
