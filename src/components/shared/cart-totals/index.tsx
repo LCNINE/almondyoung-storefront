@@ -1,6 +1,7 @@
 "use client"
 
 import { formatPrice } from "@/lib/utils/price-utils"
+import { calculateCartDiscount } from "domains/cart/utils/calculate-discount"
 import React from "react"
 
 type CartItem = {
@@ -40,18 +41,7 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals }) => {
     items,
   } = totals
 
-  // 멤버십 할인 금액 계산
-  const membershipDiscount =
-    items?.reduce((acc, item) => {
-      const compareAt = item.compare_at_unit_price
-      const membershipPrice = item.variant?.metadata?.membershipPrice
-
-      // compareAt과 membershipPrice가 모두 있고, 정가보다 낮을 때만 멤버십 할인
-      if (compareAt && membershipPrice && compareAt > membershipPrice) {
-        return acc + (compareAt - membershipPrice) * item.quantity
-      }
-      return acc
-    }, 0) ?? 0
+  const { membershipDiscount } = calculateCartDiscount(items)
 
   return (
     <div>
