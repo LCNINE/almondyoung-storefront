@@ -1,9 +1,9 @@
+import { retrieveCustomer } from "@/lib/api/medusa/customer"
 import { listProductsWithSort } from "@/lib/api/medusa/products"
 import { getRegion } from "@/lib/api/medusa/regions"
-import { SortOptions } from "../components/refinement-list/sort-products"
 import { Pagination } from "../components/pagination"
 import ProductCard from "../components/products/product-card"
-import { retrieveCustomer } from "@/lib/api/medusa/customer"
+import { SortOptions } from "../components/refinement-list/sort-products"
 
 const PRODUCT_LIMIT = 12
 

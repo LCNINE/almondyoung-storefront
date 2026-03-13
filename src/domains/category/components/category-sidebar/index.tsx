@@ -31,7 +31,7 @@ export function CategorySidebar({ categories }: CategorySidebarProps) {
       <h2 className="self-stretch text-lg font-bold text-stone-900">
         카테고리
       </h2>
-      <ul>
+      <ul className="mt-2 pl-4">
         {categories.map((category) => (
           <CategoryItem
             key={category.id}

@@ -31,7 +31,7 @@ const SortProducts = ({ sortBy, setQueryParams }: SortProductsProps) => {
 
   return (
     <Select value={sortBy} onValueChange={handleChange}>
-      <SelectTrigger className="h-8 w-auto gap-1 border-none bg-transparent px-2 text-sm font-medium shadow-none">
+      <SelectTrigger className="h-8 w-auto cursor-pointer gap-1 border-none bg-transparent px-2 text-sm font-medium shadow-none">
         <SelectValue>{selectedLabel}</SelectValue>
       </SelectTrigger>
       <SelectContent align="end">
