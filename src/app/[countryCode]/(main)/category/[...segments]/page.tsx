@@ -1,4 +1,4 @@
-import { CategoryPageContainer } from "domains/products/category/containers/category-page-container"
+import { CategoryPageContainer } from "domains/category/containers/category-page-container"
 
 interface CategoryPageProps {
   params: Promise<{
