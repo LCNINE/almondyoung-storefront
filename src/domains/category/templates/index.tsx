@@ -1,6 +1,6 @@
 import { Suspense } from "react"
-import RefinementList from "../components2/refinement-list"
-import { SortOptions } from "../components2/refinement-list/sort-products"
+import RefinementList from "../components/refinement-list"
+import { SortOptions } from "../components/refinement-list/sort-products"
 import PaginatedProducts from "./paginated-products"
 
 export function CategoryTemplate({
@@ -16,15 +16,12 @@ export function CategoryTemplate({
   const sort = sortBy || "created_at"
 
   return (
-    <div
-      className="small:flex-row small:items-start content-container flex flex-col py-6"
-      data-testid="category-container"
-    >
-      <RefinementList sortBy={sort} />
+    <div className="container mx-auto">
+      <div className="flex justify-end">
+        <RefinementList sortBy={sort} />
+      </div>
+
       <div className="w-full">
-        <div className="text-2xl-semi mb-8">
-          <h1 data-testid="store-page-title">All products</h1>
-        </div>
         <Suspense fallback={<div>Loading...</div>}>
           <PaginatedProducts
             sortBy={sort}

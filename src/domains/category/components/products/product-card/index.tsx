@@ -6,10 +6,12 @@ import Thumbnail from "../thumbnail"
 
 export default async function ProductCard({
   product,
-  isFeatured,
+  isMembership,
+  isMembershipOnly,
 }: {
   product: HttpTypes.StoreProduct
-  isFeatured?: boolean
+  isMembership: boolean
+  isMembershipOnly: boolean
 }) {
   // const pricedProduct = await listProducts({
   //   regionId: region.id,
@@ -26,22 +28,27 @@ export default async function ProductCard({
 
   return (
     <LocalizedClientLink href={`/products/${product.handle}`} className="group">
-      <div data-testid="product-wrapper">
+      <div>
         <Thumbnail
           thumbnail={product.thumbnail}
           images={product.images}
           size="full"
-          isFeatured={isFeatured}
         />
-        <div className="txt-compact-medium mt-4 flex justify-between">
-          <p className="text-ui-fg-subtle">{product.title}</p>
-          <div className="flex items-center gap-x-2">
+
+        <div className="mt-4">
+          <h3 className="line-clamp-1 text-[14px] leading-tight text-gray-600">
+            {product.title}
+          </h3>
+
+          <div className="flex flex-col gap-3">
             {cheapestPrice && (
               <ProductPrice
                 price={cheapestPrice}
                 membershipPrice={
                   product.variants?.[0]?.metadata?.membershipPrice as number
                 }
+                isMembership={isMembership}
+                isMembershipOnly={isMembershipOnly}
               />
             )}
           </div>

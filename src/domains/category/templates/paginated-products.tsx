@@ -1,8 +1,9 @@
 import { listProductsWithSort } from "@/lib/api/medusa/products"
 import { getRegion } from "@/lib/api/medusa/regions"
-import { SortOptions } from "../components2/refinement-list/sort-products"
-import { Pagination } from "../components2/pagination"
-import ProductCard from "../components2/products/product-card"
+import { SortOptions } from "../components/refinement-list/sort-products"
+import { Pagination } from "../components/pagination"
+import ProductCard from "../components/products/product-card"
+import { retrieveCustomer } from "@/lib/api/medusa/customer"
 
 const PRODUCT_LIMIT = 12
 
@@ -66,20 +67,35 @@ export default async function PaginatedProducts({
 
   const totalPages = Math.ceil(count / PRODUCT_LIMIT)
 
+  const customer = await retrieveCustomer().catch(() => null)
+  const groups = customer?.groups ?? []
   return (
     <>
       <ul
-        className="small:grid-cols-3 medium:grid-cols-4 grid w-full grid-cols-2 gap-x-6 gap-y-8"
+        className="grid w-full grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-3 md:grid-cols-4"
         data-testid="products-list"
       >
         {products.map((p) => {
           return (
             <li key={p.id}>
-              <ProductCard product={p} />
+              <ProductCard
+                product={p}
+                isMembership={
+                  groups?.some(
+                    (group) =>
+                      group.id === process.env.MEDUSA_MEMBERSHIP_GROUP_ID
+                  ) ?? false
+                }
+                isMembershipOnly={
+                  p.metadata?.isMembershipOnly === true ||
+                  p.metadata?.isMembershipOnly === "true"
+                }
+              />
             </li>
           )
         })}
       </ul>
+
       {totalPages > 1 && (
         <Pagination
           data-testid="product-pagination"

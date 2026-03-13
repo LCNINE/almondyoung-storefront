@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation"
-import { CategoryPageClient } from "../components/category-page-client"
+import { CategoryPageClient } from "../components3/category-page-client"
 import { getCategoryTree } from "@lib/api/medusa/categories"
 import { listProducts } from "@lib/api/medusa/products"
 import { getRegion } from "@lib/api/medusa/regions"
@@ -54,7 +54,9 @@ export async function CategoryPageContainer({
       },
       regionId: region?.id,
     })
-    initialProducts = mapStoreProductsToCardProps(productsResult.response.products)
+    initialProducts = mapStoreProductsToCardProps(
+      productsResult.response.products
+    )
     initialTotal = productsResult.response.count
   } catch (error) {
     console.error("❌ [CategoryPageContainer] 상품 목록 로드 실패:", error)

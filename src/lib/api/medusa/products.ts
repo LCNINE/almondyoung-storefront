@@ -4,7 +4,7 @@ import { sdk } from "@/lib/config/medusa"
 import { getAuthHeaders, getCacheOptions } from "@lib/data/cookies"
 import type { HttpTypes, StoreProduct } from "@medusajs/types"
 import { getRegion, retrieveRegion } from "./regions"
-import { SortOptions } from "@/domains/category/components2/refinement-list/sort-products"
+import { SortOptions } from "@/domains/category/components/refinement-list/sort-products"
 import { sortProducts } from "@/lib/utils/sort-products"
 
 export const listProducts = async ({
