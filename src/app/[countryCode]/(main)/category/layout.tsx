@@ -1,7 +1,7 @@
-import { Suspense } from "react"
 import { SidebarSkeleton } from "@/components/skeletons/category-page"
-import { getCategoryTree } from "@/lib/api/medusa/categories"
 import { CategorySidebar } from "@/domains/category/components/category-sidebar"
+import { getCategoryTree } from "@/lib/api/medusa/categories"
+import { Suspense } from "react"
 
 export default async function CategoryLayout({
   children,
