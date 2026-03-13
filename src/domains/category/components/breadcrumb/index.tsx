@@ -1,3 +1,4 @@
+import * as React from "react"
 import type { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@/components/shared/localized-client-link"
 import {
@@ -42,16 +43,18 @@ export function CategoryBreadcrumb({ category }: CategoryBreadcrumbProps) {
             .join("/")}`
 
           return (
-            <BreadcrumbItem key={item.handle}>
+            <React.Fragment key={item.handle}>
               <BreadcrumbSeparator />
-              {isLast ? (
-                <BreadcrumbPage>{item.name}</BreadcrumbPage>
-              ) : (
-                <BreadcrumbLink asChild>
-                  <LocalizedClientLink href={href}>{item.name}</LocalizedClientLink>
-                </BreadcrumbLink>
-              )}
-            </BreadcrumbItem>
+              <BreadcrumbItem>
+                {isLast ? (
+                  <BreadcrumbPage>{item.name}</BreadcrumbPage>
+                ) : (
+                  <BreadcrumbLink asChild>
+                    <LocalizedClientLink href={href}>{item.name}</LocalizedClientLink>
+                  </BreadcrumbLink>
+                )}
+              </BreadcrumbItem>
+            </React.Fragment>
           )
         })}
       </BreadcrumbList>
