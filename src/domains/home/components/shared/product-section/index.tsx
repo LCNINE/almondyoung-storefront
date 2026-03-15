@@ -6,7 +6,7 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel"
 import { Tabs, TabsContent } from "@/components/ui/tabs"
-import ProductCard from "@/domains/category/components/products/product-card"
+import ProductCard from "@/domains/products/components/product-card"
 import { CustomerGroup } from "@/lib/types/dto/medusa"
 import { StoreCustomerWithGroups } from "@/lib/types/ui/medusa"
 import { HttpTypes } from "@medusajs/types"
