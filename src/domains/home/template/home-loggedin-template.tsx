@@ -1,7 +1,7 @@
 import type { UserDetail } from "@/lib/types/ui/user"
 import { HeroBanner } from "../components/banner/hero-banner"
 import { WidgetSection } from "../components/sections/widget"
-import { HomeSection } from "../components/shared/section"
+import { HomeSection } from "../components/shared/home-section"
 
 interface HomeLoggedInTemplateProps {
   user: UserDetail

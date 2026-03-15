@@ -2,7 +2,7 @@ import { CategoryBestSectionSkeleton } from "@/components/skeletons/page-skeleto
 import { UserDetail } from "@/lib/types/ui/user"
 import { Suspense } from "react"
 import { HeroBanner } from "../components/banner/hero-banner"
-import { HomeSection } from "../components/shared/section"
+import { HomeSection } from "../components/shared/home-section"
 import { CategoryBestSWrapper } from "./best-categories"
 import { ErrorBoundary } from "@/components/shared/error-boundary"
 

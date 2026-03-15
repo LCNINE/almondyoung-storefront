@@ -13,7 +13,7 @@ function SkeletonCard() {
   )
 }
 
-export function CategoryBestSkeleton() {
+export function ProductSectionSkeleton() {
   return (
     <>
       {/* mobile */}
