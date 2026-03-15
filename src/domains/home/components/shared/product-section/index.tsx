@@ -1,15 +1,21 @@
 "use client"
 
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "@/components/ui/carousel"
 import { Tabs, TabsContent } from "@/components/ui/tabs"
+import ProductCard from "@/domains/category/components/products/product-card"
+import { CustomerGroup } from "@/lib/types/dto/medusa"
+import { StoreCustomerWithGroups } from "@/lib/types/ui/medusa"
 import { HttpTypes } from "@medusajs/types"
+import chunk from "lodash/chunk"
 import { ReactNode } from "react"
 import { Header, MoreButton, Title } from "../../header"
 import { ResponsiveTabList } from "../responsive-tab-list"
-import ProductCard from "@/domains/category/components/products/product-card"
-import { StoreCustomerWithGroups } from "@/lib/types/ui/medusa"
-import { CustomerGroup } from "@/lib/types/dto/medusa"
-import { ProductSectionSkeleton } from "./skeleton"
 import { ProductSectionEmpty } from "./empty-state"
+import { ProductSectionSkeleton } from "./skeleton"
 
 interface TabItem {
   id: string
@@ -19,15 +25,17 @@ interface TabItem {
 
 interface ProductSectionProps<T extends TabItem> {
   title: ReactNode
-  tabs?: readonly T[]
-  activeTab?: T
+  tabs: readonly T[]
+  activeTab: T
   products: HttpTypes.StoreProduct[]
   isPending?: boolean
   moreHref?: string
-  onTabChange?: (tab: T) => void
+  onTabChange: (tab: T) => void
   customer: StoreCustomerWithGroups | null
   emptyTitle?: string
   emptyDescription?: string
+  /** 모바일 캐러셀에서 보여줄 행 수 (기본값: 2) */
+  mobileRows?: number
 }
 
 export function ProductSection<T extends TabItem>({
@@ -41,11 +49,9 @@ export function ProductSection<T extends TabItem>({
   customer,
   emptyTitle,
   emptyDescription,
+  mobileRows = 2,
 }: ProductSectionProps<T>) {
-  const hasTabs = tabs && tabs.length > 0 && activeTab
-
   const handleTabChange = (value: string) => {
-    if (!tabs || !onTabChange) return
     const nextTab = tabs.find((t) => t.id === value)
     if (nextTab) {
       onTabChange(nextTab)
@@ -59,31 +65,58 @@ export function ProductSection<T extends TabItem>({
 
     if (products.length === 0) {
       return (
-        <ProductSectionEmpty title={emptyTitle} description={emptyDescription} />
+        <ProductSectionEmpty
+          title={emptyTitle}
+          description={emptyDescription}
+        />
       )
     }
 
+    const renderProductCard = (p: HttpTypes.StoreProduct, index: number) => (
+      <ProductCard
+        product={p}
+        isMembership={
+          customer?.groups?.some(
+            (group: CustomerGroup) =>
+              group.id === process.env.NEXT_PUBLIC_MEDUSA_MEMBERSHIP_GROUP_ID
+          ) ?? false
+        }
+        isMembershipOnly={
+          p.metadata?.isMembershipOnly === true ||
+          p.metadata?.isMembershipOnly === "true"
+        }
+        rank={index + 1}
+      />
+    )
+
+    const chunkedProducts = chunk(products, mobileRows)
+
     return (
-      <ul className="grid w-full grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-        {products.map((p, index) => (
-          <li key={p.id}>
-            <ProductCard
-              product={p}
-              isMembership={
-                customer?.groups?.some(
-                  (group: CustomerGroup) =>
-                    group.id === process.env.MEDUSA_MEMBERSHIP_GROUP_ID
-                ) ?? false
-              }
-              isMembershipOnly={
-                p.metadata?.isMembershipOnly === true ||
-                p.metadata?.isMembershipOnly === "true"
-              }
-              rank={index + 1}
-            />
-          </li>
-        ))}
-      </ul>
+      <>
+        {/* 모바일: 캐러셀 (2줄) */}
+        <Carousel className="md:hidden" opts={{ align: "start" }}>
+          <CarouselContent className="-ml-2">
+            {chunkedProducts.map((chunk, chunkIndex) => (
+              <CarouselItem key={chunkIndex} className="basis-[45%] pl-2">
+                <div className="flex flex-col gap-4">
+                  {chunk.map((p, index) => (
+                    <div key={p.id}>
+                      {renderProductCard(p, chunkIndex * mobileRows + index)}
+                    </div>
+                  ))}
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Carousel>
+
+        {/* 태블릿 이상 */}
+        <ul className="hidden w-full gap-x-4 gap-y-6 md:grid md:grid-cols-4 lg:grid-cols-5">
+          {products.map((p, index) => (
+            <li key={p.id}>{renderProductCard(p, index)}</li>
+          ))}
+        </ul>
+      </>
     )
   }
 
@@ -94,18 +127,14 @@ export function ProductSection<T extends TabItem>({
         {moreHref && <MoreButton href={moreHref} />}
       </Header>
 
-      {hasTabs ? (
-        <Tabs defaultValue={activeTab.id} onValueChange={handleTabChange}>
-          <ResponsiveTabList
-            items={tabs}
-            activeId={activeTab.id}
-            onTabChange={handleTabChange}
-          />
-          <TabsContent value={activeTab.id}>{renderProducts()}</TabsContent>
-        </Tabs>
-      ) : (
-        renderProducts()
-      )}
+      <Tabs defaultValue={activeTab.id} onValueChange={handleTabChange}>
+        <ResponsiveTabList
+          items={tabs}
+          activeId={activeTab.id}
+          onTabChange={handleTabChange}
+        />
+        <TabsContent value={activeTab.id}>{renderProducts()}</TabsContent>
+      </Tabs>
     </div>
   )
 }

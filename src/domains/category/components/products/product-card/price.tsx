@@ -53,7 +53,7 @@ export default function ProductPrice({
           </span>
         </div>
 
-        <div className="flex min-w-0 flex-wrap items-center gap-x-1 gap-y-0.5">
+        <div className="flex min-w-0 flex-col gap-x-1 gap-y-0.5 md:flex-row md:items-center">
           <span className="text-[16px] leading-none font-bold whitespace-nowrap text-black">
             {price.calculated_price_number.toLocaleString()}원
           </span>
