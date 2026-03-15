@@ -1,17 +1,17 @@
 import { cn } from "@lib/utils"
 import React from "react"
 
-interface ProductSectionProps {
+interface SectionProps {
   children: React.ReactNode
   background?: "white" | "muted"
   className?: string
 }
 
-export function ProductListSection({
+export function HomeSection({
   children,
   background = "white",
   className,
-}: ProductSectionProps) {
+}: SectionProps) {
   return (
     <section
       className={cn(
@@ -20,12 +20,12 @@ export function ProductListSection({
         className
       )}
     >
-      <ProductListSection.Inner>{children}</ProductListSection.Inner>
+      <HomeSection.Inner>{children}</HomeSection.Inner>
     </section>
   )
 }
 
-ProductListSection.Inner = function Inner({
+HomeSection.Inner = function Inner({
   children,
   className,
 }: {

@@ -1,3 +1,5 @@
+"use client"
+
 import { VariantPrice } from "@/lib/types/common/price"
 import { ProductMembershipBadge } from "@/components/shared/badges/product-membership-badge"
 
@@ -8,7 +10,7 @@ interface Props {
   isMembershipOnly: boolean
 }
 
-export default async function ProductPrice({
+export default function ProductPrice({
   price,
   membershipPrice,
   isMembership,

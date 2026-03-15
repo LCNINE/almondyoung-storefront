@@ -12,6 +12,7 @@ type ThumbnailProps = {
   size?: "small" | "medium" | "large" | "full" | "square"
   className?: string
   "data-testid"?: string
+  rank?: number
 }
 
 const Thumbnail: React.FC<ThumbnailProps> = ({
@@ -20,13 +21,14 @@ const Thumbnail: React.FC<ThumbnailProps> = ({
   size = "small",
   className,
   "data-testid": dataTestid,
+  rank,
 }) => {
   const initialImage = thumbnail || images?.[0]?.url
 
   return (
     <div
       className={cn(
-        "bg-ui-bg-subtle shadow-elevation-card-rest rounded-large group-hover:shadow-elevation-card-hover relative w-full overflow-hidden p-4 transition-shadow duration-150 ease-in-out aspect-square",
+        "bg-ui-bg-subtle shadow-elevation-card-rest rounded-large group-hover:shadow-elevation-card-hover relative aspect-square w-full overflow-hidden p-4 transition-shadow duration-150 ease-in-out",
         className,
         {
           "w-[180px]": size === "small",
@@ -38,6 +40,12 @@ const Thumbnail: React.FC<ThumbnailProps> = ({
       data-testid={dataTestid}
     >
       <ImageOrPlaceholder image={initialImage} size={size} />
+
+      {rank && (
+        <div className="absolute top-0 left-0 bg-black px-2.5 py-1 text-[12px] font-bold text-white">
+          {rank}
+        </div>
+      )}
     </div>
   )
 }

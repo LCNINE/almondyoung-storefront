@@ -1,38 +1,37 @@
+"use client"
+
 import LocalizedClientLink from "@/components/shared/localized-client-link"
 import { getProductPrice } from "@/lib/utils/get-product-price"
 import { HttpTypes } from "@medusajs/types"
 import ProductPrice from "./price"
 import Thumbnail from "../thumbnail"
 
-export default async function ProductCard({
+export default function ProductCard({
   product,
   isMembership,
   isMembershipOnly,
+  rank,
 }: {
   product: HttpTypes.StoreProduct
   isMembership: boolean
   isMembershipOnly: boolean
+  rank?: number
 }) {
-  // const pricedProduct = await listProducts({
-  //   regionId: region.id,
-  //   queryParams: { id: [product.id!] },
-  // }).then(({ response }) => response.products[0])
-
-  // if (!pricedProduct) {
-  //   return null
-  // }
-
   const { cheapestPrice } = getProductPrice({
     product,
   })
 
   return (
-    <LocalizedClientLink href={`/products/${product.handle}`} className="group">
+    <LocalizedClientLink
+      href={`/products/${product.handle}`}
+      className="group cursor-pointer"
+    >
       <div>
         <Thumbnail
           thumbnail={product.thumbnail}
           images={product.images}
           size="full"
+          rank={rank}
         />
 
         <div className="mt-4">

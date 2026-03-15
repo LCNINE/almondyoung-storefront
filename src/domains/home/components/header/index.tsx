@@ -1,16 +1,15 @@
 "use client"
 
+import LocalizedClientLink from "@/components/shared/localized-client-link"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import Link from "next/link"
 
-interface SectionHeaderProps {
+interface HeaderProps {
   children: React.ReactNode
   className?: string
 }
 
-// SectionHeader.tsx
-export function SectionHeader({ children, className }: SectionHeaderProps) {
+export function Header({ children, className }: HeaderProps) {
   return (
     <div
       className={cn("relative flex items-center justify-between", className)}
@@ -20,7 +19,7 @@ export function SectionHeader({ children, className }: SectionHeaderProps) {
   )
 }
 
-SectionHeader.Title = function SectionHeaderTitle({
+export function Title({
   children,
   className,
 }: {
@@ -35,7 +34,7 @@ SectionHeader.Title = function SectionHeaderTitle({
 }
 
 // 더보기 버튼
-SectionHeader.More = function SectionHeaderMore({
+export function MoreButton({
   showOnDesktop = false,
   className,
   href,
@@ -56,9 +55,9 @@ SectionHeader.More = function SectionHeaderMore({
         className
       )}
     >
-      <Link href={href} className="underline underline-offset-4">
+      <LocalizedClientLink href={href} className="underline underline-offset-4">
         더보기
-      </Link>
+      </LocalizedClientLink>
     </Button>
   )
 }
